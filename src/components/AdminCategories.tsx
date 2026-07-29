@@ -90,6 +90,27 @@ export function AdminCategories() {
     onError: () => toast.error("تعذّر الحذف — قد يكون التصنيف مستخدماً"),
   });
 
+  const rename = useMutation({
+    mutationFn: async (p: { id: string; name: string }) => {
+      const value = p.name.trim().slice(0, 60);
+      if (value.length < 2) throw new Error("اسم التصنيف قصير جداً");
+      const { error } = await supabase
+        .from("categories")
+        .update({ name: value, slug: "" })
+        .eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("تم تعديل التصنيف");
+      setEditId(null);
+      refresh();
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "تعذّر التعديل"),
+  });
+
+
+
   return (
     <div className="mt-6 space-y-5">
       <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
