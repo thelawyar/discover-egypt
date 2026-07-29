@@ -53,8 +53,8 @@ export const Route = createFileRoute("/search")({
   head: ({ match }) => {
     const term = match.search?.q?.trim();
     const title = term
-      ? `نتائج البحث عن "${term}" | دَوّر في بلدك`
-      : "تصفح الأنشطة التجارية | دَوّر في بلدك";
+      ? `نتائج البحث عن "${term}" | اكتشف مدينتك`
+      : "تصفح الأنشطة التجارية | اكتشف مدينتك";
     return {
       meta: [
         { title },

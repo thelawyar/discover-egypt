@@ -22,12 +22,12 @@ export const Route = createFileRoute("/city/$slug")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "المدينة غير موجودة | دَوّر في بلدك" },
+          { title: "المدينة غير موجودة | اكتشف مدينتك" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
-    const title = `دليل ${loaderData.name} التجاري | دَوّر في بلدك`;
+    const title = `دليل ${loaderData.name} التجاري | اكتشف مدينتك`;
     const desc = `تصفح ${loaderData.total} نشاطاً تجارياً في ${loaderData.name}${loaderData.gov ? ` - ${loaderData.gov}` : ""}.`;
     return {
       meta: [

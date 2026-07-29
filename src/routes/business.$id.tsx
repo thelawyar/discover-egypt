@@ -34,18 +34,18 @@ export const Route = createFileRoute("/business/$id")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "النشاط غير متاح | دَوّر في بلدك" },
+          { title: "النشاط غير متاح | اكتشف مدينتك" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
     const desc =
       loaderData.description?.slice(0, 150) ??
-      `تفاصيل ${loaderData.name} في الدليل التجاري دَوّر في بلدك.`;
+      `تفاصيل ${loaderData.name} في الدليل التجاري اكتشف مدينتك.`;
     const meta = [
-      { title: `${loaderData.name} | دَوّر في بلدك` },
+      { title: `${loaderData.name} | اكتشف مدينتك` },
       { name: "description", content: desc },
-      { property: "og:title", content: `${loaderData.name} | دَوّر في بلدك` },
+      { property: "og:title", content: `${loaderData.name} | اكتشف مدينتك` },
       { property: "og:description", content: desc },
     ];
     if (loaderData.image?.startsWith("https://")) {

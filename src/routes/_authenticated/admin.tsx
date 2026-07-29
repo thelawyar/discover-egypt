@@ -12,9 +12,9 @@ import { STATUS_LABELS } from "@/lib/directory-types";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "لوحة الإدارة | دَوّر في بلدك" },
+      { title: "لوحة الإدارة | اكتشف مدينتك" },
       { name: "description", content: "مراجعة واعتماد الأنشطة التجارية." },
-      { property: "og:title", content: "لوحة الإدارة | دَوّر في بلدك" },
+      { property: "og:title", content: "لوحة الإدارة | اكتشف مدينتك" },
       { property: "og:description", content: "مراجعة واعتماد الأنشطة التجارية." },
       { name: "robots", content: "noindex" },
     ],

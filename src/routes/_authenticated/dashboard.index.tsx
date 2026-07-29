@@ -11,9 +11,9 @@ import { STATUS_LABELS } from "@/lib/directory-types";
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
     meta: [
-      { title: "أنشطتي | دَوّر في بلدك" },
+      { title: "أنشطتي | اكتشف مدينتك" },
       { name: "description", content: "إدارة أنشطتك التجارية المسجّلة في الدليل." },
-      { property: "og:title", content: "أنشطتي | دَوّر في بلدك" },
+      { property: "og:title", content: "أنشطتي | اكتشف مدينتك" },
       { property: "og:description", content: "إدارة أنشطتك التجارية." },
       { name: "robots", content: "noindex" },
     ],

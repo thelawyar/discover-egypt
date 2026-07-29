@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "دَوّر في بلدك | دليل تجاري شامل للمدن المصرية" },
+      { title: "اكتشف مدينتك | دليل تجاري شامل للمدن المصرية" },
       {
         name: "description",
         content:
