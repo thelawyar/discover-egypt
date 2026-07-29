@@ -80,14 +80,35 @@ export const searchBusinesses = createServerFn({ method: "GET" })
       const page = Math.max(1, Math.min(200, data.page ?? 1));
       const term = (data.q ?? "").trim().slice(0, 100);
 
+      // Filters accept either a UUID or a SEO-friendly slug.
+      const resolve = async (
+        table: "cities" | "governorates" | "categories",
+        value: string | undefined,
+      ): Promise<string | null> => {
+        if (!value) return null;
+        if (UUID_RE.test(value)) return value;
+        const { data: row } = await supabase
+          .from(table)
+          .select("id")
+          .eq("slug", value)
+          .maybeSingle();
+        return row?.id ?? "__none__";
+      };
+
+      const [cityId, govId, catId] = await Promise.all([
+        resolve("cities", data.city),
+        resolve("governorates", data.gov),
+        resolve("categories", data.cat),
+      ]);
+
       let query = supabase
         .from("businesses")
         .select(CARD_SELECT, { count: "exact" })
         .eq("status", "approved");
 
-      if (data.city) query = query.eq("city_id", data.city);
-      if (data.gov) query = query.eq("governorate_id", data.gov);
-      if (data.cat) query = query.eq("category_id", data.cat);
+      if (cityId) query = query.eq("city_id", cityId);
+      if (govId) query = query.eq("governorate_id", govId);
+      if (catId) query = query.eq("category_id", catId);
 
       if (term) {
         const escaped = term.replace(/[%,()]/g, " ");
