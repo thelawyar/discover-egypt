@@ -47,7 +47,8 @@ export function SearchBar({
   const filtered = useMemo(() => {
     const term = cityFilter.trim();
     let list = cities;
-    if (useGovSteps && selectedGov && !term) {
+    if (useGovSteps) {
+      if (!selectedGov) return [];
       list = cities.filter((c) => c.governorate_id === selectedGov.id);
     }
     if (term) list = list.filter((c) => c.name.includes(term));
@@ -163,7 +164,7 @@ export function SearchBar({
               onChange={(e) => setCityFilter(e.target.value)}
               placeholder={
                 useGovSteps && !selectedGov
-                  ? "اكتب اسم المحافظة أو المدينة..."
+                  ? "اكتب اسم المحافظة..."
                   : "اكتب اسم المدينة..."
               }
               className="h-9 w-full rounded-lg bg-muted px-3 text-sm outline-none"
@@ -197,7 +198,7 @@ export function SearchBar({
                 : "كل المدن"}
             </button>
 
-            {useGovSteps && !selectedGov && !cityFilter.trim()
+            {useGovSteps && !selectedGov
               ? filteredGovs.map((g) => (
                   <button
                     key={g.id}
