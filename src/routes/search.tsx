@@ -52,6 +52,7 @@ export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => search,
   head: ({ match, loaderData }) => {
+    const ld = loaderData as unknown as { origin: string; pages: number } | undefined;
     const sp = match.search ?? { q: "", city: "", gov: "", cat: "", page: 1 };
     const term = sp.q?.trim();
     const title = term
@@ -62,7 +63,7 @@ export const Route = createFileRoute("/search")({
     const desc = term
       ? `نتائج البحث عن "${term}" في الدليل التجاري لكل المدن المصرية.`
       : "ابحث عن الأنشطة التجارية في المدن المصرية وتصفح النتائج بالتفصيل.";
-    const origin = loaderData?.origin ?? "";
+    const origin = ld?.origin ?? "";
     const build = (page: number) => {
       const usp = new URLSearchParams();
       if (sp.city) usp.set("city", sp.city);
@@ -81,7 +82,7 @@ export const Route = createFileRoute("/search")({
     const links: Record<string, string>[] = [{ rel: "canonical", href: canonical }];
     if (indexable) {
       if (page > 1) links.push({ rel: "prev", href: build(page - 1) });
-      if (loaderData && page < loaderData.pages) links.push({ rel: "next", href: build(page + 1) });
+      if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
     }
 
     return {
