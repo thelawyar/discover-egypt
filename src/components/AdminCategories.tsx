@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, Plus, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ export function AdminCategories() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
   const [name, setName] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const list = useQuery({
     queryKey: ["admin-categories", tab],
@@ -88,6 +90,27 @@ export function AdminCategories() {
     onError: () => toast.error("تعذّر الحذف — قد يكون التصنيف مستخدماً"),
   });
 
+  const rename = useMutation({
+    mutationFn: async (p: { id: string; name: string }) => {
+      const value = p.name.trim().slice(0, 60);
+      if (value.length < 2) throw new Error("اسم التصنيف قصير جداً");
+      const { error } = await supabase
+        .from("categories")
+        .update({ name: value, slug: "" })
+        .eq("id", p.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("تم تعديل التصنيف");
+      setEditId(null);
+      refresh();
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "تعذّر التعديل"),
+  });
+
+
+
   return (
     <div className="mt-6 space-y-5">
       <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
@@ -151,13 +174,63 @@ export function AdminCategories() {
               className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card"
             >
               <div className="min-w-40 flex-1">
-                <p className="text-sm font-bold">{c.name}</p>
-                <p className="text-xs text-muted-foreground" dir="ltr">
-                  {c.slug}
-                </p>
+                {editId === c.id ? (
+                  <div className="flex gap-2">
+                    <Input
+                      value={editName}
+                      maxLength={60}
+                      autoFocus
+                      onChange={(e) => setEditName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          rename.mutate({ id: c.id, name: editName });
+                        }
+                        if (e.key === "Escape") setEditId(null);
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      className="rounded-full"
+                      disabled={rename.isPending}
+                      onClick={() => rename.mutate({ id: c.id, name: editName })}
+                    >
+                      حفظ
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full"
+                      onClick={() => setEditId(null)}
+                    >
+                      إلغاء
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold">{c.name}</p>
+                    <p className="text-xs text-muted-foreground" dir="ltr">
+                      {c.slug}
+                    </p>
+                  </>
+                )}
               </div>
               <div className="flex flex-wrap gap-1.5">
+                {editId !== c.id ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => {
+                      setEditId(c.id);
+                      setEditName(c.name);
+                    }}
+                  >
+                    <Pencil className="size-3.5" /> تعديل
+                  </Button>
+                ) : null}
                 {c.status !== "approved" ? (
+
                   <Button
                     size="sm"
                     className="rounded-full"

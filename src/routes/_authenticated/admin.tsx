@@ -128,7 +128,11 @@ function AdminPage() {
               {label}
             </button>
           ))}
+          <Button asChild variant="outline" size="sm" className="ms-auto rounded-full">
+            <Link to="/admin-categories">صفحة إدارة التصنيفات</Link>
+          </Button>
         </div>
+
 
         {view === "branding" ? <BrandingSettings /> : null}
         {view === "users" ? <AdminUsers /> : null}
