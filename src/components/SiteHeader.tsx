@@ -100,7 +100,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       <footer className="mt-16 border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 text-center text-xs text-muted-foreground">
           <Brand />
-          <p>دليل تجاري شامل لكل المدن المصرية — durtown.com</p>
+          <p>{tagline} — durtown.com</p>
         </div>
       </footer>
     </div>
