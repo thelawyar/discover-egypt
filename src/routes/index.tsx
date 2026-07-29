@@ -4,6 +4,8 @@ import { getTaxonomy, getHomeStats } from "@/lib/directory.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Brand, SiteHeader } from "@/components/SiteHeader";
+import { getRequestOrigin } from "@/lib/origin.functions";
+import { ogImageMeta } from "@/lib/og";
 
 const taxonomyQuery = queryOptions({
   queryKey: ["taxonomy"],
@@ -17,7 +19,14 @@ const statsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/")({
-  head: () => ({
+  loader: async ({ context }) => ({
+    origin: await context.queryClient.ensureQueryData({
+      queryKey: ["origin"],
+      queryFn: () => getRequestOrigin(),
+      staleTime: Infinity,
+    }),
+  }),
+  head: ({ loaderData }) => ({
     meta: [
       { title: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
       {
@@ -36,6 +45,7 @@ export const Route = createFileRoute("/")({
         name: "twitter:description",
         content: "دليل تجاري شامل يجمع كل الأنشطة التجارية في مدينتك.",
       },
+      ...ogImageMeta(null, loaderData?.origin, "اكتشف مدينتك"),
     ],
     links: [{ rel: "canonical", href: "/" }],
     scripts: [
