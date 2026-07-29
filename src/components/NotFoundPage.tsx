@@ -92,7 +92,7 @@ export function NotFoundPage() {
             <h2 className="text-sm font-extrabold">أنشطة قد تهمّك</h2>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {suggestions.map((b) => (
-                <BusinessCard key={b.id} business={b} />
+                <BusinessCard key={b.id} item={b} />
               ))}
             </div>
           </div>
