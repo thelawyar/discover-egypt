@@ -47,7 +47,7 @@ function AdminPage() {
   const update = useMutation({
     mutationFn: async (payload: {
       id: string;
-      status?: string;
+      status?: "pending" | "approved" | "rejected";
       is_featured?: boolean;
       rejection_reason?: string | null;
     }) => {
