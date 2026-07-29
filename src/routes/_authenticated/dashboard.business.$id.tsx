@@ -328,7 +328,58 @@ function BusinessForm() {
                     </option>
                   ))}
                 </select>
+
+                {showCategoryInput ? (
+                  <div className="space-y-1.5 rounded-lg border border-dashed border-border p-2">
+                    <Input
+                      value={newCategory}
+                      maxLength={60}
+                      placeholder="اسم التصنيف الجديد"
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addCategory.mutate();
+                        }
+                      }}
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      {isAdmin
+                        ? "سيُضاف التصنيف مباشرة ويظهر للجميع."
+                        : "سيُرسل الاقتراح لمراجعة الإدارة قبل ظهوره."}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="rounded-full"
+                        disabled={addCategory.isPending}
+                        onClick={() => addCategory.mutate()}
+                      >
+                        {isAdmin ? "إضافة" : "إرسال للمراجعة"}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-full"
+                        onClick={() => setShowCategoryInput(false)}
+                      >
+                        إلغاء
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoryInput(true)}
+                    className="text-[11px] font-bold text-primary hover:underline"
+                  >
+                    {isAdmin ? "+ إضافة تصنيف جديد" : "+ اقتراح تصنيف جديد"}
+                  </button>
+                )}
               </div>
+
 
               <div className="space-y-1.5">
                 <Label>المحافظة *</Label>
