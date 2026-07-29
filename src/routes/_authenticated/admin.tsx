@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
+import { BrandingSettings } from "@/components/BrandingSettings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -27,6 +28,7 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
+  const [view, setView] = useState<"moderation" | "branding">("moderation");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -91,7 +93,23 @@ function AdminPage() {
           مراجعة الأنشطة المرسلة واعتمادها أو رفضها.
         </p>
 
-        <div className="mt-5 flex gap-2">
+        <div className="mt-5 flex gap-2 border-b border-border pb-3">
+          {([["moderation", "الأنشطة"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`rounded-full px-4 py-1.5 text-xs font-bold ${
+                view === v ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {view === "branding" ? <BrandingSettings /> : null}
+
+        <div className={view === "branding" ? "hidden" : "mt-5 flex gap-2"}>
           {TABS.map((t) => (
             <button
               key={t}
@@ -107,7 +125,7 @@ function AdminPage() {
           ))}
         </div>
 
-        {isLoading ? (
+        {view === "branding" ? null : isLoading ? (
           <p className="py-20 text-center text-sm text-muted-foreground">جارٍ التحميل...</p>
         ) : !data?.length ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
