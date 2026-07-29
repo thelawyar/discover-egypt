@@ -15,6 +15,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandingStyles } from "@/hooks/useSiteSettings";
+import { NotFoundPage } from "@/components/NotFoundPage";
 
 function NotFoundComponent() {
   return <NotFoundPage />;
