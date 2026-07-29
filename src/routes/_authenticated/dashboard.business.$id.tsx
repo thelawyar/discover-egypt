@@ -1,0 +1,448 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { toast } from "sonner";
+import { ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { getTaxonomy } from "@/lib/directory.functions";
+import { useAuth } from "@/hooks/useAuth";
+import { PageShell } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+export const Route = createFileRoute("/_authenticated/dashboard/business/$id")({
+  head: () => ({
+    meta: [
+      { title: "بيانات النشاط | دَوّر في بلدك" },
+      { name: "description", content: "أضف أو عدّل بيانات نشاطك التجاري." },
+      { property: "og:title", content: "بيانات النشاط | دَوّر في بلدك" },
+      { property: "og:description", content: "أضف أو عدّل بيانات نشاطك التجاري." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: BusinessForm,
+});
+
+const schema = z.object({
+  name: z.string().trim().min(2, "اسم النشاط مطلوب").max(120),
+  description: z.string().trim().max(2000).optional(),
+  category_id: z.string().uuid({ message: "اختر التصنيف" }),
+  governorate_id: z.string().uuid({ message: "اختر المحافظة" }),
+  city_id: z.string().uuid({ message: "اختر المدينة" }),
+  address: z.string().trim().max(250).optional(),
+  phone: z.string().trim().max(30).optional(),
+  whatsapp: z.string().trim().max(30).optional(),
+  email: z.string().trim().max(255).optional(),
+  website: z.string().trim().max(255).optional(),
+  facebook: z.string().trim().max(255).optional(),
+  instagram: z.string().trim().max(255).optional(),
+});
+
+type FormState = {
+  name: string;
+  description: string;
+  category_id: string;
+  governorate_id: string;
+  city_id: string;
+  address: string;
+  phone: string;
+  whatsapp: string;
+  email: string;
+  website: string;
+  facebook: string;
+  instagram: string;
+  products: string[];
+  cover_image_url: string | null;
+};
+
+const EMPTY: FormState = {
+  name: "",
+  description: "",
+  category_id: "",
+  governorate_id: "",
+  city_id: "",
+  address: "",
+  phone: "",
+  whatsapp: "",
+  email: "",
+  website: "",
+  facebook: "",
+  instagram: "",
+  products: [],
+  cover_image_url: null,
+};
+
+function BusinessForm() {
+  const { id } = Route.useParams();
+  const isNew = id === "new";
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [form, setForm] = useState<FormState>(EMPTY);
+  const [productInput, setProductInput] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const { data: taxonomy } = useQuery({
+    queryKey: ["taxonomy"],
+    queryFn: () => getTaxonomy(),
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const { data: existing } = useQuery({
+    queryKey: ["business-edit", id],
+    enabled: !isNew && Boolean(user?.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (!existing) return;
+    setForm({
+      name: existing.name ?? "",
+      description: existing.description ?? "",
+      category_id: existing.category_id ?? "",
+      governorate_id: existing.governorate_id ?? "",
+      city_id: existing.city_id ?? "",
+      address: existing.address ?? "",
+      phone: existing.phone ?? "",
+      whatsapp: existing.whatsapp ?? "",
+      email: existing.email ?? "",
+      website: existing.website ?? "",
+      facebook: existing.facebook ?? "",
+      instagram: existing.instagram ?? "",
+      products: existing.products ?? [],
+      cover_image_url: existing.cover_image_url ?? null,
+    });
+  }, [existing]);
+
+  const cities = (taxonomy?.cities ?? []).filter(
+    (c) => !form.governorate_id || c.governorate_id === form.governorate_id,
+  );
+
+  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function uploadCover(file: File) {
+    if (!user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("business-images")
+        .upload(path, file, { upsert: false });
+      if (error) throw error;
+      const { data: signed, error: signError } = await supabase.storage
+        .from("business-images")
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (signError) throw signError;
+      set("cover_image_url", signed.signedUrl);
+      toast.success("تم رفع الصورة");
+    } catch {
+      toast.error("تعذّر رفع الصورة");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const parsed = schema.safeParse(form);
+      if (!parsed.success) throw new Error(parsed.error.issues[0].message);
+
+      const payload = {
+        ...parsed.data,
+        description: form.description.trim() || null,
+        address: form.address.trim() || null,
+        phone: form.phone.trim() || null,
+        whatsapp: form.whatsapp.trim() || null,
+        email: form.email.trim() || null,
+        website: form.website.trim() || null,
+        facebook: form.facebook.trim() || null,
+        instagram: form.instagram.trim() || null,
+        products: form.products,
+        cover_image_url: form.cover_image_url,
+        owner_id: user!.id,
+      };
+
+      if (isNew) {
+        const { error } = await supabase.from("businesses").insert(payload);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("businesses")
+          .update(payload)
+          .eq("id", id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("تم الحفظ. النشاط الآن قيد مراجعة الإدارة.");
+      queryClient.invalidateQueries({ queryKey: ["my-businesses"] });
+      navigate({ to: "/dashboard" });
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ"),
+  });
+
+  function addProduct() {
+    const value = productInput.trim().slice(0, 60);
+    if (!value || form.products.includes(value) || form.products.length >= 20) return;
+    set("products", [...form.products, value]);
+    setProductInput("");
+  }
+
+  return (
+    <PageShell>
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <Link
+          to="/dashboard"
+          className="mb-4 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+        >
+          <ArrowRight className="size-3.5" /> رجوع إلى أنشطتي
+        </Link>
+
+        <h1 className="text-xl font-extrabold">
+          {isNew ? "إضافة نشاط جديد" : "تعديل النشاط"}
+        </h1>
+        <p className="mt-1 text-xs text-muted-foreground">
+          سيتم إرسال البيانات للمراجعة قبل نشرها في الدليل.
+        </p>
+
+        <form
+          className="mt-6 space-y-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
+        >
+          <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
+            <div className="space-y-1.5">
+              <Label htmlFor="name">اسم النشاط *</Label>
+              <Input
+                id="name"
+                value={form.name}
+                maxLength={120}
+                onChange={(e) => set("name", e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="description">وصف النشاط</Label>
+              <Textarea
+                id="description"
+                rows={4}
+                maxLength={2000}
+                value={form.description}
+                onChange={(e) => set("description", e.target.value)}
+                placeholder="اكتب نبذة عن نشاطك وما يقدمه..."
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>التصنيف *</Label>
+                <select
+                  value={form.category_id}
+                  onChange={(e) => set("category_id", e.target.value)}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  required
+                >
+                  <option value="">اختر</option>
+                  {(taxonomy?.categories ?? []).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>المحافظة *</Label>
+                <select
+                  value={form.governorate_id}
+                  onChange={(e) => {
+                    set("governorate_id", e.target.value);
+                    set("city_id", "");
+                  }}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  required
+                >
+                  <option value="">اختر</option>
+                  {(taxonomy?.governorates ?? []).map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>المدينة *</Label>
+                <select
+                  value={form.city_id}
+                  onChange={(e) => set("city_id", e.target.value)}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  required
+                >
+                  <option value="">اختر</option>
+                  {cities.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="address">العنوان التفصيلي</Label>
+              <Input
+                id="address"
+                value={form.address}
+                maxLength={250}
+                onChange={(e) => set("address", e.target.value)}
+              />
+            </div>
+          </section>
+
+          <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
+            <h2 className="text-sm font-bold">المنتجات والخدمات</h2>
+            <div className="flex gap-2">
+              <Input
+                value={productInput}
+                maxLength={60}
+                placeholder="مثال: قطع غيار، توصيل منزلي"
+                onChange={(e) => setProductInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addProduct();
+                  }
+                }}
+              />
+              <Button type="button" variant="outline" onClick={addProduct}>
+                إضافة
+              </Button>
+            </div>
+            {form.products.length ? (
+              <div className="flex flex-wrap gap-2">
+                {form.products.map((p) => (
+                  <span
+                    key={p}
+                    className="flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 text-xs"
+                  >
+                    {p}
+                    <button
+                      type="button"
+                      aria-label={`حذف ${p}`}
+                      onClick={() =>
+                        set(
+                          "products",
+                          form.products.filter((x) => x !== p),
+                        )
+                      }
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </section>
+
+          <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
+            <h2 className="text-sm font-bold">بيانات التواصل</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(
+                [
+                  ["phone", "رقم الهاتف"],
+                  ["whatsapp", "واتساب"],
+                  ["email", "البريد الإلكتروني"],
+                  ["website", "الموقع الإلكتروني"],
+                  ["facebook", "رابط فيسبوك"],
+                  ["instagram", "رابط إنستجرام"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label htmlFor={key}>{label}</Label>
+                  <Input
+                    id={key}
+                    dir="ltr"
+                    value={form[key]}
+                    maxLength={255}
+                    onChange={(e) => set(key, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card">
+            <h2 className="text-sm font-bold">صورة الغلاف</h2>
+            {form.cover_image_url ? (
+              <div className="relative overflow-hidden rounded-xl border border-border">
+                <img
+                  src={form.cover_image_url}
+                  alt="غلاف النشاط"
+                  className="aspect-[16/9] w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => set("cover_image_url", null)}
+                  className="absolute top-2 left-2 rounded-full bg-background/90 p-1.5"
+                  aria-label="إزالة الصورة"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ) : null}
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border py-6 text-sm text-muted-foreground hover:bg-muted">
+              {uploading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ImagePlus className="size-4" />
+              )}
+              {uploading ? "جارٍ الرفع..." : "اختر صورة (حتى 5 ميجابايت)"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadCover(file);
+                }}
+              />
+            </label>
+          </section>
+
+          <div className="flex justify-end gap-2">
+            <Button asChild type="button" variant="outline" className="rounded-full">
+              <Link to="/dashboard">إلغاء</Link>
+            </Button>
+            <Button type="submit" disabled={save.isPending} className="rounded-full">
+              {save.isPending ? "جارٍ الحفظ..." : "حفظ وإرسال للمراجعة"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </PageShell>
+  );
+}
