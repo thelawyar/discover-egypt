@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { BrandingSettings } from "@/components/BrandingSettings";
 import { AdminUsers } from "@/components/AdminUsers";
+import { SeoStatusPanel } from "@/components/SeoStatus";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
