@@ -55,19 +55,21 @@ export const Route = createFileRoute("/search")({
     const title = term
       ? `نتائج البحث عن "${term}" | اكتشف مدينتك`
       : "تصفح الأنشطة التجارية | اكتشف مدينتك";
+    const desc = term
+      ? `نتائج البحث عن "${term}" في الدليل التجاري لكل المدن المصرية.`
+      : "ابحث عن الأنشطة التجارية في المدن المصرية وتصفح النتائج بالتفصيل.";
     return {
       meta: [
         { title },
-        {
-          name: "description",
-          content: "ابحث عن الأنشطة التجارية في المدن المصرية وتصفح النتائج بالتفصيل.",
-        },
+        { name: "description", content: desc },
         { property: "og:title", content: title },
-        {
-          property: "og:description",
-          content: "نتائج البحث في الدليل التجاري لكل المدن المصرية.",
-        },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: "/search" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+        { name: "robots", content: "noindex, follow" },
       ],
+      links: [{ rel: "canonical", href: "/search" }],
     };
   },
   loader: async ({ context, deps }) => {
