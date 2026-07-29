@@ -43,7 +43,7 @@ export function NotFoundPage() {
           className="mx-auto mt-6 flex max-w-lg gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            navigate({ to: "/search", search: { q: term.trim() || undefined } });
+            navigate({ to: "/search", search: { q: term.trim(), city: "", gov: "", cat: "", page: 1 } });
           }}
         >
           <Input
@@ -63,7 +63,7 @@ export function NotFoundPage() {
             <Link
               key={c.id}
               to="/search"
-              search={{ cat: c.slug }}
+              search={{ q: "", city: "", gov: "", cat: c.slug, page: 1 }}
               className="rounded-full bg-muted px-3 py-1.5 text-xs font-medium hover:bg-primary-soft"
             >
               {c.name}
