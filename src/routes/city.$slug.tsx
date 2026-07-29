@@ -18,7 +18,7 @@ export const Route = createFileRoute("/city/$slug")({
     if (!data) throw notFound();
     return { name: data.city.name, gov: data.city.governorate_name, total: data.total };
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
     if (!loaderData) {
       return {
         meta: [
@@ -29,13 +29,18 @@ export const Route = createFileRoute("/city/$slug")({
     }
     const title = `دليل ${loaderData.name} التجاري | اكتشف مدينتك`;
     const desc = `تصفح ${loaderData.total} نشاطاً تجارياً في ${loaderData.name}${loaderData.gov ? ` - ${loaderData.gov}` : ""}.`;
+    const url = `/city/${params.slug}`;
     return {
       meta: [
         { title },
         { name: "description", content: desc },
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
       ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
   component: CityPage,
