@@ -33,6 +33,10 @@ function toCard(row: Row): BusinessCardData {
   };
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NO_MATCH = "00000000-0000-0000-0000-000000000000";
+
 const CARD_SELECT =
   "id,name,description,address,phone,whatsapp,cover_image_url,products,is_featured," +
   "categories(name),cities(name),governorates(name)";
@@ -92,7 +96,7 @@ export const searchBusinesses = createServerFn({ method: "GET" })
           .select("id")
           .eq("slug", value)
           .maybeSingle();
-        return row?.id ?? "__none__";
+        return row?.id ?? NO_MATCH;
       };
 
       const [cityId, govId, catId] = await Promise.all([
