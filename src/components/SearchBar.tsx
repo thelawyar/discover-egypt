@@ -1,11 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Search, MapPin, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Search, MapPin, X, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { City } from "@/lib/directory-types";
+import type { City, Governorate } from "@/lib/directory-types";
 
 type Props = {
   cities: City[];
+  governorates?: Governorate[];
   initialQuery?: string;
   initialCity?: string;
   size?: "hero" | "compact";
@@ -14,6 +15,7 @@ type Props = {
 
 export function SearchBar({
   cities,
+  governorates = [],
   initialQuery = "",
   initialCity = "",
   size = "hero",
@@ -24,6 +26,7 @@ export function SearchBar({
   const [cityId, setCityId] = useState(initialCity);
   const [cityOpen, setCityOpen] = useState(false);
   const [cityFilter, setCityFilter] = useState("");
+  const [govId, setGovId] = useState<string | null>(null);
   const wrapRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => setQ(initialQuery), [initialQuery]);
@@ -38,17 +41,53 @@ export function SearchBar({
   }, []);
 
   const selectedCity = cities.find((c) => c.slug === cityId || c.id === cityId);
-  const filtered = cityFilter.trim()
-    ? cities.filter((c) => c.name.includes(cityFilter.trim())).slice(0, 60)
-    : cities.slice(0, 60);
+  const selectedGov = governorates.find((g) => g.id === govId) ?? null;
+  const useGovSteps = governorates.length > 0;
+
+  const filtered = useMemo(() => {
+    const term = cityFilter.trim();
+    let list = cities;
+    if (useGovSteps && selectedGov && !term) {
+      list = cities.filter((c) => c.governorate_id === selectedGov.id);
+    }
+    if (term) list = list.filter((c) => c.name.includes(term));
+    return list.slice(0, 80);
+  }, [cities, cityFilter, selectedGov, useGovSteps]);
+
+  const filteredGovs = useMemo(() => {
+    const term = cityFilter.trim();
+    return term
+      ? governorates.filter((g) => g.name.includes(term))
+      : governorates;
+  }, [governorates, cityFilter]);
+
+  const cityCount = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of cities)
+      map.set(c.governorate_id, (map.get(c.governorate_id) ?? 0) + 1);
+    return map;
+  }, [cities]);
+
+  function closeMenu() {
+    setCityOpen(false);
+    setCityFilter("");
+    setGovId(null);
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     navigate({
       to: "/search",
-      search: { q: q.trim(), city: cityId, gov: "", cat: "", page: 1 },
+      search: {
+        q: q.trim(),
+        city: cityId,
+        gov: cityId ? "" : (selectedGov?.slug ?? ""),
+        cat: "",
+        page: 1,
+      },
     });
   }
+
 
   return (
     <form

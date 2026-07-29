@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
 import { Route as AuthenticatedAdminSetupRouteImport } from './routes/_authenticated/admin-setup'
+import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin-categories'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_authenticated/dashboard.business.$id'
@@ -60,6 +61,12 @@ const AuthenticatedAdminSetupRoute = AuthenticatedAdminSetupRouteImport.update({
   path: '/admin-setup',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminCategoriesRoute =
+  AuthenticatedAdminCategoriesRouteImport.update({
+    id: '/admin-categories',
+    path: '/admin-categories',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -84,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/admin-categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
@@ -96,6 +104,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/admin-categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
@@ -110,6 +119,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin-categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/admin'
+    | '/admin-categories'
     | '/admin-setup'
     | '/business/$id'
     | '/city/$slug'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/admin'
+    | '/admin-categories'
     | '/admin-setup'
     | '/business/$id'
     | '/city/$slug'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/admin-categories'
     | '/_authenticated/admin-setup'
     | '/business/$id'
     | '/city/$slug'
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSetupRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-categories': {
+      id: '/_authenticated/admin-categories'
+      path: '/admin-categories'
+      fullPath: '/admin-categories'
+      preLoaderRoute: typeof AuthenticatedAdminCategoriesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -250,6 +270,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
   AuthenticatedAdminSetupRoute: typeof AuthenticatedAdminSetupRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardBusinessIdRoute: typeof AuthenticatedDashboardBusinessIdRoute
@@ -257,6 +278,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminSetupRoute: AuthenticatedAdminSetupRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedDashboardBusinessIdRoute: AuthenticatedDashboardBusinessIdRoute,
