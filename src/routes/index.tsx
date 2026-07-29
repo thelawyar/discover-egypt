@@ -30,7 +30,14 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "دليل تجاري شامل يجمع كل الأنشطة التجارية في مدينتك.",
       },
+      { property: "og:url", content: "/" },
+      { name: "twitter:title", content: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
+      {
+        name: "twitter:description",
+        content: "دليل تجاري شامل يجمع كل الأنشطة التجارية في مدينتك.",
+      },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   loader: async ({ context }) => {
     await Promise.all([
