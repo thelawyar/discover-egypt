@@ -13,6 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import { getBusiness } from "@/lib/directory.functions";
+import { getRequestOrigin } from "@/lib/origin.functions";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { WEEK_DAYS } from "@/lib/directory-types";
@@ -26,9 +27,35 @@ function businessQuery(id: string) {
 
 export const Route = createFileRoute("/business/$id")({
   loader: async ({ context, params }) => {
-    const data = await context.queryClient.ensureQueryData(businessQuery(params.id));
+    const [data, origin] = await Promise.all([
+      context.queryClient.ensureQueryData(businessQuery(params.id)),
+      context.queryClient.ensureQueryData({
+        queryKey: ["origin"],
+        queryFn: () => getRequestOrigin(),
+        staleTime: Infinity,
+      }),
+    ]);
     if (!data) throw notFound();
-    return { name: data.name, description: data.description, image: data.cover_image_url };
+    const rating = data.reviews.length
+      ? data.reviews.reduce((s, r) => s + r.rating, 0) / data.reviews.length
+      : null;
+    return {
+      origin,
+      name: data.name,
+      description: data.description,
+      image: data.cover_image_url ?? data.images[0]?.url ?? null,
+      address: data.address,
+      phone: data.phone,
+      website: data.website,
+      city_name: data.city_name,
+      city_slug: data.city_slug,
+      governorate_name: data.governorate_name,
+      category_name: data.category_name,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      rating,
+      reviewCount: data.reviews.length,
+    };
   },
   head: ({ params, loaderData }) => {
     if (!loaderData) {
@@ -54,14 +81,94 @@ export const Route = createFileRoute("/business/$id")({
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
-    if (loaderData.image?.startsWith("https://")) {
+    const origin = loaderData.origin ?? "";
+    const image = loaderData.image
+      ? loaderData.image.startsWith("http")
+        ? loaderData.image
+        : `${origin}${loaderData.image}`
+      : null;
+    if (image?.startsWith("https://")) {
       meta.push(
-        { property: "og:image", content: loaderData.image },
+        { property: "og:image", content: image },
         { property: "og:image:alt", content: loaderData.name },
-        { name: "twitter:image", content: loaderData.image },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { name: "twitter:image", content: image },
       );
     }
-    return { meta, links: [{ rel: "canonical", href: url }] };
+
+    const jsonLd: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: loaderData.name,
+      description: desc,
+      url: `${origin}${url}`,
+      ...(image ? { image } : {}),
+      ...(loaderData.phone ? { telephone: loaderData.phone } : {}),
+      ...(loaderData.website ? { sameAs: [loaderData.website] } : {}),
+      address: {
+        "@type": "PostalAddress",
+        addressCountry: "EG",
+        ...(loaderData.address ? { streetAddress: loaderData.address } : {}),
+        ...(loaderData.city_name ? { addressLocality: loaderData.city_name } : {}),
+        ...(loaderData.governorate_name
+          ? { addressRegion: loaderData.governorate_name }
+          : {}),
+      },
+      ...(loaderData.latitude && loaderData.longitude
+        ? {
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: loaderData.latitude,
+              longitude: loaderData.longitude,
+            },
+          }
+        : {}),
+      ...(loaderData.rating && loaderData.reviewCount
+        ? {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: loaderData.rating.toFixed(1),
+              reviewCount: loaderData.reviewCount,
+              bestRating: 5,
+              worstRating: 1,
+            },
+          }
+        : {}),
+    };
+
+    const breadcrumb = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "الرئيسية", item: `${origin}/` },
+        ...(loaderData.city_slug && loaderData.city_name
+          ? [
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: loaderData.city_name,
+                item: `${origin}/city/${loaderData.city_slug}`,
+              },
+            ]
+          : []),
+        {
+          "@type": "ListItem",
+          position: loaderData.city_slug ? 3 : 2,
+          name: loaderData.name,
+          item: `${origin}${url}`,
+        },
+      ],
+    };
+
+    return {
+      meta,
+      links: [{ rel: "canonical", href: `${origin}${url}` }],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(jsonLd) },
+        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+      ],
+    };
   },
   component: BusinessPage,
   notFoundComponent: () => (
