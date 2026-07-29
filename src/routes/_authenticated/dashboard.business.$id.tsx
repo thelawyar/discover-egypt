@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTaxonomy } from "@/lib/directory.functions";
+import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
