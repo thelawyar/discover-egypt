@@ -77,7 +77,7 @@ export const Route = createFileRoute("/business/$id")({
       { property: "og:title", content: title },
       { property: "og:description", content: desc },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: url },
+      { property: "og:url", content: `${loaderData.origin ?? ""}${url}` },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
