@@ -47,7 +47,8 @@ export function SearchBar({
   const filtered = useMemo(() => {
     const term = cityFilter.trim();
     let list = cities;
-    if (useGovSteps && selectedGov && !term) {
+    if (useGovSteps) {
+      if (!selectedGov) return [];
       list = cities.filter((c) => c.governorate_id === selectedGov.id);
     }
     if (term) list = list.filter((c) => c.name.includes(term));
