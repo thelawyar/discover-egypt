@@ -12,14 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import townLogo from "@/assets/town-logo.jpg.asset.json";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
+  const { site_name: name, logo_url: logo } = useSiteSettings();
   const cls = size === "lg" ? "text-4xl sm:text-5xl" : "text-xl";
   const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-9";
   return (
     <span className="inline-flex items-center gap-2">
-      <img src={townLogo.url} alt="اكتشف مدينتك" className={`${imgCls} w-auto`} />
-      <span className={`font-extrabold tracking-tight text-foreground ${cls}`}>اكتشف مدينتك</span>
+      <img src={logo || townLogo.url} alt={name} className={`${imgCls} w-auto`} />
+      <span className={`font-extrabold tracking-tight text-foreground ${cls}`}>{name}</span>
     </span>
   );
 }
