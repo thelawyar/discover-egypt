@@ -12,14 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import townLogo from "@/assets/town-logo.jpg.asset.json";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
+  const { site_name: name, logo_url: logo } = useSiteSettings();
   const cls = size === "lg" ? "text-4xl sm:text-5xl" : "text-xl";
   const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-9";
   return (
     <span className="inline-flex items-center gap-2">
-      <img src={townLogo.url} alt="اكتشف مدينتك" className={`${imgCls} w-auto`} />
-      <span className={`font-extrabold tracking-tight text-foreground ${cls}`}>اكتشف مدينتك</span>
+      <img src={logo || townLogo.url} alt={name} className={`${imgCls} w-auto`} />
+      <span className={`font-extrabold tracking-tight text-foreground ${cls}`}>{name}</span>
     </span>
   );
 }
@@ -83,6 +85,7 @@ export function SiteHeader() {
 }
 
 export function PageShell({ children }: { children: React.ReactNode }) {
+  const { tagline } = useSiteSettings();
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
@@ -97,7 +100,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       <footer className="mt-16 border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 text-center text-xs text-muted-foreground">
           <Brand />
-          <p>دليل تجاري شامل لكل المدن المصرية — durtown.com</p>
+          <p>{tagline} — durtown.com</p>
         </div>
       </footer>
     </div>
