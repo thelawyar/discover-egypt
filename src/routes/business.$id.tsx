@@ -82,20 +82,9 @@ export const Route = createFileRoute("/business/$id")({
       { name: "twitter:description", content: desc },
     ];
     const origin = loaderData.origin ?? "";
-    const image = loaderData.image
-      ? loaderData.image.startsWith("http")
-        ? loaderData.image
-        : `${origin}${loaderData.image}`
-      : null;
-    if (image?.startsWith("https://")) {
-      meta.push(
-        { property: "og:image", content: image },
-        { property: "og:image:alt", content: loaderData.name },
-        { property: "og:image:width", content: "1200" },
-        { property: "og:image:height", content: "630" },
-        { name: "twitter:image", content: image },
-      );
-    }
+    const image = absoluteOgImage(loaderData.image, origin);
+    meta.push(...ogImageMeta(loaderData.image, origin, loaderData.name));
+
 
     const jsonLd: Record<string, unknown> = {
       "@context": "https://schema.org",
