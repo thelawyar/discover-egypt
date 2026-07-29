@@ -87,6 +87,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "ابحث عن أي نشاط تجاري في مدينتك: عيادات، محلات، مصانع، مدارس وأكثر.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "اكتشف مدينتك" },
+      { property: "og:locale", content: "ar_EG" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
