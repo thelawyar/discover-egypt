@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_invite_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          label: string | null
+          token_hash: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          label?: string | null
+          token_hash: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          label?: string | null
+          token_hash?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       business_hours: {
         Row: {
           business_id: string
@@ -405,6 +438,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_admin: boolean
+          last_sign_in_at: string
+        }[]
+      }
+      admin_set_admin_role: {
+        Args: { _grant: boolean; _user_id: string }
+        Returns: boolean
+      }
+      claim_admin_invite: { Args: { _token: string }; Returns: boolean }
+      create_admin_invite: {
+        Args: { _days?: number; _label?: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

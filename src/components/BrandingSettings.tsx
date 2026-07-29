@@ -39,7 +39,45 @@ export function BrandingSettings() {
     onError: () => toast.error("تعذّر الحفظ"),
   });
 
+  /** Validates format, size and dimensions before uploading. */
+  async function validateLogo(file: File): Promise<string | null> {
+    const allowed = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+    if (!allowed.includes(file.type))
+      return "صيغة غير مدعومة — استخدم PNG أو JPG أو WEBP أو SVG.";
+    if (file.size > 2 * 1024 * 1024)
+      return `حجم الملف ${(file.size / 1024 / 1024).toFixed(1)}MB — الحد الأقصى 2 ميجابايت.`;
+    if (file.type === "image/svg+xml") return null;
+
+    const dims = await new Promise<{ w: number; h: number } | null>((resolve) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ w: img.naturalWidth, h: img.naturalHeight });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      img.src = url;
+    });
+
+    if (!dims) return "تعذّر قراءة الصورة، تأكد أن الملف سليم.";
+    if (dims.w < 80 || dims.h < 40)
+      return `أبعاد الصورة ${dims.w}×${dims.h} صغيرة جداً — الحد الأدنى 80×40 بكسل.`;
+    if (dims.w > 2000 || dims.h > 2000)
+      return `أبعاد الصورة ${dims.w}×${dims.h} كبيرة جداً — الحد الأقصى 2000×2000 بكسل.`;
+    if (dims.w / dims.h > 8 || dims.h / dims.w > 4)
+      return "نسبة أبعاد الشعار غير مناسبة، يفضّل شعاراً أفقياً متوازناً.";
+    return null;
+  }
+
   async function uploadLogo(file: File) {
+    const problem = await validateLogo(file);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() ?? "png";
@@ -86,6 +124,9 @@ export function BrandingSettings() {
 
       <div>
         <label className="text-xs font-medium text-muted-foreground">شعار الموقع (Logo)</label>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          PNG / JPG / WEBP / SVG — حتى 2 ميجابايت، وأبعاد بين 80×40 و2000×2000 بكسل.
+        </p>
         <div className="mt-2 flex items-center gap-3">
           {form.logo_url ? (
             <img
@@ -101,7 +142,7 @@ export function BrandingSettings() {
             {uploading ? "جارٍ الرفع..." : "رفع شعار"}
             <input
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -166,6 +207,63 @@ export function BrandingSettings() {
               value={form.accent_color}
               onChange={(e) => setForm({ ...form, accent_color: e.target.value })}
             />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-medium text-muted-foreground">معاينة مباشرة قبل الحفظ</p>
+        <div
+          className="mt-2 overflow-hidden rounded-2xl border border-border"
+          style={
+            {
+              "--preview-primary": form.primary_color,
+              "--preview-accent": form.accent_color,
+            } as React.CSSProperties
+          }
+        >
+          <div className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3">
+            <div className="flex items-center gap-2">
+              {form.logo_url ? (
+                <img src={form.logo_url} alt="معاينة الشعار" className="h-8 w-auto" />
+              ) : null}
+              <div className="leading-tight">
+                <p className="text-sm font-extrabold">{form.site_name || "اكتشف مدينتك"}</p>
+                <p className="text-[10px] text-muted-foreground">{form.tagline}</p>
+              </div>
+            </div>
+            <span
+              className="rounded-full px-3 py-1 text-[11px] font-bold text-white"
+              style={{ backgroundColor: "var(--preview-primary)" }}
+            >
+              إضافة نشاط
+            </span>
+          </div>
+          <div
+            className="space-y-3 px-4 py-5"
+            style={{ backgroundColor: "var(--preview-accent)" }}
+          >
+            <div className="rounded-full border border-border bg-background px-4 py-2 text-xs text-muted-foreground">
+              ابحث عن نشاط أو منتج أو مجال...
+            </div>
+            <div className="flex gap-2">
+              <span
+                className="rounded-full px-3 py-1 text-[11px] font-bold text-white"
+                style={{ backgroundColor: "var(--preview-primary)" }}
+              >
+                بحث
+              </span>
+              <span
+                className="rounded-full border px-3 py-1 text-[11px] font-bold"
+                style={{
+                  borderColor: "var(--preview-primary)",
+                  color: "var(--preview-primary)",
+                  backgroundColor: "var(--background)",
+                }}
+              >
+                تصفح المدن
+              </span>
+            </div>
           </div>
         </div>
       </div>
