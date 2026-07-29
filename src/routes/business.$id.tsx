@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getBusiness } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
+import { absoluteOgImage, ogImageMeta } from "@/lib/og";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { WEEK_DAYS } from "@/lib/directory-types";
