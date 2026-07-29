@@ -349,6 +349,36 @@ export type Database = {
           },
         ]
       }
+      site_settings: {
+        Row: {
+          accent_color: string
+          id: string
+          logo_url: string | null
+          primary_color: string
+          site_name: string
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          site_name?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          site_name?: string
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
