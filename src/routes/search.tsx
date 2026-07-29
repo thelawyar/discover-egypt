@@ -172,9 +172,10 @@ function SearchPage() {
             onChange={(e) =>
               navigate({ search: (p: SearchParams) => ({ ...p, city: e.target.value, page: 1 }) })
             }
-            className="h-9 rounded-full border border-border bg-card px-3 text-xs"
+            disabled={!selectedGov}
+            className="h-9 rounded-full border border-border bg-card px-3 text-xs disabled:opacity-60"
           >
-            <option value="">كل المدن</option>
+            <option value="">{selectedGov ? "كل المدن" : "اختر المحافظة أولاً"}</option>
             {govCities.map((c) => (
               <option key={c.id} value={c.slug}>
                 {c.name}
