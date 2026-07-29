@@ -406,10 +406,13 @@ function BusinessForm() {
                 <select
                   value={form.city_id}
                   onChange={(e) => set("city_id", e.target.value)}
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  disabled={!form.governorate_id}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm disabled:opacity-60"
                   required
                 >
-                  <option value="">اختر</option>
+                  <option value="">
+                    {form.governorate_id ? "اختر" : "اختر المحافظة أولاً"}
+                  </option>
                   {cities.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
