@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { BrandingSettings } from "@/components/BrandingSettings";
 import { AdminUsers } from "@/components/AdminUsers";
+import { AdminCategories } from "@/components/AdminCategories";
 import { SeoStatusPanel } from "@/components/SeoStatus";
 
 
