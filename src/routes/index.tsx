@@ -68,12 +68,8 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(taxonomyQuery),
-      context.queryClient.ensureQueryData(statsQuery),
-    ]);
-  },
+
+
   component: Home,
 });
 
