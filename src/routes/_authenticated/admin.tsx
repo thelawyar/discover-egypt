@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Star, X } from "lucide-react";
+import { Check, Plus, Star, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { BrandingSettings } from "@/components/BrandingSettings";
 import { AdminUsers } from "@/components/AdminUsers";
+import { AdminCategories } from "@/components/AdminCategories";
 import { SeoStatusPanel } from "@/components/SeoStatus";
 
 
@@ -31,7 +32,9 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
-  const [view, setView] = useState<"moderation" | "users" | "branding" | "seo">("moderation");
+  const [view, setView] = useState<
+    "moderation" | "categories" | "users" | "branding" | "seo"
+  >("moderation");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -99,13 +102,22 @@ function AdminPage() {
   return (
     <PageShell>
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-xl font-extrabold">لوحة الإدارة</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
-          مراجعة الأنشطة المرسلة واعتمادها أو رفضها.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-extrabold">لوحة الإدارة</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              مراجعة الأنشطة والتصنيفات المرسلة واعتمادها أو رفضها.
+            </p>
+          </div>
+          <Button asChild className="rounded-full">
+            <Link to="/dashboard/business/$id" params={{ id: "new" }}>
+              <Plus className="size-4" /> إضافة نشاط
+            </Link>
+          </Button>
+        </div>
 
-        <div className="mt-5 flex gap-2 border-b border-border pb-3">
-          {([["moderation", "الأنشطة"], ["users", "المستخدمون"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+        <div className="mt-5 flex flex-wrap gap-2 border-b border-border pb-3">
+          {([["moderation", "الأنشطة"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -120,7 +132,9 @@ function AdminPage() {
 
         {view === "branding" ? <BrandingSettings /> : null}
         {view === "users" ? <AdminUsers /> : null}
+        {view === "categories" ? <AdminCategories /> : null}
         {view === "seo" ? <SeoStatusPanel /> : null}
+
 
         <div className={view !== "moderation" ? "hidden" : "mt-5 flex gap-2"}>
           {TABS.map((t) => (

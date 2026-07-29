@@ -79,19 +79,53 @@ const EMPTY: FormState = {
 function BusinessForm() {
   const { id } = Route.useParams();
   const isNew = id === "new";
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [productInput, setProductInput] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
 
   const { data: taxonomy } = useQuery({
     queryKey: ["taxonomy"],
     queryFn: () => getTaxonomy(),
     staleTime: 1000 * 60 * 30,
   });
+
+  const addCategory = useMutation({
+    mutationFn: async () => {
+      const value = newCategory.trim().slice(0, 60);
+      if (value.length < 2) throw new Error("اسم التصنيف قصير جداً");
+      const { data, error } = await supabase
+        .from("categories")
+        .insert({
+          name: value,
+          slug: "",
+          status: isAdmin ? "approved" : "pending",
+        })
+        .select("id,status")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      setNewCategory("");
+      setShowCategoryInput(false);
+      if (data.status === "approved") {
+        queryClient.invalidateQueries({ queryKey: ["taxonomy"] });
+        set("category_id", data.id);
+        toast.success("تمت إضافة التصنيف");
+      } else {
+        toast.success("تم إرسال التصنيف المقترح لمراجعة الإدارة");
+      }
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "تعذّر إضافة التصنيف"),
+  });
+
 
   const { data: existing } = useQuery({
     queryKey: ["business-edit", id],
@@ -294,7 +328,58 @@ function BusinessForm() {
                     </option>
                   ))}
                 </select>
+
+                {showCategoryInput ? (
+                  <div className="space-y-1.5 rounded-lg border border-dashed border-border p-2">
+                    <Input
+                      value={newCategory}
+                      maxLength={60}
+                      placeholder="اسم التصنيف الجديد"
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addCategory.mutate();
+                        }
+                      }}
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      {isAdmin
+                        ? "سيُضاف التصنيف مباشرة ويظهر للجميع."
+                        : "سيُرسل الاقتراح لمراجعة الإدارة قبل ظهوره."}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="rounded-full"
+                        disabled={addCategory.isPending}
+                        onClick={() => addCategory.mutate()}
+                      >
+                        {isAdmin ? "إضافة" : "إرسال للمراجعة"}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-full"
+                        onClick={() => setShowCategoryInput(false)}
+                      >
+                        إلغاء
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoryInput(true)}
+                    className="text-[11px] font-bold text-primary hover:underline"
+                  >
+                    {isAdmin ? "+ إضافة تصنيف جديد" : "+ اقتراح تصنيف جديد"}
+                  </button>
+                )}
               </div>
+
 
               <div className="space-y-1.5">
                 <Label>المحافظة *</Label>
