@@ -30,7 +30,7 @@ export const Route = createFileRoute("/business/$id")({
     if (!data) throw notFound();
     return { name: data.name, description: data.description, image: data.cover_image_url };
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
     if (!loaderData) {
       return {
         meta: [
@@ -39,22 +39,29 @@ export const Route = createFileRoute("/business/$id")({
         ],
       };
     }
+    const title = `${loaderData.name} | اكتشف مدينتك`;
     const desc =
       loaderData.description?.slice(0, 150) ??
       `تفاصيل ${loaderData.name} في الدليل التجاري اكتشف مدينتك.`;
+    const url = `/business/${params.id}`;
     const meta = [
-      { title: `${loaderData.name} | اكتشف مدينتك` },
+      { title },
       { name: "description", content: desc },
-      { property: "og:title", content: `${loaderData.name} | اكتشف مدينتك` },
+      { property: "og:title", content: title },
       { property: "og:description", content: desc },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: url },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: desc },
     ];
     if (loaderData.image?.startsWith("https://")) {
       meta.push(
         { property: "og:image", content: loaderData.image },
+        { property: "og:image:alt", content: loaderData.name },
         { name: "twitter:image", content: loaderData.image },
       );
     }
-    return { meta };
+    return { meta, links: [{ rel: "canonical", href: url }] };
   },
   component: BusinessPage,
   notFoundComponent: () => (
