@@ -164,7 +164,7 @@ export function SearchBar({
               onChange={(e) => setCityFilter(e.target.value)}
               placeholder={
                 useGovSteps && !selectedGov
-                  ? "اكتب اسم المحافظة أو المدينة..."
+                  ? "اكتب اسم المحافظة..."
                   : "اكتب اسم المدينة..."
               }
               className="h-9 w-full rounded-lg bg-muted px-3 text-sm outline-none"
