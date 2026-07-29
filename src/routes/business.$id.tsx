@@ -72,7 +72,7 @@ export const Route = createFileRoute("/business/$id")({
       loaderData.description?.slice(0, 150) ??
       `تفاصيل ${loaderData.name} في الدليل التجاري اكتشف مدينتك.`;
     const url = `/business/${params.id}`;
-    const meta = [
+    const meta: Record<string, string>[] = [
       { title },
       { name: "description", content: desc },
       { property: "og:title", content: title },

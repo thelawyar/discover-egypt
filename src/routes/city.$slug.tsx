@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { getCityPage } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
-import { absoluteOgImage, ogImageMeta } from "@/lib/og";
+import { ogImageMeta } from "@/lib/og";
 import { PageShell } from "@/components/SiteHeader";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Button } from "@/components/ui/button";
