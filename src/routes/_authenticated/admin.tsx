@@ -32,7 +32,9 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
-  const [view, setView] = useState<"moderation" | "users" | "branding" | "seo">("moderation");
+  const [view, setView] = useState<
+    "moderation" | "categories" | "users" | "branding" | "seo"
+  >("moderation");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
