@@ -33,6 +33,10 @@ function toCard(row: Row): BusinessCardData {
   };
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NO_MATCH = "00000000-0000-0000-0000-000000000000";
+
 const CARD_SELECT =
   "id,name,description,address,phone,whatsapp,cover_image_url,products,is_featured," +
   "categories(name),cities(name),governorates(name)";
@@ -80,14 +84,35 @@ export const searchBusinesses = createServerFn({ method: "GET" })
       const page = Math.max(1, Math.min(200, data.page ?? 1));
       const term = (data.q ?? "").trim().slice(0, 100);
 
+      // Filters accept either a UUID or a SEO-friendly slug.
+      const resolve = async (
+        table: "cities" | "governorates" | "categories",
+        value: string | undefined,
+      ): Promise<string | null> => {
+        if (!value) return null;
+        if (UUID_RE.test(value)) return value;
+        const { data: row } = await supabase
+          .from(table)
+          .select("id")
+          .eq("slug", value)
+          .maybeSingle();
+        return row?.id ?? NO_MATCH;
+      };
+
+      const [cityId, govId, catId] = await Promise.all([
+        resolve("cities", data.city),
+        resolve("governorates", data.gov),
+        resolve("categories", data.cat),
+      ]);
+
       let query = supabase
         .from("businesses")
         .select(CARD_SELECT, { count: "exact" })
         .eq("status", "approved");
 
-      if (data.city) query = query.eq("city_id", data.city);
-      if (data.gov) query = query.eq("governorate_id", data.gov);
-      if (data.cat) query = query.eq("category_id", data.cat);
+      if (cityId) query = query.eq("city_id", cityId);
+      if (govId) query = query.eq("governorate_id", govId);
+      if (catId) query = query.eq("category_id", catId);
 
       if (term) {
         const escaped = term.replace(/[%,()]/g, " ");
@@ -170,19 +195,27 @@ export const getBusiness = createServerFn({ method: "GET" })
     };
   });
 
+export const CITY_PER_PAGE = 24;
+
 export const getCityPage = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => z.object({ slug: z.string() }).parse(data))
+  .inputValidator((data: unknown) =>
+    z.object({ slug: z.string(), page: z.number().optional() }).parse(data),
+  )
   .handler(async ({ data }) => {
     const { getPublicClient } = await import("./supabase-public.server");
     const supabase = getPublicClient();
 
     const { data: city } = await supabase
       .from("cities")
-      .select("id,name,slug,is_new_city,governorates(name,id)")
+      .select("id,name,slug,is_new_city,governorates(name,id,slug)")
       .eq("slug", data.slug)
       .maybeSingle();
 
     if (!city) return null;
+
+    const perPage = 24;
+    const page = Math.max(1, Math.min(200, data.page ?? 1));
+    const from = (page - 1) * perPage;
 
     const { data: rows, count } = await supabase
       .from("businesses")
@@ -191,7 +224,7 @@ export const getCityPage = createServerFn({ method: "GET" })
       .eq("city_id", city.id)
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(24);
+      .range(from, from + perPage - 1);
 
     return {
       city: {
@@ -199,11 +232,42 @@ export const getCityPage = createServerFn({ method: "GET" })
         name: city.name,
         slug: city.slug,
         governorate_name: rel((city as unknown as Row).governorates, "name"),
+        governorate_slug: rel((city as unknown as Row).governorates, "slug"),
       },
       items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
       total: count ?? 0,
+      page,
+      perPage,
     };
   });
+
+/** Data for /sitemap.xml: indexable cities, categories and approved businesses. */
+export const getSitemapData = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
+
+    const [cities, categories, businesses] = await Promise.all([
+      supabase.from("cities").select("slug").order("name"),
+      supabase.from("categories").select("slug").order("sort_order"),
+      supabase
+        .from("businesses")
+        .select("id,updated_at")
+        .eq("status", "approved")
+        .order("updated_at", { ascending: false })
+        .limit(5000),
+    ]);
+
+    return {
+      cities: (cities.data ?? []).map((c) => c.slug),
+      categories: (categories.data ?? []).map((c) => c.slug),
+      businesses: (businesses.data ?? []).map((b) => ({
+        id: b.id,
+        updated_at: b.updated_at,
+      })),
+    };
+  },
+);
 
 export const getHomeStats = createServerFn({ method: "GET" }).handler(
   async () => {

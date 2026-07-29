@@ -38,6 +38,25 @@ export const Route = createFileRoute("/")({
       },
     ],
     links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "اكتشف مدينتك",
+          inLanguage: "ar-EG",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: "/search?q={search_term_string}",
+            },
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+    ],
   }),
   loader: async ({ context }) => {
     await Promise.all([
@@ -75,7 +94,7 @@ function Home() {
             <Link
               key={c.id}
               to="/search"
-              search={{ q: "", city: "", gov: "", cat: c.id, page: 1 }}
+              search={{ q: "", city: "", gov: "", cat: c.slug, page: 1 }}
               className="rounded-full border border-border bg-card px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               {c.name}

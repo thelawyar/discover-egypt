@@ -4,6 +4,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { SearchX } from "lucide-react";
 import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
+import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { PageShell } from "@/components/SiteHeader";
@@ -50,33 +51,65 @@ function resultsQuery(deps: {
 export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => search,
-  head: ({ match }) => {
-    const term = match.search?.q?.trim();
+  head: ({ match, loaderData }) => {
+    const ld = loaderData as unknown as { origin: string; pages: number } | undefined;
+    const sp = match.search ?? { q: "", city: "", gov: "", cat: "", page: 1 };
+    const term = sp.q?.trim();
     const title = term
       ? `نتائج البحث عن "${term}" | اكتشف مدينتك`
-      : "تصفح الأنشطة التجارية | اكتشف مدينتك";
+      : (sp.page ?? 1) > 1
+        ? `تصفح الأنشطة التجارية - صفحة ${sp.page} | اكتشف مدينتك`
+        : "تصفح الأنشطة التجارية | اكتشف مدينتك";
     const desc = term
       ? `نتائج البحث عن "${term}" في الدليل التجاري لكل المدن المصرية.`
       : "ابحث عن الأنشطة التجارية في المدن المصرية وتصفح النتائج بالتفصيل.";
+    const origin = ld?.origin ?? "";
+    const build = (page: number) => {
+      const usp = new URLSearchParams();
+      if (sp.city) usp.set("city", sp.city);
+      if (sp.gov) usp.set("gov", sp.gov);
+      if (sp.cat) usp.set("cat", sp.cat);
+      if (page > 1) usp.set("page", String(page));
+      const qs = usp.toString();
+      return `${origin}/search${qs ? `?${qs}` : ""}`;
+    };
+
+    const page = sp.page ?? 1;
+    const canonical = build(page);
+    // Free-text queries stay out of the index; filtered/browsable pages are indexable.
+    const indexable = !term;
+
+    const links: Record<string, string>[] = [{ rel: "canonical", href: canonical }];
+    if (indexable) {
+      if (page > 1) links.push({ rel: "prev", href: build(page - 1) });
+      if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
+    }
+
     return {
       meta: [
         { title },
         { name: "description", content: desc },
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
-        { property: "og:url", content: "/search" },
+        { property: "og:url", content: canonical },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc },
-        { name: "robots", content: "noindex, follow" },
+        { name: "robots", content: indexable ? "index, follow" : "noindex, follow" },
       ],
-      links: [{ rel: "canonical", href: "/search" }],
+      links,
     };
   },
   loader: async ({ context, deps }) => {
-    await Promise.all([
+    const [, results, origin] = await Promise.all([
       context.queryClient.ensureQueryData(taxonomyQuery),
       context.queryClient.ensureQueryData(resultsQuery(deps)),
+      context.queryClient.ensureQueryData({
+        queryKey: ["origin"],
+        queryFn: () => getRequestOrigin(),
+        staleTime: Infinity,
+      }),
     ]);
+    return { origin, pages: Math.max(1, Math.ceil(results.total / 12)) };
   },
   component: SearchPage,
   errorComponent: () => (
@@ -96,8 +129,9 @@ function SearchPage() {
 
   const perPage = 12;
   const pages = Math.max(1, Math.ceil(results.total / perPage));
-  const govCities = params.gov
-    ? taxonomy.cities.filter((c) => c.governorate_id === params.gov)
+  const selectedGov = taxonomy.governorates.find((g) => g.slug === params.gov);
+  const govCities = selectedGov
+    ? taxonomy.cities.filter((c) => c.governorate_id === selectedGov.id)
     : taxonomy.cities;
 
   return (
@@ -126,7 +160,7 @@ function SearchPage() {
           >
             <option value="">كل المحافظات</option>
             {taxonomy.governorates.map((g) => (
-              <option key={g.id} value={g.id}>
+              <option key={g.id} value={g.slug}>
                 {g.name}
               </option>
             ))}
@@ -141,7 +175,7 @@ function SearchPage() {
           >
             <option value="">كل المدن</option>
             {govCities.map((c) => (
-              <option key={c.id} value={c.id}>
+              <option key={c.id} value={c.slug}>
                 {c.name}
               </option>
             ))}
@@ -156,7 +190,7 @@ function SearchPage() {
           >
             <option value="">كل التصنيفات</option>
             {taxonomy.categories.map((c) => (
-              <option key={c.id} value={c.id}>
+              <option key={c.id} value={c.slug}>
                 {c.name}
               </option>
             ))}

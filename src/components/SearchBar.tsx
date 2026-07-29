@@ -37,7 +37,7 @@ export function SearchBar({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  const selectedCity = cities.find((c) => c.id === cityId);
+  const selectedCity = cities.find((c) => c.slug === cityId || c.id === cityId);
   const filtered = cityFilter.trim()
     ? cities.filter((c) => c.name.includes(cityFilter.trim())).slice(0, 60)
     : cities.slice(0, 60);
@@ -138,7 +138,7 @@ export function SearchBar({
                 key={c.id}
                 type="button"
                 onClick={() => {
-                  setCityId(c.id);
+                  setCityId(c.slug);
                   setCityOpen(false);
                 }}
                 className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-right text-sm hover:bg-muted"

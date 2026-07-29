@@ -1,0 +1,12 @@
+import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+
+/** Absolute origin of the current request (needed for absolute og:image / sitemap URLs). */
+export const getRequestOrigin = createServerFn({ method: "GET" }).handler(
+  async (): Promise<string> => {
+    const req = getRequest();
+    const proto = req.headers.get("x-forwarded-proto") ?? "https";
+    const host = req.headers.get("host") ?? "";
+    return host ? `${proto}://${host}` : "";
+  },
+);
