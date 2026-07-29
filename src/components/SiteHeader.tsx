@@ -13,11 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
-  const cls = size === "lg" ? "text-5xl sm:text-6xl" : "text-xl";
+  const cls = size === "lg" ? "text-4xl sm:text-5xl" : "text-xl";
+  const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-9";
   return (
-    <span className={`font-extrabold tracking-tight ${cls}`}>
-      <span className="text-primary">دَوّر</span>
-      <span className="text-foreground"> في بلدك</span>
+    <span className="inline-flex items-center gap-2">
+      <img src={townLogo.url} alt="اكتشف مدينتك" className={`${imgCls} w-auto`} />
+      <span className={`font-extrabold tracking-tight text-foreground ${cls}`}>اكتشف مدينتك</span>
     </span>
   );
 }
