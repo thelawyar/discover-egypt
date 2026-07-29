@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getBusiness } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
+import { absoluteOgImage, ogImageMeta } from "@/lib/og";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { WEEK_DAYS } from "@/lib/directory-types";
@@ -71,7 +72,7 @@ export const Route = createFileRoute("/business/$id")({
       loaderData.description?.slice(0, 150) ??
       `تفاصيل ${loaderData.name} في الدليل التجاري اكتشف مدينتك.`;
     const url = `/business/${params.id}`;
-    const meta = [
+    const meta: Record<string, string>[] = [
       { title },
       { name: "description", content: desc },
       { property: "og:title", content: title },
@@ -82,20 +83,9 @@ export const Route = createFileRoute("/business/$id")({
       { name: "twitter:description", content: desc },
     ];
     const origin = loaderData.origin ?? "";
-    const image = loaderData.image
-      ? loaderData.image.startsWith("http")
-        ? loaderData.image
-        : `${origin}${loaderData.image}`
-      : null;
-    if (image?.startsWith("https://")) {
-      meta.push(
-        { property: "og:image", content: image },
-        { property: "og:image:alt", content: loaderData.name },
-        { property: "og:image:width", content: "1200" },
-        { property: "og:image:height", content: "630" },
-        { name: "twitter:image", content: image },
-      );
-    }
+    const image = absoluteOgImage(loaderData.image, origin);
+    meta.push(...ogImageMeta(loaderData.image, origin, loaderData.name));
+
 
     const jsonLd: Record<string, unknown> = {
       "@context": "https://schema.org",

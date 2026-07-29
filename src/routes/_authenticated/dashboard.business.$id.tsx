@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTaxonomy } from "@/lib/directory.functions";
+import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -136,30 +137,51 @@ function BusinessForm() {
 
   async function uploadCover(file: File) {
     if (!user) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+      toast.error("الصيغ المدعومة: PNG أو JPG أو WEBP");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("حجم الصورة يجب أن يكون أقل من 10 ميجابايت");
       return;
     }
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("business-images")
-        .upload(path, file, { upsert: false });
-      if (error) throw error;
+      const { large, thumb } = await buildCoverVariants(file);
+      const base = `${user.id}/${crypto.randomUUID()}`;
+
+      const upload = async (variant: typeof large, suffix: string) => {
+        const path = `${base}-${suffix}.${variant.ext}`;
+        const { error } = await supabase.storage
+          .from("business-images")
+          .upload(path, variant.blob, {
+            upsert: false,
+            contentType: variant.contentType,
+            cacheControl: "31536000",
+          });
+        if (error) throw error;
+        return path;
+      };
+
+      const [largePath] = await Promise.all([
+        upload(large, "1200"),
+        upload(thumb, "600"),
+      ]);
+
       const { data: signed, error: signError } = await supabase.storage
         .from("business-images")
-        .createSignedUrl(path, 60 * 60 * 24 * 365);
+        .createSignedUrl(largePath, 60 * 60 * 24 * 365);
       if (signError) throw signError;
       set("cover_image_url", signed.signedUrl);
-      toast.success("تم رفع الصورة");
+      const saved = Math.max(0, Math.round((1 - large.blob.size / file.size) * 100));
+      toast.success(`تم رفع الصورة بعد ضغطها (توفير ${saved}% من الحجم)`);
     } catch {
       toast.error("تعذّر رفع الصورة");
     } finally {
       setUploading(false);
     }
   }
+
 
   const save = useMutation({
     mutationFn: async () => {

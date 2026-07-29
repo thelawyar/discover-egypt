@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { BrandingSettings } from "@/components/BrandingSettings";
 import { AdminUsers } from "@/components/AdminUsers";
+import { SeoStatusPanel } from "@/components/SeoStatus";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -29,7 +31,7 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
-  const [view, setView] = useState<"moderation" | "users" | "branding">("moderation");
+  const [view, setView] = useState<"moderation" | "users" | "branding" | "seo">("moderation");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -103,7 +105,7 @@ function AdminPage() {
         </p>
 
         <div className="mt-5 flex gap-2 border-b border-border pb-3">
-          {([["moderation", "الأنشطة"], ["users", "المستخدمون"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+          {([["moderation", "الأنشطة"], ["users", "المستخدمون"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -118,6 +120,7 @@ function AdminPage() {
 
         {view === "branding" ? <BrandingSettings /> : null}
         {view === "users" ? <AdminUsers /> : null}
+        {view === "seo" ? <SeoStatusPanel /> : null}
 
         <div className={view !== "moderation" ? "hidden" : "mt-5 flex gap-2"}>
           {TABS.map((t) => (

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { getCityPage } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
+import { ogImageMeta } from "@/lib/og";
 import { PageShell } from "@/components/SiteHeader";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Button } from "@/components/ui/button";
@@ -68,13 +69,8 @@ export const Route = createFileRoute("/city/$slug")({
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
-    if (loaderData.image?.startsWith("https://")) {
-      meta.push(
-        { property: "og:image", content: loaderData.image },
-        { property: "og:image:alt", content: `دليل ${loaderData.name}` },
-        { name: "twitter:image", content: loaderData.image },
-      );
-    }
+    meta.push(...ogImageMeta(loaderData.image, origin, `دليل ${loaderData.name}`));
+
 
     const links: Record<string, string>[] = [{ rel: "canonical", href: pageUrl }];
     if (loaderData.page > 1)
