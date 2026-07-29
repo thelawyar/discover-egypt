@@ -198,7 +198,7 @@ export function SearchBar({
                 : "كل المدن"}
             </button>
 
-            {useGovSteps && !selectedGov && !cityFilter.trim()
+            {useGovSteps && !selectedGov
               ? filteredGovs.map((g) => (
                   <button
                     key={g.id}
