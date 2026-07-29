@@ -22,6 +22,8 @@ export function AdminCategories() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
   const [name, setName] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const list = useQuery({
     queryKey: ["admin-categories", tab],
