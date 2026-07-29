@@ -19,13 +19,13 @@ const statsQuery = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "دَوّر في بلدك | الدليل التجاري لكل مدن مصر" },
+      { title: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
       {
         name: "description",
         content:
           "ابحث عن العيادات والمحلات والمصانع والمدارس والأكشاك في مدينتك. دليل تجاري شامل لكل المحافظات والمدن المصرية.",
       },
-      { property: "og:title", content: "دَوّر في بلدك | الدليل التجاري لكل مدن مصر" },
+      { property: "og:title", content: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
       {
         property: "og:description",
         content: "دليل تجاري شامل يجمع كل الأنشطة التجارية في مدينتك.",
@@ -110,7 +110,7 @@ function Home() {
       </main>
 
       <footer className="mt-16 border-t border-border py-8 text-center text-xs text-muted-foreground">
-        دَوّر في بلدك — durtown.com
+        اكتشف مدينتك — durtown.com
       </footer>
     </div>
   );

@@ -16,9 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 export const Route = createFileRoute("/_authenticated/dashboard/business/$id")({
   head: () => ({
     meta: [
-      { title: "بيانات النشاط | دَوّر في بلدك" },
+      { title: "بيانات النشاط | اكتشف مدينتك" },
       { name: "description", content: "أضف أو عدّل بيانات نشاطك التجاري." },
-      { property: "og:title", content: "بيانات النشاط | دَوّر في بلدك" },
+      { property: "og:title", content: "بيانات النشاط | اكتشف مدينتك" },
       { property: "og:description", content: "أضف أو عدّل بيانات نشاطك التجاري." },
       { name: "robots", content: "noindex" },
     ],

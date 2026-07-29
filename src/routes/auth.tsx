@@ -18,12 +18,12 @@ const credentials = z.object({
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "تسجيل الدخول | دَوّر في بلدك" },
+      { title: "تسجيل الدخول | اكتشف مدينتك" },
       {
         name: "description",
-        content: "سجّل الدخول أو أنشئ حساباً لإضافة نشاطك التجاري إلى دليل دَوّر في بلدك.",
+        content: "سجّل الدخول أو أنشئ حساباً لإضافة نشاطك التجاري إلى دليل اكتشف مدينتك.",
       },
-      { property: "og:title", content: "تسجيل الدخول | دَوّر في بلدك" },
+      { property: "og:title", content: "تسجيل الدخول | اكتشف مدينتك" },
       { property: "og:description", content: "أضف نشاطك التجاري إلى الدليل." },
       { name: "robots", content: "noindex" },
     ],
