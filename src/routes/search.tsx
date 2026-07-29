@@ -132,7 +132,7 @@ function SearchPage() {
   const selectedGov = taxonomy.governorates.find((g) => g.slug === params.gov);
   const govCities = selectedGov
     ? taxonomy.cities.filter((c) => c.governorate_id === selectedGov.id)
-    : taxonomy.cities;
+    : [];
 
   return (
     <PageShell>
