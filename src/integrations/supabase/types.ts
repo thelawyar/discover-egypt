@@ -229,6 +229,8 @@ export type Database = {
           parent_id: string | null
           slug: string
           sort_order: number
+          status: Database["public"]["Enums"]["business_status"]
+          suggested_by: string | null
         }
         Insert: {
           created_at?: string
@@ -238,6 +240,8 @@ export type Database = {
           parent_id?: string | null
           slug: string
           sort_order?: number
+          status?: Database["public"]["Enums"]["business_status"]
+          suggested_by?: string | null
         }
         Update: {
           created_at?: string
@@ -247,6 +251,8 @@ export type Database = {
           parent_id?: string | null
           slug?: string
           sort_order?: number
+          status?: Database["public"]["Enums"]["business_status"]
+          suggested_by?: string | null
         }
         Relationships: [
           {
