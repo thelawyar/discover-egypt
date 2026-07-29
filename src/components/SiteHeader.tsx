@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import townLogo from "@/assets/town-logo.jpg.asset.json";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
   const cls = size === "lg" ? "text-4xl sm:text-5xl" : "text-xl";
