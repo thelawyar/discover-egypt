@@ -174,13 +174,63 @@ export function AdminCategories() {
               className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card"
             >
               <div className="min-w-40 flex-1">
-                <p className="text-sm font-bold">{c.name}</p>
-                <p className="text-xs text-muted-foreground" dir="ltr">
-                  {c.slug}
-                </p>
+                {editId === c.id ? (
+                  <div className="flex gap-2">
+                    <Input
+                      value={editName}
+                      maxLength={60}
+                      autoFocus
+                      onChange={(e) => setEditName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          rename.mutate({ id: c.id, name: editName });
+                        }
+                        if (e.key === "Escape") setEditId(null);
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      className="rounded-full"
+                      disabled={rename.isPending}
+                      onClick={() => rename.mutate({ id: c.id, name: editName })}
+                    >
+                      حفظ
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full"
+                      onClick={() => setEditId(null)}
+                    >
+                      إلغاء
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold">{c.name}</p>
+                    <p className="text-xs text-muted-foreground" dir="ltr">
+                      {c.slug}
+                    </p>
+                  </>
+                )}
               </div>
               <div className="flex flex-wrap gap-1.5">
+                {editId !== c.id ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => {
+                      setEditId(c.id);
+                      setEditName(c.name);
+                    }}
+                  >
+                    <Pencil className="size-3.5" /> تعديل
+                  </Button>
+                ) : null}
                 {c.status !== "approved" ? (
+
                   <Button
                     size="sm"
                     className="rounded-full"
