@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
@@ -17,6 +18,11 @@ import { Route as BusinessIdRouteImport } from './routes/business.$id'
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const BusinessIdRoute = BusinessIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/search': typeof SearchRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/search': typeof SearchRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/search': typeof SearchRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/search' | '/business/$id' | '/city/$slug'
+  fullPaths: '/' | '/auth' | '/search' | '/business/$id' | '/city/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/business/$id' | '/city/$slug'
-  id: '__root__' | '/' | '/search' | '/business/$id' | '/city/$slug'
+  to: '/' | '/auth' | '/search' | '/business/$id' | '/city/$slug'
+  id: '__root__' | '/' | '/auth' | '/search' | '/business/$id' | '/city/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   SearchRoute: typeof SearchRoute
   BusinessIdRoute: typeof BusinessIdRoute
   CitySlugRoute: typeof CitySlugRoute
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   SearchRoute: SearchRoute,
   BusinessIdRoute: BusinessIdRoute,
   CitySlugRoute: CitySlugRoute,
