@@ -98,7 +98,7 @@ function Home() {
         </p>
 
         <div className="mt-8 flex w-full justify-center">
-          <SearchBar cities={taxonomy.cities} />
+          <SearchBar cities={taxonomy.cities} governorates={taxonomy.governorates} />
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">

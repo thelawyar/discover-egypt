@@ -140,6 +140,7 @@ function SearchPage() {
         <div className="mx-auto max-w-6xl px-4 py-4">
           <SearchBar
             cities={taxonomy.cities}
+            governorates={taxonomy.governorates}
             initialQuery={params.q}
             initialCity={params.city}
             size="compact"
