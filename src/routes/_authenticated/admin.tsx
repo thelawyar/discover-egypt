@@ -9,6 +9,7 @@ import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { BrandingSettings } from "@/components/BrandingSettings";
+import { AdminUsers } from "@/components/AdminUsers";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -28,7 +29,7 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
-  const [view, setView] = useState<"moderation" | "branding">("moderation");
+  const [view, setView] = useState<"moderation" | "users" | "branding">("moderation");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -77,9 +78,17 @@ function AdminPage() {
       <PageShell>
         <div className="mx-auto max-w-xl px-4 py-24 text-center">
           <p className="text-lg font-bold">هذه الصفحة للإدارة فقط</p>
-          <Button asChild variant="outline" className="mt-4 rounded-full">
-            <Link to="/">العودة للرئيسية</Link>
-          </Button>
+          <p className="mt-2 text-xs text-muted-foreground">
+            لو معك رمز دعوة مسؤول، فعّله من صفحة التفعيل.
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <Button asChild className="rounded-full">
+              <Link to="/admin-setup">تفعيل رمز دعوة</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/">العودة للرئيسية</Link>
+            </Button>
+          </div>
         </div>
       </PageShell>
     );
@@ -94,7 +103,7 @@ function AdminPage() {
         </p>
 
         <div className="mt-5 flex gap-2 border-b border-border pb-3">
-          {([["moderation", "الأنشطة"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+          {([["moderation", "الأنشطة"], ["users", "المستخدمون"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -108,8 +117,9 @@ function AdminPage() {
         </div>
 
         {view === "branding" ? <BrandingSettings /> : null}
+        {view === "users" ? <AdminUsers /> : null}
 
-        <div className={view === "branding" ? "hidden" : "mt-5 flex gap-2"}>
+        <div className={view !== "moderation" ? "hidden" : "mt-5 flex gap-2"}>
           {TABS.map((t) => (
             <button
               key={t}
@@ -125,7 +135,7 @@ function AdminPage() {
           ))}
         </div>
 
-        {view === "branding" ? null : isLoading ? (
+        {view !== "moderation" ? null : isLoading ? (
           <p className="py-20 text-center text-sm text-muted-foreground">جارٍ التحميل...</p>
         ) : !data?.length ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
