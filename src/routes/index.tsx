@@ -19,13 +19,19 @@ const statsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/")({
-  loader: async ({ context }) => ({
-    origin: await context.queryClient.ensureQueryData({
-      queryKey: ["origin"],
-      queryFn: () => getRequestOrigin(),
-      staleTime: Infinity,
-    }),
-  }),
+  loader: async ({ context }) => {
+    const [origin] = await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: ["origin"],
+        queryFn: () => getRequestOrigin(),
+        staleTime: Infinity,
+      }),
+      context.queryClient.ensureQueryData(taxonomyQuery),
+      context.queryClient.ensureQueryData(statsQuery),
+    ]);
+    return { origin };
+  },
+
   head: ({ loaderData }) => ({
     meta: [
       { title: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
