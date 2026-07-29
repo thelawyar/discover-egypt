@@ -85,6 +85,7 @@ export function SiteHeader() {
 }
 
 export function PageShell({ children }: { children: React.ReactNode }) {
+  const { tagline } = useSiteSettings();
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
