@@ -102,13 +102,22 @@ function AdminPage() {
   return (
     <PageShell>
       <div className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-xl font-extrabold">لوحة الإدارة</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
-          مراجعة الأنشطة المرسلة واعتمادها أو رفضها.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-extrabold">لوحة الإدارة</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              مراجعة الأنشطة والتصنيفات المرسلة واعتمادها أو رفضها.
+            </p>
+          </div>
+          <Button asChild className="rounded-full">
+            <Link to="/dashboard/business/$id" params={{ id: "new" }}>
+              <Plus className="size-4" /> إضافة نشاط
+            </Link>
+          </Button>
+        </div>
 
-        <div className="mt-5 flex gap-2 border-b border-border pb-3">
-          {([["moderation", "الأنشطة"], ["users", "المستخدمون"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+        <div className="mt-5 flex flex-wrap gap-2 border-b border-border pb-3">
+          {([["moderation", "الأنشطة"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -123,7 +132,9 @@ function AdminPage() {
 
         {view === "branding" ? <BrandingSettings /> : null}
         {view === "users" ? <AdminUsers /> : null}
+        {view === "categories" ? <AdminCategories /> : null}
         {view === "seo" ? <SeoStatusPanel /> : null}
+
 
         <div className={view !== "moderation" ? "hidden" : "mt-5 flex gap-2"}>
           {TABS.map((t) => (
