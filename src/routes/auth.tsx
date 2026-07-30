@@ -15,7 +15,14 @@ const credentials = z.object({
   password: z.string().min(8, { message: "كلمة المرور 8 أحرف على الأقل" }).max(72),
 });
 
+function safeNext(value: unknown): string | undefined {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
+    ? value
+    : undefined;
+}
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({ next: safeNext(s.next) }),
   head: () => ({
     meta: [
       { title: "تسجيل الدخول | اكتشف مدينتك" },
@@ -39,10 +46,22 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+
+  function goNext() {
+    if (next) {
+      window.location.href = next;
+      return;
+    }
+    navigate({ to: "/dashboard" });
+  }
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/dashboard", replace: true });
-  }, [loading, user, navigate]);
+    if (loading || !user) return;
+    if (next) window.location.href = next;
+    else navigate({ to: "/dashboard", replace: true });
+  }, [loading, user, navigate, next]);
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
