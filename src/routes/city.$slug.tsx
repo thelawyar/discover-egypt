@@ -103,13 +103,25 @@ export const Route = createFileRoute("/city/$slug")({
       },
     };
 
+    const trail: { name: string; item: string }[] = [
+      { name: "الرئيسية", item: `${origin}/` },
+    ];
+    if (loaderData.gov && loaderData.govSlug)
+      trail.push({
+        name: loaderData.gov,
+        item: `${origin}/search?gov=${encodeURIComponent(loaderData.govSlug)}`,
+      });
+    trail.push({ name: loaderData.name, item: `${origin}${path}` });
+
     const breadcrumb = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "الرئيسية", item: `${origin}/` },
-        { "@type": "ListItem", position: 2, name: loaderData.name, item: `${origin}${path}` },
-      ],
+      itemListElement: trail.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.name,
+        item: c.item,
+      })),
     };
 
     return {
@@ -121,6 +133,10 @@ export const Route = createFileRoute("/city/$slug")({
       ],
     };
   },
+  headers: () => ({
+    "X-Robots-Tag": "index, follow, max-image-preview:large, max-snippet:-1",
+  }),
+
   component: CityPage,
   notFoundComponent: () => (
     <PageShell>
