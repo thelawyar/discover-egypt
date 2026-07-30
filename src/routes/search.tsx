@@ -384,9 +384,16 @@ function SearchPage() {
           }
           cityName={taxonomy.cities.find((c) => c.slug === normalized.city)?.name ?? null}
           catName={taxonomy.categories.find((c) => c.slug === params.cat)?.name ?? null}
-          onClear={(patch) =>
-            navigate({ search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }) })
-          }
+          onClear={(patch) => {
+            // Clearing the query term (the × on the search chip) or "مسح الكل"
+            // means leaving the results page — send the visitor back home, since
+            // the homepage is search-only and there is nothing to browse without a term.
+            if (patch.q === "") navigate({ to: "/" });
+            else
+              navigate({
+                search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }),
+              });
+          }}
         />
 
         {results.items.length === 0 ? (
