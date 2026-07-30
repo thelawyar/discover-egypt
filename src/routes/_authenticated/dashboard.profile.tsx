@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
+import { ImageCropDialog, validateImageFile } from "@/components/ImageCropDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard/profile")({
   head: () => ({
@@ -39,6 +40,7 @@ function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -174,7 +176,7 @@ function ProfilePage() {
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
                     className="hidden"
-                    onChange={(e) => onPickAvatar(e.target.files?.[0])}
+                    onChange={(e) => onSelectFile(e.target.files?.[0])}
                   />
                   <Button
                     type="button"
@@ -190,6 +192,15 @@ function ProfilePage() {
                     )}
                     تغيير الصورة
                   </Button>
+                  <ImageCropDialog
+                    file={pendingFile}
+                    ratio={1}
+                    outputWidth={512}
+                    title="قصّ الصورة الشخصية"
+                    busy={uploading}
+                    onCancel={() => setPendingFile(null)}
+                    onConfirm={onCroppedAvatar}
+                  />
                   <p className="text-[11px] text-muted-foreground">
                     PNG أو JPG أو WEBP — حتى 10 ميجابايت.
                   </p>
