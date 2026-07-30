@@ -4,11 +4,17 @@ import { Link } from "@tanstack/react-router";
 import {
   BarChart3,
   Eye,
+  FileDown,
+  Printer,
   MousePointerClick,
   Search,
   SquareMousePointer,
 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { downloadCsv, printReport, type ReportTable } from "@/lib/export-report";
+
 
 type Stats = {
   days: number;
