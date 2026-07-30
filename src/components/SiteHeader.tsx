@@ -68,6 +68,13 @@ export function SiteHeader() {
                 أنشطتي
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard/profile" className="gap-2">
+                <UserRound className="size-4" />
+                الملف الشخصي
+              </Link>
+            </DropdownMenuItem>
+
             {isAdmin ? (
               <DropdownMenuItem asChild>
                 <Link to="/admin" className="gap-2">
