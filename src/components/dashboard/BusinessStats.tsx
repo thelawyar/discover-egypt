@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Eye, MousePointerClick } from "lucide-react";
+import { BarChart3, Download, Eye, MousePointerClick } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type Stats = {
@@ -9,7 +10,26 @@ type Stats = {
   sources: { source: string; count: number }[];
   contacts: { label: string; count: number }[];
   daily: { day: string; count: number }[];
+  prev_views?: number;
+  prev_contact_clicks?: number;
 };
+
+/** Growth vs. the previous period of the same length. */
+function Delta({ current, previous }: { current: number; previous: number }) {
+  if (!previous && !current) return null;
+  const diff = current - previous;
+  const pct = previous ? Math.round((diff / previous) * 100) : 100;
+  const up = diff >= 0;
+  return (
+    <span
+      className={`text-[11px] font-semibold ${up ? "text-success" : "text-destructive"}`}
+      dir="ltr"
+    >
+      {up ? "▲" : "▼"} {Math.abs(pct)}%
+      <span className="text-muted-foreground"> ({previous} سابقًا)</span>
+    </span>
+  );
+}
 
 const SOURCE_LABELS: Record<string, string> = {
   direct: "زيارة مباشرة",
@@ -71,6 +91,39 @@ function Bars({
 /** Visits, traffic sources and contact clicks for one business mini-site. */
 export function BusinessStats({ businessId }: { businessId: string }) {
   const [days, setDays] = useState(30);
+  const [exporting, setExporting] = useState(false);
+
+  async function exportCsv() {
+    setExporting(true);
+    try {
+      const { data: rows, error } = await supabase.rpc(
+        "business_page_events_export",
+        { _business_id: businessId, _days: days },
+      );
+      if (error) throw error;
+      const header = "created_at,event_type,label,source";
+      const body = (rows ?? [])
+        .map((r) =>
+          [r.created_at, r.event_type, r.label ?? "", r.source ?? ""]
+            .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+            .join(","),
+        )
+        .join("\n");
+      const blob = new Blob(["\uFEFF" + header + "\n" + body], {
+        type: "text/csv;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `stats-${days}d.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "تعذّر تصدير البيانات");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["business-stats", businessId, days],
@@ -105,6 +158,15 @@ export function BusinessStats({ businessId }: { businessId: string }) {
               {r.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={exportCsv}
+            disabled={exporting}
+            className="flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-[11px] font-semibold text-muted-foreground disabled:opacity-60"
+          >
+            <Download className="size-3" />
+            {exporting ? "جارٍ التصدير..." : "تصدير CSV"}
+          </button>
         </div>
       </div>
 
@@ -120,6 +182,7 @@ export function BusinessStats({ businessId }: { businessId: string }) {
                 <Eye className="size-3.5" /> زيارات الصفحة
               </p>
               <p className="mt-1 text-2xl font-extrabold">{data?.views ?? 0}</p>
+              <Delta current={data?.views ?? 0} previous={Number(data?.prev_views ?? 0)} />
             </div>
             <div className="rounded-xl bg-muted p-4">
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -128,6 +191,10 @@ export function BusinessStats({ businessId }: { businessId: string }) {
               <p className="mt-1 text-2xl font-extrabold">
                 {data?.contact_clicks ?? 0}
               </p>
+              <Delta
+                current={data?.contact_clicks ?? 0}
+                previous={Number(data?.prev_contact_clicks ?? 0)}
+              />
             </div>
           </div>
 
