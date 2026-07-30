@@ -512,12 +512,13 @@ function lastSearchLabel(
 }
 
 /** Copies a short share link (/s/<code>) carrying every filter and the sort order. */
-function ShareResults({ params, origin }: { params: SearchParams; origin: string }) {
+function ShareResults({ params }: { params: SearchParams }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
     if (typeof window === "undefined") return;
-    const base = origin || window.location.origin;
+    const base = window.location.origin;
+
     const url = shortShareUrl(base, params as SearchState);
     try {
       await navigator.clipboard.writeText(url);
