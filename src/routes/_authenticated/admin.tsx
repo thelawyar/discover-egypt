@@ -197,6 +197,14 @@ function AdminPage() {
                 <div className="flex flex-wrap gap-1.5">
                   <Button
                     size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setOwnerFor(b.id)}
+                  >
+                    <UserCog className="size-3.5" /> المالك
+                  </Button>
+                  <Button
+                    size="sm"
                     variant={b.is_featured ? "default" : "outline"}
                     className="rounded-full"
                     onClick={() =>
@@ -205,6 +213,7 @@ function AdminPage() {
                   >
                     <Star className="size-3.5" /> مميز
                   </Button>
+
                   {b.status !== "approved" ? (
                     <Button
                       size="sm"
