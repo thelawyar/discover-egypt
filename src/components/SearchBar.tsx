@@ -15,6 +15,8 @@ type Props = {
   initialCity?: string;
   size?: "hero" | "compact";
   autoFocus?: boolean;
+  /** When set, the query is applied instantly (debounced) without a submit. */
+  onLiveChange?: (term: string) => void;
 };
 
 export function SearchBar({
@@ -24,6 +26,7 @@ export function SearchBar({
   initialCity = "",
   size = "hero",
   autoFocus = false,
+  onLiveChange,
 }: Props) {
   const navigate = useNavigate();
   const [q, setQ] = useState(initialQuery);
@@ -43,6 +46,15 @@ export function SearchBar({
     const t = setTimeout(() => setDebounced(q.trim()), 220);
     return () => clearTimeout(t);
   }, [q]);
+
+  // Instant results: apply the debounced term to the current page.
+  useEffect(() => {
+    if (!onLiveChange) return;
+    if (debounced === initialQuery.trim()) return;
+    const t = setTimeout(() => onLiveChange(debounced), 180);
+    return () => clearTimeout(t);
+  }, [debounced, initialQuery, onLiveChange]);
+
 
   const suggestQuery = useQuery({
     queryKey: ["suggest", debounced],
