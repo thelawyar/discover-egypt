@@ -170,6 +170,16 @@ export const searchBusinesses = createServerFn({ method: "GET" })
         count = loose.count;
       }
 
+      // Log the search so the admin dashboard can surface popular / empty terms.
+      if (term.length >= 2 && page === 1) {
+        await supabase.rpc("log_search_query", {
+          _term: term,
+          _results: count ?? 0,
+          _city: data.city ?? null,
+          _category: data.cat ?? null,
+        });
+      }
+
       return {
         items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
         total: count ?? 0,
@@ -177,6 +187,54 @@ export const searchBusinesses = createServerFn({ method: "GET" })
       };
     },
   );
+
+/** Fast autocomplete: business names plus matching categories and cities. */
+export const suggestSearch = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) =>
+    z.object({ q: z.string().max(100) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const term = data.q.trim().replace(/[%,()]/g, " ").slice(0, 60);
+    if (term.length < 2)
+      return { businesses: [], categories: [], cities: [] };
+
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
+
+    const [biz, cats, cities] = await Promise.all([
+      supabase
+        .from("businesses")
+        .select("id,username,name,cover_image_url,categories(name),cities(name)")
+        .eq("status", "approved")
+        .ilike("search_text", `%${term}%`)
+        .order("is_featured", { ascending: false })
+        .limit(6),
+      supabase
+        .from("categories")
+        .select("name,slug")
+        .eq("status", "approved")
+        .ilike("name", `%${term}%`)
+        .limit(4),
+      supabase.from("cities").select("name,slug").ilike("name", `%${term}%`).limit(4),
+    ]);
+
+    return {
+      businesses: (biz.data ?? []).map((r) => {
+        const row = r as unknown as Row;
+        return {
+          id: row.id as string,
+          username: (row.username as string) ?? "",
+          name: row.name as string,
+          cover_image_url: (row.cover_image_url as string) ?? null,
+          category_name: rel(row.categories, "name"),
+          city_name: rel(row.cities, "name"),
+        };
+      }),
+      categories: cats.data ?? [],
+      cities: cities.data ?? [],
+    };
+  });
+
 
 export const getBusiness = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => z.object({ id: z.string() }).parse(data))
