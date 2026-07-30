@@ -26,6 +26,7 @@ function toCard(row: Row): BusinessCardData {
     phone: (row.phone as string) ?? null,
     whatsapp: (row.whatsapp as string) ?? null,
     cover_image_url: (row.cover_image_url as string) ?? null,
+    cover_thumb_url: (row.cover_thumb_url as string) ?? null,
     products: (row.products as string[]) ?? [],
     is_featured: Boolean(row.is_featured),
     category_name: rel(row.categories, "name"),
@@ -39,7 +40,7 @@ const UUID_RE =
 const NO_MATCH = "00000000-0000-0000-0000-000000000000";
 
 const CARD_SELECT =
-  "id,username,name,description,address,phone,whatsapp,cover_image_url,products,is_featured," +
+  "id,username,name,description,address,phone,whatsapp,cover_image_url,cover_thumb_url,products,is_featured," +
   "categories(name),cities(name),governorates(name)";
 
 export const getTaxonomy = createServerFn({ method: "GET" }).handler(

@@ -17,7 +17,7 @@ export default defineConfig({
     plugins: [
       VitePWA({
         strategies: "generateSW",
-        registerType: "autoUpdate",
+        registerType: "prompt",
         // Registration happens only from src/lib/register-sw.ts (guarded).
         injectRegister: null,
         filename: "sw.js",
@@ -32,8 +32,10 @@ export default defineConfig({
           globIgnores: ["**/node_modules/**", "sw.js", "workbox-*.js"],
           navigateFallback: null,
           cleanupOutdatedCaches: true,
-          clientsClaim: true,
-          skipWaiting: true,
+          clientsClaim: false,
+          skipWaiting: false,
+          // Adds the SKIP_WAITING message handler used by the update prompt.
+          importScripts: ["/sw-skip-waiting.js"],
           maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
           runtimeCaching: [
             {

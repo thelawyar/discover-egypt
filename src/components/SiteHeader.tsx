@@ -17,12 +17,23 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
   const { site_name: name, logo_url: logo } = useSiteSettings();
-  const cls = size === "lg" ? "text-4xl sm:text-5xl" : "text-xl";
-  const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-9";
+  const cls =
+    size === "lg"
+      ? "text-4xl sm:text-5xl"
+      : "truncate text-base sm:text-xl";
+  const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-8 sm:h-9";
   return (
-    <span className="inline-flex items-center gap-2">
-      <img src={logo || townLogo.url} alt={name} className={`${imgCls} w-auto`} />
-      <span className={`font-extrabold tracking-tight text-foreground ${cls}`}>{name}</span>
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <img
+        src={logo || townLogo.url}
+        alt={name}
+        className={`${imgCls} w-auto shrink-0`}
+      />
+      <span
+        className={`truncate font-extrabold tracking-tight text-foreground ${cls}`}
+      >
+        {name}
+      </span>
     </span>
   );
 }
@@ -40,7 +51,7 @@ export function SiteHeader() {
   }
 
   return (
-    <div className="flex items-center gap-1 sm:gap-2">
+    <div className="flex min-w-0 shrink items-center gap-1 sm:gap-2">
       <ThemeToggle />
       {loading ? null : user ? (
         <DropdownMenu>
@@ -74,11 +85,19 @@ export function SiteHeader() {
         </DropdownMenu>
       ) : (
         <>
-          <Button asChild variant="ghost" size="sm" className="rounded-full">
-            <Link to="/auth">تسجيل الدخول</Link>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="rounded-full px-2 text-xs sm:px-3 sm:text-sm"
+          >
+            <Link to="/auth">دخول</Link>
           </Button>
-          <Button asChild size="sm" className="rounded-full">
-            <Link to="/auth">أضف نشاطك</Link>
+          <Button asChild size="sm" className="rounded-full px-3 text-xs sm:text-sm">
+            <Link to="/auth">
+              <span className="sm:hidden">أضف</span>
+              <span className="hidden sm:inline">أضف نشاطك</span>
+            </Link>
           </Button>
         </>
       )}
@@ -91,8 +110,8 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-          <Link to="/" className="shrink-0">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4">
+          <Link to="/" className="min-w-0 shrink">
             <Brand />
           </Link>
           <SiteHeader />

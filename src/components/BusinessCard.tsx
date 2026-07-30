@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Phone, Star, Store } from "lucide-react";
 import type { BusinessCardData } from "@/lib/directory-types";
 import { Highlight, matchesTerms } from "@/lib/highlight";
+import { SmartImage } from "@/components/SmartImage";
 
 export function BusinessCard({
   item,
@@ -18,11 +19,14 @@ export function BusinessCard({
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {item.cover_image_url ? (
-          <img
+          <SmartImage
             src={item.cover_image_url}
+            thumbSrc={item.cover_thumb_url}
             alt={item.name}
-            loading="lazy"
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            width={1200}
+            height={750}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+            className="size-full object-cover duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex size-full items-center justify-center text-muted-foreground">

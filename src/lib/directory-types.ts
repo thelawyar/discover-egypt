@@ -36,6 +36,8 @@ export type BusinessCardData = {
   phone: string | null;
   whatsapp: string | null;
   cover_image_url: string | null;
+  /** Lighter 600px variant used by result cards. */
+  cover_thumb_url: string | null;
   products: string[];
   is_featured: boolean;
   category_name: string | null;

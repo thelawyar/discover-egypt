@@ -354,6 +354,7 @@ export type Database = {
           category_id: string | null
           city_id: string | null
           cover_image_url: string | null
+          cover_thumb_url: string | null
           created_at: string
           description: string | null
           email: string | null
@@ -389,6 +390,7 @@ export type Database = {
           category_id?: string | null
           city_id?: string | null
           cover_image_url?: string | null
+          cover_thumb_url?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
@@ -424,6 +426,7 @@ export type Database = {
           category_id?: string | null
           city_id?: string | null
           cover_image_url?: string | null
+          cover_thumb_url?: string | null
           created_at?: string
           description?: string | null
           email?: string | null

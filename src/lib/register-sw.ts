@@ -1,8 +1,39 @@
 /**
  * Service worker registration, guarded so it never runs in dev or Lovable preview.
  * Offline caching only applies to the published site.
+ *
+ * The worker does NOT skip waiting on its own: when a new build is cached we
+ * notify the app so the user can refresh at their convenience.
  */
 const SW_URL = "/sw.js";
+
+let waitingWorker: ServiceWorker | null = null;
+const listeners = new Set<() => void>();
+
+/** Subscribe to "a new version is ready" — returns an unsubscribe function. */
+export function onUpdateAvailable(cb: () => void): () => void {
+  listeners.add(cb);
+  if (waitingWorker) cb();
+  return () => listeners.delete(cb);
+}
+
+function notify() {
+  listeners.forEach((cb) => cb());
+}
+
+/** Activates the waiting worker and reloads once it takes control. */
+export function applyUpdate() {
+  if (!waitingWorker) {
+    window.location.reload();
+    return;
+  }
+  navigator.serviceWorker.addEventListener(
+    "controllerchange",
+    () => window.location.reload(),
+    { once: true },
+  );
+  waitingWorker.postMessage({ type: "SKIP_WAITING" });
+}
 
 function blocked(): boolean {
   if (typeof window === "undefined") return true;
@@ -34,6 +65,24 @@ async function unregisterExisting() {
   }
 }
 
+function track(reg: ServiceWorkerRegistration) {
+  if (reg.waiting && navigator.serviceWorker.controller) {
+    waitingWorker = reg.waiting;
+    notify();
+  }
+  reg.addEventListener("updatefound", () => {
+    const installing = reg.installing;
+    if (!installing) return;
+    installing.addEventListener("statechange", () => {
+      // "installed" with an existing controller == an update, not a first install.
+      if (installing.state === "installed" && navigator.serviceWorker.controller) {
+        waitingWorker = installing;
+        notify();
+      }
+    });
+  });
+}
+
 export function registerServiceWorker() {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
   if (blocked()) {
@@ -41,8 +90,17 @@ export function registerServiceWorker() {
     return;
   }
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register(SW_URL, { scope: "/" }).catch(() => {
-      /* offline support is best-effort */
-    });
+    navigator.serviceWorker
+      .register(SW_URL, { scope: "/" })
+      .then((reg) => {
+        track(reg);
+        // Look for a newer build when the tab regains focus.
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") void reg.update();
+        });
+      })
+      .catch(() => {
+        /* offline support is best-effort */
+      });
   });
 }

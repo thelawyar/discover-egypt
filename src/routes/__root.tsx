@@ -18,6 +18,7 @@ import { BrandingStyles } from "@/hooks/useSiteSettings";
 import { NotFoundPage } from "@/components/NotFoundPage";
 import { ThemeProvider, themeBootstrapScript } from "@/hooks/useTheme";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { registerServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
@@ -107,7 +108,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/app-icon-192.png", type: "image/png", sizes: "192x192" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
       { rel: "manifest", href: "/manifest.webmanifest" },
+      // PWA splash screens (iOS shows these while the app boots).
+      ...[
+        { w: 1170, h: 2532, dppx: 3 },
+        { w: 1284, h: 2778, dppx: 3 },
+        { w: 1125, h: 2436, dppx: 3 },
+        { w: 750, h: 1334, dppx: 2 },
+        { w: 1620, h: 2160, dppx: 2 },
+        { w: 1536, h: 2048, dppx: 2 },
+      ].map(({ w, h, dppx }) => ({
+        rel: "apple-touch-startup-image",
+        href: `/splash/splash-${w}x${h}.png`,
+        media: `(device-width: ${w / dppx}px) and (device-height: ${h / dppx}px) and (-webkit-device-pixel-ratio: ${dppx}) and (orientation: portrait)`,
+      })),
     ],
+
 
   }),
   shellComponent: RootShell,
@@ -156,6 +171,7 @@ function RootComponent() {
         <AuthProvider>
           <BrandingStyles />
           <OfflineBanner />
+          <UpdatePrompt />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <Toaster position="top-center" dir="rtl" richColors />

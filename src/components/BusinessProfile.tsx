@@ -24,6 +24,7 @@ import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { Button } from "@/components/ui/button";
 import { MessageForm } from "@/components/MessageForm";
+import { whatsAppDigits } from "@/lib/phone";
 
 /** Where the visit came from, derived from the referrer. */
 function visitSource(): string {
@@ -151,7 +152,7 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
       ? [
           {
             key: "whatsapp",
-            href: `https://wa.me/${encodeURIComponent(data.whatsapp.replace(/\D/g, ""))}`,
+            href: `https://wa.me/${whatsAppDigits(data.whatsapp)}`,
             label: "واتساب",
             external: true,
             icon: MessageCircle,
