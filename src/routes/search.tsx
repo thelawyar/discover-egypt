@@ -1,12 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Check, Copy, Link2, Loader2, LocateFixed, SearchX, X } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Link2,
+  Loader2,
+  LocateFixed,
+  RefreshCw,
+  SearchX,
+  X,
+} from "lucide-react";
 import { detectLocation } from "@/lib/geo-locate";
-import type { City, Governorate } from "@/lib/directory-types";
-import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
+import type { Category, City, Governorate } from "@/lib/directory-types";
+import { getTaxonomy, searchBusinesses, suggestSearch } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
