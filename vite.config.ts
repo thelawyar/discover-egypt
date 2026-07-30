@@ -21,12 +21,13 @@ export default defineConfig({
         // Registration happens only from src/lib/register-sw.ts (guarded).
         injectRegister: null,
         filename: "sw.js",
+        outDir: "dist/client",
         devOptions: { enabled: false },
         // The project ships its own hand-written manifest in public/.
         manifest: false,
         injectManifest: undefined,
         workbox: {
-          globDirectory: ".output/public",
+          globDirectory: "dist/client",
           globPatterns: ["**/*.{js,css,ico,png,jpg,svg,webp,woff2,webmanifest}"],
           globIgnores: ["**/node_modules/**", "sw.js", "workbox-*.js"],
           navigateFallback: null,
