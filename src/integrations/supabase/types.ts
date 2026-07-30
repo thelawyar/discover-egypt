@@ -202,6 +202,38 @@ export type Database = {
           },
         ]
       }
+      business_managers: {
+        Row: {
+          business_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_managers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_page_events: {
         Row: {
           business_id: string
@@ -689,6 +721,23 @@ export type Database = {
         Args: { _grant: boolean; _user_id: string }
         Returns: boolean
       }
+      admin_set_business_owner: {
+        Args: { _business_id: string; _email: string }
+        Returns: boolean
+      }
+      business_add_manager: {
+        Args: { _business_id: string; _email: string }
+        Returns: boolean
+      }
+      business_list_managers: {
+        Args: { _business_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          user_id: string
+        }[]
+      }
       business_page_events_export: {
         Args: { _business_id: string; _days?: number }
         Returns: {
@@ -714,6 +763,14 @@ export type Database = {
           username: string
         }[]
       }
+      business_remove_manager: {
+        Args: { _business_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_manage_business: {
+        Args: { _business_id: string; _user_id: string }
+        Returns: boolean
+      }
       claim_admin_invite: { Args: { _token: string }; Returns: boolean }
       create_admin_invite: {
         Args: { _days?: number; _label?: string }
@@ -724,6 +781,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_business_manager: {
+        Args: { _business_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_business_owner: {
+        Args: { _business_id: string; _user_id: string }
         Returns: boolean
       }
       log_search_query: {

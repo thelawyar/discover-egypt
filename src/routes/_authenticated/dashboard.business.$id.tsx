@@ -20,6 +20,7 @@ import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
 import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { HoursEditor } from "@/components/dashboard/HoursEditor";
 import { BusinessStats } from "@/components/dashboard/BusinessStats";
+import { ManagersEditor } from "@/components/dashboard/ManagersEditor";
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -330,7 +331,8 @@ function BusinessForm() {
         theme_font: form.theme_font,
         theme_button: form.theme_button,
         theme_contrast: form.theme_contrast,
-        owner_id: user!.id,
+        // Ownership is set only when creating; editors/managers must not steal it.
+        ...(isNew ? { owner_id: user!.id } : {}),
       };
 
       if (isNew) {
@@ -732,6 +734,7 @@ function BusinessForm() {
               <GalleryEditor businessId={id} userId={user?.id ?? ""} />
               <HoursEditor businessId={id} />
               <BusinessStats businessId={id} />
+              <ManagersEditor businessId={id} />
             </>
           ) : (
             <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
