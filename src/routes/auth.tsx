@@ -77,7 +77,9 @@ function AuthPage() {
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: next
+              ? `${window.location.origin}${next}`
+              : window.location.origin,
             data: { full_name: name.trim().slice(0, 100) },
           },
         });
@@ -86,7 +88,7 @@ function AuthPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword(parsed.data);
         if (error) throw error;
-        navigate({ to: "/dashboard" });
+        goNext();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
@@ -104,15 +106,18 @@ function AuthPage() {
 
   async function google() {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: next
+        ? `${window.location.origin}${next}`
+        : window.location.origin,
     });
     if (result.error) {
       toast.error("تعذّر تسجيل الدخول عبر جوجل");
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/dashboard" });
+    goNext();
   }
+
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40 px-4 py-12">
