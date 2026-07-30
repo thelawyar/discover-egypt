@@ -37,6 +37,59 @@ export function absoluteOgImage(
 
 type Meta = Record<string, string>;
 
+export interface OgCardParams {
+  kind: "business" | "city" | "search" | "site";
+  title: string;
+  subtitle?: string | null;
+  badge?: string | null;
+  stats?: (string | null | undefined)[];
+  /** Real photo to use as the card background (business cover, first result, ...). */
+  photo?: string | null;
+}
+
+/**
+ * URL of the dynamically rendered Open Graph card for a page.
+ * Returns null when the origin isn't an absolute https URL (crawlers need absolute).
+ */
+export function ogCardUrl(
+  params: OgCardParams,
+  origin: string | null | undefined,
+): string | null {
+  const base = (origin ?? "").replace(/\/$/, "");
+  if (!base.startsWith("https://")) return null;
+  const usp = new URLSearchParams();
+  usp.set("kind", params.kind);
+  usp.set("t", params.title.slice(0, 120));
+  if (params.subtitle) usp.set("s", params.subtitle.slice(0, 200));
+  if (params.badge) usp.set("b", params.badge.slice(0, 40));
+  const stats = (params.stats ?? []).filter((s): s is string => Boolean(s));
+  if (stats.length) usp.set("st", stats.slice(0, 3).join("|"));
+  const photo = absoluteOgImage(params.photo, base);
+  // absoluteOgImage falls back to the static default; only pass through real photos.
+  if (params.photo && photo && !photo.endsWith(DEFAULT_OG_IMAGE)) usp.set("img", photo);
+  return `${base}/api/public/og?${usp.toString()}`;
+}
+
+/** Meta entries for a generated card, with the static image as last-resort fallback. */
+export function ogCardMeta(
+  params: OgCardParams,
+  origin: string | null | undefined,
+  alt?: string,
+): Meta[] {
+  const url = ogCardUrl(params, origin);
+  if (!url) return ogImageMeta(params.photo ?? null, origin, alt ?? params.title);
+  return [
+    { property: "og:image", content: url },
+    { property: "og:image:secure_url", content: url },
+    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:width", content: String(OG_WIDTH) },
+    { property: "og:image:height", content: String(OG_HEIGHT) },
+    { property: "og:image:alt", content: alt ?? params.title },
+    { name: "twitter:image", content: url },
+    { name: "twitter:image:alt", content: alt ?? params.title },
+  ];
+}
+
 /** Full set of og:image / twitter:image meta entries (always valid, never partial). */
 export function ogImageMeta(
   image: string | null | undefined,
