@@ -36,17 +36,28 @@ function Dashboard() {
     queryKey: ["my-businesses", user?.id],
     enabled: Boolean(user?.id),
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Businesses this user was granted edit access to (in addition to owned ones).
+      const { data: managed } = await supabase
+        .from("business_managers")
+        .select("business_id")
+        .eq("user_id", user!.id);
+      const managedIds = (managed ?? []).map((m) => m.business_id);
+
+      const query = supabase
         .from("businesses")
         .select(
-          "id,name,status,rejection_reason,cover_image_url,created_at,categories(name),cities(name)",
-        )
-        .eq("owner_id", user!.id)
-        .order("created_at", { ascending: false });
+          "id,name,status,owner_id,rejection_reason,cover_image_url,created_at,categories(name),cities(name)",
+        );
+
+      const { data, error } = await (managedIds.length
+        ? query.or(`owner_id.eq.${user!.id},id.in.(${managedIds.join(",")})`)
+        : query.eq("owner_id", user!.id)
+      ).order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
