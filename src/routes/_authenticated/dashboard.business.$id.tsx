@@ -720,9 +720,6 @@ function BusinessForm() {
               theme_font: form.theme_font,
               theme_button: form.theme_button,
               theme_contrast: form.theme_contrast,
-        theme_font: form.theme_font,
-        theme_button: form.theme_button,
-        theme_contrast: form.theme_contrast,
             }}
             onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
             userId={user?.id ?? ""}
