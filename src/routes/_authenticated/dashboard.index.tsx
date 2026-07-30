@@ -88,9 +88,14 @@ function Dashboard() {
           </Button>
         </div>
 
-        <div className="mt-6">
-          <ContactNotifications />
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <MessagesInbox />
+          <div className="space-y-4">
+            <ContactNotifications />
+            <NotificationSettings />
+          </div>
         </div>
+
 
         {isLoading ? (
           <p className="py-20 text-center text-sm text-muted-foreground">جارٍ التحميل...</p>
