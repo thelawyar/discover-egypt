@@ -202,6 +202,73 @@ export type Database = {
           },
         ]
       }
+      business_page_events: {
+        Row: {
+          business_id: string
+          created_at: string
+          event_type: string
+          id: string
+          label: string | null
+          source: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          label?: string | null
+          source?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          label?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_page_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_username_history: {
+        Row: {
+          business_id: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          username: string
+        }
+        Insert: {
+          business_id: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          username: string
+        }
+        Update: {
+          business_id?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_username_history_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string | null
@@ -217,6 +284,7 @@ export type Database = {
           instagram: string | null
           is_featured: boolean
           latitude: number | null
+          logo_url: string | null
           longitude: number | null
           name: string
           owner_id: string | null
@@ -225,6 +293,9 @@ export type Database = {
           rejection_reason: string | null
           search_text: string
           status: Database["public"]["Enums"]["business_status"]
+          theme_bg: string | null
+          theme_primary: string | null
+          theme_style: string
           updated_at: string
           username: string
           view_count: number
@@ -245,6 +316,7 @@ export type Database = {
           instagram?: string | null
           is_featured?: boolean
           latitude?: number | null
+          logo_url?: string | null
           longitude?: number | null
           name: string
           owner_id?: string | null
@@ -253,6 +325,9 @@ export type Database = {
           rejection_reason?: string | null
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
+          theme_bg?: string | null
+          theme_primary?: string | null
+          theme_style?: string
           updated_at?: string
           username?: string
           view_count?: number
@@ -273,6 +348,7 @@ export type Database = {
           instagram?: string | null
           is_featured?: boolean
           latitude?: number | null
+          logo_url?: string | null
           longitude?: number | null
           name?: string
           owner_id?: string | null
@@ -281,6 +357,9 @@ export type Database = {
           rejection_reason?: string | null
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
+          theme_bg?: string | null
+          theme_primary?: string | null
+          theme_style?: string
           updated_at?: string
           username?: string
           view_count?: number
@@ -574,6 +653,10 @@ export type Database = {
         Args: { _grant: boolean; _user_id: string }
         Returns: boolean
       }
+      business_page_stats: {
+        Args: { _business_id: string; _days?: number }
+        Returns: Json
+      }
       claim_admin_invite: { Args: { _token: string }; Returns: boolean }
       create_admin_invite: {
         Args: { _days?: number; _label?: string }
@@ -591,6 +674,15 @@ export type Database = {
       random_username: { Args: never; Returns: string }
       track_ad_click: { Args: { _ad_id: string }; Returns: undefined }
       track_ad_impression: { Args: { _ad_id: string }; Returns: undefined }
+      track_business_event: {
+        Args: {
+          _business_id: string
+          _event_type: string
+          _label?: string
+          _source?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       ad_placement: "home" | "search" | "business"
