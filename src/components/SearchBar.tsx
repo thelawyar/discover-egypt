@@ -29,6 +29,7 @@ export function SearchBar({
   size = "hero",
   autoFocus = false,
   onLiveChange,
+  onClear,
 }: Props) {
   const navigate = useNavigate();
   const [q, setQ] = useState(initialQuery);
