@@ -409,6 +409,7 @@ export type Database = {
           phone: string | null
           products: string[]
           rejection_reason: string | null
+          search_norm: string
           search_text: string
           status: Database["public"]["Enums"]["business_status"]
           theme_bg: string | null
@@ -445,6 +446,7 @@ export type Database = {
           phone?: string | null
           products?: string[]
           rejection_reason?: string | null
+          search_norm?: string
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           theme_bg?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           phone?: string | null
           products?: string[]
           rejection_reason?: string | null
+          search_norm?: string
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           theme_bg?: string | null
@@ -525,6 +528,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          name_norm: string | null
           parent_id: string | null
           slug: string
           sort_order: number
@@ -536,6 +540,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          name_norm?: string | null
           parent_id?: string | null
           slug: string
           sort_order?: number
@@ -547,6 +552,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          name_norm?: string | null
           parent_id?: string | null
           slug?: string
           sort_order?: number
@@ -571,6 +577,7 @@ export type Database = {
           is_active: boolean
           is_new_city: boolean
           name: string
+          name_norm: string | null
           slug: string
         }
         Insert: {
@@ -580,6 +587,7 @@ export type Database = {
           is_active?: boolean
           is_new_city?: boolean
           name: string
+          name_norm?: string | null
           slug: string
         }
         Update: {
@@ -589,6 +597,7 @@ export type Database = {
           is_active?: boolean
           is_new_city?: boolean
           name?: string
+          name_norm?: string | null
           slug?: string
         }
         Relationships: [
@@ -606,6 +615,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          name_norm: string | null
           slug: string
           sort_order: number
         }
@@ -613,6 +623,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          name_norm?: string | null
           slug: string
           sort_order?: number
         }
@@ -620,6 +631,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          name_norm?: string | null
           slug?: string
           sort_order?: number
         }
@@ -903,6 +915,7 @@ export type Database = {
         Args: { _business_id: string; _email: string }
         Returns: boolean
       }
+      ar_norm: { Args: { _t: string }; Returns: string }
       business_add_manager: {
         Args: { _business_id: string; _email: string }
         Returns: boolean
