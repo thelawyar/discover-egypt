@@ -448,6 +448,9 @@ function ActiveFilters({
     chips.push({ key: "gov", label: govName, patch: { gov: "", city: "" } });
   if (cityName) chips.push({ key: "city", label: cityName, patch: { city: "" } });
   if (catName) chips.push({ key: "cat", label: catName, patch: { cat: "" } });
+  if (params.prod)
+    chips.push({ key: "prod", label: `منتج: ${params.prod}`, patch: { prod: "" } });
+
 
   if (!chips.length) return null;
 
