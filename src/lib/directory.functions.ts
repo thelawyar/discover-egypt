@@ -50,7 +50,8 @@ export const getTaxonomy = createServerFn({ method: "GET" }).handler(
       supabase.from("governorates").select("id,name,slug").order("sort_order"),
       supabase
         .from("cities")
-        .select("id,name,slug,governorate_id,is_new_city")
+        .select("id,name,slug,governorate_id,is_new_city,is_active")
+        .eq("is_active", true)
         .order("name"),
       supabase.from("categories").select("id,name,slug,icon").order("sort_order"),
     ]);

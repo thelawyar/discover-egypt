@@ -6,6 +6,12 @@ import { toast } from "sonner";
 import { ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTaxonomy } from "@/lib/directory.functions";
+import { CityPicker } from "@/components/CityPicker";
+import {
+  citiesForGovernorate,
+  cityBelongsToGovernorate,
+  CITY_MISMATCH_MESSAGE,
+} from "@/lib/location-filter";
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
@@ -161,9 +167,20 @@ function BusinessForm() {
     });
   }, [existing]);
 
-  const cities = (taxonomy?.cities ?? []).filter(
-    (c) => !form.governorate_id || c.governorate_id === form.governorate_id,
+  const cities = citiesForGovernorate(
+    taxonomy?.cities ?? [],
+    form.governorate_id || null,
   );
+
+  // Drop a stale city whenever it no longer belongs to the selected governorate.
+  useEffect(() => {
+    if (!form.city_id || !form.governorate_id) return;
+    const list = taxonomy?.cities ?? [];
+    if (!list.length) return;
+    if (!cityBelongsToGovernorate(list, form.city_id, form.governorate_id)) {
+      setForm((prev) => ({ ...prev, city_id: "" }));
+    }
+  }, [form.city_id, form.governorate_id, taxonomy?.cities]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -221,6 +238,18 @@ function BusinessForm() {
     mutationFn: async () => {
       const parsed = schema.safeParse(form);
       if (!parsed.success) throw new Error(parsed.error.issues[0].message);
+
+      const allCities = taxonomy?.cities ?? [];
+      if (
+        allCities.length &&
+        !cityBelongsToGovernorate(
+          allCities,
+          parsed.data.city_id,
+          parsed.data.governorate_id,
+        )
+      ) {
+        throw new Error(CITY_MISMATCH_MESSAGE);
+      }
 
       const payload = {
         ...parsed.data,
@@ -403,22 +432,16 @@ function BusinessForm() {
 
               <div className="space-y-1.5">
                 <Label>المدينة *</Label>
-                <select
+                <CityPicker
+                  cities={cities}
                   value={form.city_id}
-                  onChange={(e) => set("city_id", e.target.value)}
+                  valueKey="id"
                   disabled={!form.governorate_id}
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm disabled:opacity-60"
-                  required
-                >
-                  <option value="">
-                    {form.governorate_id ? "اختر" : "اختر المحافظة أولاً"}
-                  </option>
-                  {cities.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => set("city_id", v)}
+                  placeholder={
+                    form.governorate_id ? "اختر المدينة" : "اختر المحافظة أولاً"
+                  }
+                />
               </div>
             </div>
 
