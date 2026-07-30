@@ -185,6 +185,3 @@ export function themeVars(theme: ResolvedTheme): CSSProperties {
     color: "var(--biz-fg)",
   } as CSSProperties;
 }
-
-  } as CSSProperties;
-}
