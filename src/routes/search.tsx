@@ -292,17 +292,15 @@ function SearchPage() {
         />
 
         {results.items.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-24 text-center">
-            <SearchX className="size-10 text-muted-foreground" />
-            <p className="font-semibold">لا توجد نتائج مطابقة</p>
-            <p className="text-sm text-muted-foreground">
-              جرّب كلمات بحث مختلفة أو وسّع نطاق المدينة والتصنيف.
-            </p>
-            <Button asChild variant="outline" size="sm" className="mt-2 rounded-full">
-              <Link to="/">العودة للرئيسية</Link>
-            </Button>
-          </div>
+          <NoResults
+            params={params}
+            taxonomy={taxonomy}
+            onApply={(patch) =>
+              navigate({ search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }) })
+            }
+          />
         ) : (
+
           <ResultsWithAds
             items={results.items}
             targeting={{
