@@ -146,19 +146,19 @@ function AdminPage() {
           </Button>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2 border-b border-border pb-3">
+        <div className="mt-5 -mx-4 flex gap-2 overflow-x-auto border-b border-border px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
           {([["moderation", "الأنشطة"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["ads", "الإعلانات"], ["searches", "كلمات البحث"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`rounded-full px-4 py-1.5 text-xs font-bold ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold ${
                 view === v ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"
               }`}
             >
               {label}
             </button>
           ))}
-          <div className="ms-auto flex gap-2">
+          <div className="ms-auto flex shrink-0 gap-2">
             <Button asChild variant="outline" size="sm" className="rounded-full">
               <Link to="/admin-cities">المحافظات والمدن</Link>
             </Button>
@@ -175,12 +175,12 @@ function AdminPage() {
         {view === "searches" ? <AdminSearchTerms /> : null}
 
 
-        <div className={view !== "moderation" ? "hidden" : "mt-5 flex gap-2"}>
+        <div className={view !== "moderation" ? "hidden" : "mt-5 -mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0"}>
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`rounded-full px-4 py-1.5 text-xs font-medium ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-medium ${
                 tab === t
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-primary-soft"

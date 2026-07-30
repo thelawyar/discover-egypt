@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import townLogo from "@/assets/town-logo.jpg.asset.json";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
   const { site_name: name, logo_url: logo } = useSiteSettings();
@@ -39,7 +40,8 @@ export function SiteHeader() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2">
+      <ThemeToggle />
       {loading ? null : user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
