@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { getCityPage } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
-import { ogImageMeta } from "@/lib/og";
+import { ogCardMeta } from "@/lib/og";
 import { PageShell } from "@/components/SiteHeader";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,23 @@ export const Route = createFileRoute("/city/$slug")({
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
-    meta.push(...ogImageMeta(loaderData.image, origin, `دليل ${loaderData.name}`));
+    meta.push(
+      ...ogCardMeta(
+        {
+          kind: "city",
+          title: `دليل ${loaderData.name} التجاري`,
+          subtitle: loaderData.gov ? `محافظة ${loaderData.gov}` : null,
+          badge: "مدينة",
+          stats: [
+            `${loaderData.total.toLocaleString("ar-EG")} نشاط`,
+            loaderData.page > 1 ? `صفحة ${loaderData.page}` : null,
+          ],
+          photo: loaderData.image,
+        },
+        origin,
+        `دليل ${loaderData.name}`,
+      ),
+    );
 
 
     const links: Record<string, string>[] = [{ rel: "canonical", href: pageUrl }];

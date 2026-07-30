@@ -18,7 +18,7 @@ import { detectLocation } from "@/lib/geo-locate";
 import type { Category, City, Governorate } from "@/lib/directory-types";
 import { getTaxonomy, searchBusinesses, suggestSearch } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
-import { ogImageMeta } from "@/lib/og";
+import { ogCardMeta } from "@/lib/og";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { CityPicker } from "@/components/CityPicker";
@@ -207,7 +207,22 @@ export const Route = createFileRoute("/search")({
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: shareTitle },
         { name: "twitter:description", content: desc.slice(0, 300) },
-        ...ogImageMeta(ld?.image ?? null, origin, shareTitle),
+        ...ogCardMeta(
+          {
+            kind: "search",
+            title: shareTitle,
+            subtitle: place ? `في ${place}` : "في المدن المصرية",
+            badge: term ? "نتائج البحث" : cat ? cat : "تصفح الدليل",
+            stats: [
+              count ? `${count.toLocaleString("ar-EG")} نتيجة` : null,
+              place,
+              page > 1 ? `صفحة ${page}` : null,
+            ],
+            photo: ld?.image ?? null,
+          },
+          origin,
+          shareTitle,
+        ),
         {
           name: "robots",
           content: indexable
