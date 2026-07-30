@@ -132,6 +132,19 @@ export const Route = createFileRoute("/search")({
     const origin = ld?.origin ?? "";
     const build = (p: number) => {
       const usp = new URLSearchParams();
+      if (sp.q) usp.set("q", sp.q);
+      if (sp.city) usp.set("city", sp.city);
+      if (sp.gov) usp.set("gov", sp.gov);
+      if (sp.cat) usp.set("cat", sp.cat);
+      if (sp.prod) usp.set("prod", sp.prod);
+      if (sp.sort && sp.sort !== "best") usp.set("sort", sp.sort);
+      if (p > 1) usp.set("page", String(p));
+      const qs = usp.toString();
+      return `${origin}/search${qs ? `?${qs}` : ""}`;
+    };
+    /** Canonical drops the free-text term so filter pages stay the indexable copy. */
+    const canonicalBuild = (p: number) => {
+      const usp = new URLSearchParams();
       if (sp.city) usp.set("city", sp.city);
       if (sp.gov) usp.set("gov", sp.gov);
       if (sp.cat) usp.set("cat", sp.cat);
@@ -140,15 +153,15 @@ export const Route = createFileRoute("/search")({
       return `${origin}/search${qs ? `?${qs}` : ""}`;
     };
 
-    const canonical = build(page);
+    const canonical = canonicalBuild(page);
     // Free-text queries stay out of the index; filtered/browsable pages are indexable.
     const indexable = !term;
 
     const links: Record<string, string>[] = [{ rel: "canonical", href: canonical }];
-    if (indexable) {
-      if (page > 1) links.push({ rel: "prev", href: build(page - 1) });
-      if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
-    }
+    // Paging hints always help crawlers understand the sequence, indexable or not.
+    if (page > 1) links.push({ rel: "prev", href: build(page - 1) });
+    if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
+
 
     // Breadcrumb trail: home › governorate › city › category, as selected.
     const crumbs: { name: string; item: string }[] = [
