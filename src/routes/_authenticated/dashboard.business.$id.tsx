@@ -14,6 +14,7 @@ import {
 } from "@/lib/location-filter";
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
+import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ const schema = z.object({
 
 type FormState = {
   name: string;
+  username: string;
   description: string;
   category_id: string;
   governorate_id: string;
@@ -67,6 +69,7 @@ type FormState = {
 
 const EMPTY: FormState = {
   name: "",
+  username: "",
   description: "",
   category_id: "",
   governorate_id: "",
@@ -151,6 +154,7 @@ function BusinessForm() {
     if (!existing) return;
     setForm({
       name: existing.name ?? "",
+      username: existing.username ?? "",
       description: existing.description ?? "",
       category_id: existing.category_id ?? "",
       governorate_id: existing.governorate_id ?? "",
@@ -251,8 +255,15 @@ function BusinessForm() {
         throw new Error(CITY_MISMATCH_MESSAGE);
       }
 
+      const handle = form.username.trim();
+      if (handle) {
+        const handleError = validateUsername(handle);
+        if (handleError) throw new Error(handleError);
+      }
+
       const payload = {
         ...parsed.data,
+        ...(handle ? { username: normalizeUsername(handle) } : {}),
         description: form.description.trim() || null,
         address: form.address.trim() || null,
         phone: form.phone.trim() || null,
@@ -268,13 +279,21 @@ function BusinessForm() {
 
       if (isNew) {
         const { error } = await supabase.from("businesses").insert(payload);
-        if (error) throw error;
+        if (error) {
+          if (error.code === "23505")
+            throw new Error("هذا الرابط مستخدم بالفعل، جرّب رابطًا آخر.");
+          throw error;
+        }
       } else {
         const { error } = await supabase
           .from("businesses")
           .update(payload)
           .eq("id", id);
-        if (error) throw error;
+        if (error) {
+          if (error.code === "23505")
+            throw new Error("هذا الرابط مستخدم بالفعل، جرّب رابطًا آخر.");
+          throw error;
+        }
       }
     },
     onSuccess: () => {
@@ -328,6 +347,33 @@ function BusinessForm() {
                 required
               />
             </div>
+
+            {!isNew ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="username">الرابط الخاص بالنشاط</Label>
+                <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
+                  <span className="text-xs text-muted-foreground" dir="ltr">
+                    {typeof window !== "undefined"
+                      ? window.location.host.replace(/^www\./, "")
+                      : "durtown.com"}
+                    /
+                  </span>
+                  <input
+                    id="username"
+                    dir="ltr"
+                    value={form.username}
+                    maxLength={32}
+                    onChange={(e) => set("username", normalizeUsername(e.target.value))}
+                    className="h-9 flex-1 bg-transparent text-sm outline-none"
+                    placeholder="my-shop"
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {USERNAME_HINT} يمكنك استخدام هذا الرابط في كروت العمل وصفحات
+                  التواصل الاجتماعي.
+                </p>
+              </div>
+            ) : null}
 
             <div className="space-y-1.5">
               <Label htmlFor="description">وصف النشاط</Label>
