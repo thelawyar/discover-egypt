@@ -95,7 +95,7 @@ export const Route = createFileRoute("/city/$slug")({
           "@type": "ListItem",
           position: (loaderData.page - 1) * 24 + i + 1,
           name: b.name,
-          url: `${origin}/business/${b.id}`,
+          url: `${origin}/${b.username}`,
         })),
       },
     };
