@@ -398,7 +398,7 @@ function SearchPage() {
             // Clearing the query term (the × on the search chip) or "مسح الكل"
             // means leaving the results page — send the visitor back home, since
             // the homepage is search-only and there is nothing to browse without a term.
-            if (patch.q === "") navigate({ to: "/" });
+            if (patch.q === "") resetSearch();
             else
               navigate({
                 search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }),
