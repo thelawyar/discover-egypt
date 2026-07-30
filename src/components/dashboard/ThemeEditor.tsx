@@ -19,6 +19,9 @@ export type ThemeValue = {
   theme_primary: string | null;
   theme_bg: string | null;
   theme_style: string;
+  theme_font: string;
+  theme_button: string;
+  theme_contrast: boolean;
 };
 
 /** Theme customization for the public mini-site, with an instant live preview. */
