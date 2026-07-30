@@ -72,3 +72,5 @@ Allow: /
 # Agent skills: /.well-known/skills.json
 
 Sitemap: /sitemap.xml
+Sitemap: /sitemap-index.xml
+Sitemap: /sitemap-search.xml
