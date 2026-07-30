@@ -293,8 +293,18 @@ export function ThemeEditor({
               نبذة قصيرة عن النشاط تظهر هنا لزوار صفحتك.
             </p>
             <span
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs"
-              style={{ background: "var(--biz-soft)" }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
+              style={
+                theme.buttonOutlined
+                  ? {
+                      borderRadius: "var(--biz-btn-radius)",
+                      border: "1.5px solid var(--biz-primary)",
+                    }
+                  : {
+                      borderRadius: "var(--biz-btn-radius)",
+                      background: "var(--biz-soft)",
+                    }
+              }
             >
               <Phone className="size-3.5" style={{ color: "var(--biz-primary)" }} />
               اتصل بنا
