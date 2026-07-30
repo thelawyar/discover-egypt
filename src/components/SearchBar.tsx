@@ -17,6 +17,8 @@ type Props = {
   autoFocus?: boolean;
   /** When set, the query is applied instantly (debounced) without a submit. */
   onLiveChange?: (term: string) => void;
+  /** Called when the visitor clears the box (✕ or ESC). */
+  onClear?: () => void;
 };
 
 export function SearchBar({
