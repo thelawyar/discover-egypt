@@ -532,8 +532,21 @@ function lastSearchLabel(
 function ShareResults({ params }: { params: SearchParams }) {
   const [copied, setCopied] = useState(false);
 
+  // Nothing to share when the search state is completely empty.
+  const hasState = Boolean(
+    params.q.trim() ||
+      params.city ||
+      params.gov ||
+      params.cat ||
+      params.prod.trim() ||
+      params.sort !== "best" ||
+      params.page > 1,
+  );
+
+  useEffect(() => setCopied(false), [params]);
+
   async function copy() {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !hasState) return;
     const base = window.location.origin;
 
     const url = shortShareUrl(base, params as SearchState);
@@ -553,13 +566,19 @@ function ShareResults({ params }: { params: SearchParams }) {
       size="sm"
       className="rounded-full"
       onClick={copy}
-      title="نسخ رابط قصير يحمل كل الفلاتر والفرز"
+      disabled={!hasState}
+      title={
+        hasState
+          ? "نسخ رابط قصير يحمل كل الفلاتر والفرز"
+          : "ابدأ بحثًا أو اختر فلترًا لتفعيل رابط المشاركة"
+      }
     >
       {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
       {copied ? "تم نسخ الرابط" : "نسخ رابط المشاركة"}
     </Button>
   );
 }
+
 
 
 /** Chips reflecting exactly what the shareable URL contains. */
