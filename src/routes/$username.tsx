@@ -63,6 +63,7 @@ export const Route = createFileRoute("/$username")({
       category_name: data.category_name,
       latitude: data.latitude,
       longitude: data.longitude,
+      hours: data.hours ?? [],
       rating,
       updated_at: data.updated_at,
       reviewCount: data.reviews.length,
