@@ -20,7 +20,7 @@ export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
   const cls =
     size === "lg"
       ? "text-4xl sm:text-5xl"
-      : "hidden text-base xs:inline sm:text-xl";
+      : "truncate text-base sm:text-xl";
   const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-8 sm:h-9";
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
@@ -94,7 +94,10 @@ export function SiteHeader() {
             <Link to="/auth">دخول</Link>
           </Button>
           <Button asChild size="sm" className="rounded-full px-3 text-xs sm:text-sm">
-            <Link to="/auth">أضف نشاطك</Link>
+            <Link to="/auth">
+              <span className="sm:hidden">أضف</span>
+              <span className="hidden sm:inline">أضف نشاطك</span>
+            </Link>
           </Button>
         </>
       )}
