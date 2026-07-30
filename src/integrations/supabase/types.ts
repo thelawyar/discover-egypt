@@ -281,6 +281,44 @@ export type Database = {
           },
         ]
       }
+      business_moderation_log: {
+        Row: {
+          actor_id: string | null
+          business_id: string
+          created_at: string
+          from_status: Database["public"]["Enums"]["business_status"] | null
+          id: string
+          reason: string | null
+          to_status: Database["public"]["Enums"]["business_status"]
+        }
+        Insert: {
+          actor_id?: string | null
+          business_id: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["business_status"] | null
+          id?: string
+          reason?: string | null
+          to_status: Database["public"]["Enums"]["business_status"]
+        }
+        Update: {
+          actor_id?: string | null
+          business_id?: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["business_status"] | null
+          id?: string
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["business_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_moderation_log_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_page_events: {
         Row: {
           business_id: string
