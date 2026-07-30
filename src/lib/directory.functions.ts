@@ -107,33 +107,68 @@ export const searchBusinesses = createServerFn({ method: "GET" })
         resolve("categories", data.cat),
       ]);
 
-      let query = supabase
-        .from("businesses")
-        .select(CARD_SELECT, { count: "exact" })
-        .eq("status", "approved");
+      // Split the query into words so "عيادة اسنان المنصورة" matches a business
+      // whose words are spread across name / description / products / city.
+      const tokens = term
+        .replace(/[%,()]/g, " ")
+        .split(/\s+/)
+        .filter((t) => t.length >= 2)
+        .slice(0, 5);
 
-      if (cityId) query = query.eq("city_id", cityId);
-      if (govId) query = query.eq("governorate_id", govId);
-      if (catId) query = query.eq("category_id", catId);
-
-      if (term) {
-        const escaped = term.replace(/[%,()]/g, " ");
-        const { data: cats } = await supabase
-          .from("categories")
-          .select("id")
-          .ilike("name", `%${escaped}%`);
-        const catIds = (cats ?? []).map((c) => c.id);
-
-        const clauses = [`search_text.ilike.%${escaped}%`];
-        if (catIds.length) clauses.push(`category_id.in.(${catIds.join(",")})`);
-        query = query.or(clauses.join(","));
-      }
+      const clausesPerToken = await Promise.all(
+        tokens.map(async (token) => {
+          const [cats, cities, govs] = await Promise.all([
+            supabase.from("categories").select("id").ilike("name", `%${token}%`),
+            supabase.from("cities").select("id").ilike("name", `%${token}%`),
+            supabase.from("governorates").select("id").ilike("name", `%${token}%`),
+          ]);
+          const parts = [`search_text.ilike.%${token}%`];
+          const catList = (cats.data ?? []).map((c) => c.id);
+          const cityList = (cities.data ?? []).map((c) => c.id);
+          const govList = (govs.data ?? []).map((g) => g.id);
+          if (catList.length) parts.push(`category_id.in.(${catList.join(",")})`);
+          if (cityList.length) parts.push(`city_id.in.(${cityList.join(",")})`);
+          if (govList.length)
+            parts.push(`governorate_id.in.(${govList.join(",")})`);
+          return parts.join(",");
+        }),
+      );
 
       const from = (page - 1) * perPage;
-      const { data: rows, count } = await query
-        .order("is_featured", { ascending: false })
-        .order("created_at", { ascending: false })
-        .range(from, from + perPage - 1);
+
+      const build = (mode: "all" | "any") => {
+        let query = supabase
+          .from("businesses")
+          .select(CARD_SELECT, { count: "exact" })
+          .eq("status", "approved");
+
+        if (cityId) query = query.eq("city_id", cityId);
+        if (govId) query = query.eq("governorate_id", govId);
+        if (catId) query = query.eq("category_id", catId);
+
+        if (clausesPerToken.length) {
+          if (mode === "all") {
+            // Chained .or() calls are AND-ed together: every word must match something.
+            for (const clause of clausesPerToken) query = query.or(clause);
+          } else {
+            query = query.or(clausesPerToken.join(","));
+          }
+        }
+
+        return query
+          .order("is_featured", { ascending: false })
+          .order("created_at", { ascending: false })
+          .range(from, from + perPage - 1);
+      };
+
+      let { data: rows, count } = await build("all");
+
+      // Nothing matched every word — fall back to "any word" so the user still gets results.
+      if (!rows?.length && clausesPerToken.length > 1) {
+        const loose = await build("any");
+        rows = loose.data;
+        count = loose.count;
+      }
 
       return {
         items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
