@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Plus, Star, UserCog, X } from "lucide-react";
+import { Check, History, Plus, Star, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
@@ -16,6 +16,8 @@ import { SeoStatusPanel } from "@/components/SeoStatus";
 import { AdminAds } from "@/components/AdminAds";
 import { AdminSearchTerms } from "@/components/AdminSearchTerms";
 import { AdminInsights } from "@/components/AdminInsights";
+import { ModerationLog } from "@/components/AdminModerationLog";
+
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
