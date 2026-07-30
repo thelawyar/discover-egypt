@@ -279,6 +279,11 @@ function BusinessForm() {
         if (handleError) throw new Error(handleError);
       }
 
+      if (form.theme_primary && !isHexColor(form.theme_primary))
+        throw new Error("اللون الأساسي يجب أن يكون بصيغة #RRGGBB");
+      if (form.theme_bg && !isHexColor(form.theme_bg))
+        throw new Error("لون الخلفية يجب أن يكون بصيغة #RRGGBB");
+
       const payload = {
         ...parsed.data,
         ...(handle ? { username: normalizeUsername(handle) } : {}),
@@ -292,6 +297,10 @@ function BusinessForm() {
         instagram: form.instagram.trim() || null,
         products: form.products,
         cover_image_url: form.cover_image_url,
+        logo_url: form.logo_url,
+        theme_primary: form.theme_primary,
+        theme_bg: form.theme_bg,
+        theme_style: form.theme_style,
         owner_id: user!.id,
       };
 
