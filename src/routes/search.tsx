@@ -194,7 +194,7 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
-  const loaderData = Route.useLoaderData();
+  
   const { data: taxonomy } = useSuspenseQuery(taxonomyQuery);
   const { data: results } = useSuspenseQuery(resultsQuery(params));
 
