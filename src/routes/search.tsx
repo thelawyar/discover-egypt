@@ -131,13 +131,8 @@ export const Route = createFileRoute("/search")({
     return { origin, pages: Math.max(1, Math.ceil(results.total / 12)) };
   },
   component: SearchPage,
-  errorComponent: () => (
-    <PageShell>
-      <div className="mx-auto max-w-6xl px-4 py-20 text-center text-muted-foreground">
-        تعذّر تحميل نتائج البحث. حاول مرة أخرى.
-      </div>
-    </PageShell>
-  ),
+  errorComponent: ({ error }) => <ResultsError message={error.message} />,
+
 });
 
 function SearchPage() {
