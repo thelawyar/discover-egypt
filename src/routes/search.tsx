@@ -196,6 +196,8 @@ function SearchPage() {
   const navigate = Route.useNavigate();
   const loaderData = Route.useLoaderData();
   const { data: taxonomy } = useSuspenseQuery(taxonomyQuery);
+  const { data: results } = useSuspenseQuery(resultsQuery(params));
+
 
 
   const { data: results } = useSuspenseQuery(resultsQuery(params));
