@@ -192,15 +192,21 @@ export const Route = createFileRoute("/search")({
       })),
     };
 
+    const shareTitle = title.replace(" | اكتشف مدينتك", "");
     return {
       meta: [
         { title },
         { name: "description", content: desc.slice(0, 300) },
-        { property: "og:title", content: title },
+        { property: "og:title", content: shareTitle },
         { property: "og:description", content: desc.slice(0, 300) },
-        { property: "og:url", content: canonical },
-        { name: "twitter:title", content: title },
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "اكتشف مدينتك" },
+        { property: "og:locale", content: "ar_EG" },
+        { property: "og:url", content: build(page) },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: shareTitle },
         { name: "twitter:description", content: desc.slice(0, 300) },
+        ...ogImageMeta(ld?.image ?? null, origin, shareTitle),
         {
           name: "robots",
           content: indexable
@@ -208,6 +214,7 @@ export const Route = createFileRoute("/search")({
             : "noindex, follow",
         },
       ],
+
       links,
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
