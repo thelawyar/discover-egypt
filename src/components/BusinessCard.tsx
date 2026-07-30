@@ -3,6 +3,7 @@ import { MapPin, Phone, Star, Store } from "lucide-react";
 import type { BusinessCardData } from "@/lib/directory-types";
 import { Highlight, matchesTerms } from "@/lib/highlight";
 import { SmartImage } from "@/components/SmartImage";
+import { supabase } from "@/integrations/supabase/client";
 
 export function BusinessCard({
   item,
@@ -11,12 +12,23 @@ export function BusinessCard({
   item: BusinessCardData;
   terms?: string[];
 }) {
+  /** Fire-and-forget click tracking so the directory dashboard can rank cards. */
+  function trackClick() {
+    void supabase.rpc("track_business_event", {
+      _business_id: item.id,
+      _event_type: "card_click",
+      _source: "results",
+    });
+  }
+
   return (
     <Link
       to="/$username"
       params={{ username: item.username }}
+      onClick={trackClick}
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:shadow-raised"
     >
+
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {item.cover_image_url ? (
           <SmartImage

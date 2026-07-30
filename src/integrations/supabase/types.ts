@@ -786,6 +786,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_directory_stats: { Args: { _days?: number }; Returns: Json }
       admin_list_users: {
         Args: never
         Returns: {

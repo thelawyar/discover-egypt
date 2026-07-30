@@ -37,3 +37,22 @@ export function normalizeEgyptWhatsApp(input: string): string {
 export function whatsAppDigits(input: string): string {
   return normalizeEgyptWhatsApp(input).replace(/\D/g, "");
 }
+
+/**
+ * Validates a WhatsApp number before saving.
+ * Egyptian numbers must resolve to 20 + 10 digits starting with 1;
+ * other country codes just need a plausible international length.
+ */
+export function isValidWhatsApp(input: string): boolean {
+  const digits = whatsAppDigits(input);
+  if (!digits) return false;
+  if (digits.startsWith(EG_CODE)) return /^201[0-9]{9}$/.test(digits);
+  return digits.length >= 8 && digits.length <= 15;
+}
+
+/** Human-readable hint about what the saved number will look like. */
+export function whatsAppPreview(input: string): string {
+  const value = normalizeEgyptWhatsApp(input);
+  return value ? `سيُحفظ الرقم كـ ${value}` : "";
+}
+

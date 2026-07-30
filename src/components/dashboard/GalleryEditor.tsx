@@ -41,8 +41,9 @@ export function GalleryEditor({
       let order = current;
       for (const file of list) {
         // Square crop + compression keeps the gallery grid tidy and fast to load.
-        const url = await uploadBusinessImage(file, userId, {
+        const { url } = await uploadBusinessImage(file, userId, {
           maxWidth: 1200,
+          thumbWidth: 480,
           crop: true,
           ratio: 1,
           quality: 0.82,
