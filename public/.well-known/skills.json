@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "site": "اكتشف مدينتك (Discover Your Town)",
+  "skills": [
+    {
+      "name": "find-local-business",
+      "title": "البحث عن نشاط تجاري في مدينة مصرية",
+      "description": "Search the Egyptian city directory for businesses by keyword, category, or city and return names, categories, phones, and profile links.",
+      "path": "/.well-known/skills/find-local-business/SKILL.md",
+      "tools": ["search_businesses", "list_taxonomy"]
+    },
+    {
+      "name": "read-business-profile",
+      "title": "قراءة بيانات نشاط تجاري",
+      "description": "Read the full public profile of a business (contact details, products, hours, location) from its username or id.",
+      "path": "/.well-known/skills/read-business-profile/SKILL.md",
+      "tools": ["get_business"]
+    }
+  ]
+}
