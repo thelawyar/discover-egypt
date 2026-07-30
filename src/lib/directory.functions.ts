@@ -403,6 +403,63 @@ export const getSitemapData = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/**
+ * Per-facet approved counts, used to emit the paginated /search sitemap
+ * (one <url> per real page, so nothing empty or duplicated gets indexed).
+ */
+export const getSearchFacetCounts = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
+
+    const [cats, govs, cities, rows] = await Promise.all([
+      supabase.from("categories").select("id,slug").order("sort_order"),
+      supabase.from("governorates").select("id,slug").order("name"),
+      supabase.from("cities").select("id,slug,governorate_id").order("name"),
+      supabase
+        .from("businesses")
+        .select("category_id,city_id,updated_at")
+        .eq("status", "approved")
+        .limit(20000),
+    ]);
+
+    const cityGov = new Map<string, string | null>(
+      (cities.data ?? []).map((c) => [c.id, c.governorate_id ?? null]),
+    );
+    const byCat = new Map<string, number>();
+    const byCity = new Map<string, number>();
+    const byGov = new Map<string, number>();
+    let lastmod: string | null = null;
+
+    for (const r of rows.data ?? []) {
+      if (r.category_id) byCat.set(r.category_id, (byCat.get(r.category_id) ?? 0) + 1);
+      if (r.city_id) {
+        byCity.set(r.city_id, (byCity.get(r.city_id) ?? 0) + 1);
+        const gov = cityGov.get(r.city_id);
+        if (gov) byGov.set(gov, (byGov.get(gov) ?? 0) + 1);
+      }
+      if (r.updated_at && (!lastmod || r.updated_at > lastmod)) lastmod = r.updated_at;
+    }
+
+    const pick = (
+      list: { id: string; slug: string }[] | null,
+      counts: Map<string, number>,
+    ) =>
+      (list ?? [])
+        .map((x) => ({ slug: x.slug, count: counts.get(x.id) ?? 0 }))
+        .filter((x) => x.count > 0);
+
+    return {
+      total: (rows.data ?? []).length,
+      lastmod,
+      categories: pick(cats.data, byCat),
+      governorates: pick(govs.data, byGov),
+      cities: pick(cities.data, byCity),
+    };
+  },
+);
+
+
 export const getHomeStats = createServerFn({ method: "GET" }).handler(
   async () => {
     const { getPublicClient } = await import("./supabase-public.server");

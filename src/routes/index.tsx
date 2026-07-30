@@ -4,7 +4,7 @@ import { getTaxonomy, getHomeStats } from "@/lib/directory.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { Brand, SiteHeader } from "@/components/SiteHeader";
 import { getRequestOrigin } from "@/lib/origin.functions";
-import { ogImageMeta } from "@/lib/og";
+import { ogCardMeta } from "@/lib/og";
 
 const taxonomyQuery = queryOptions({
   queryKey: ["taxonomy"],
@@ -50,7 +50,16 @@ export const Route = createFileRoute("/")({
         name: "twitter:description",
         content: "دليل تجاري شامل يجمع كل الأنشطة التجارية في مدينتك.",
       },
-      ...ogImageMeta(null, loaderData?.origin, "اكتشف مدينتك"),
+      ...ogCardMeta(
+        {
+          kind: "site",
+          title: "اكتشف مدينتك",
+          subtitle: "الدليل التجاري لكل مدن مصر",
+          badge: "دليل تجاري",
+        },
+        loaderData?.origin,
+        "اكتشف مدينتك",
+      ),
     ],
     links: [{ rel: "canonical", href: "/" }],
     scripts: [
