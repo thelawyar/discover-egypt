@@ -153,7 +153,8 @@ export const getBusiness = createServerFn({ method: "GET" })
       .from("businesses")
       .select(
         CARD_SELECT +
-          ",email,website,facebook,instagram,latitude,longitude,view_count,cities(slug,name)",
+          ",email,website,facebook,instagram,latitude,longitude,view_count," +
+          "logo_url,theme_primary,theme_bg,theme_style,cities(slug,name)",
       )
       .eq(UUID_RE.test(data.id) ? "id" : "username", data.id.toLowerCase())
       .eq("status", "approved")
@@ -184,6 +185,10 @@ export const getBusiness = createServerFn({ method: "GET" })
 
     return {
       ...toCard(r),
+      logo_url: (r.logo_url as string) ?? null,
+      theme_primary: (r.theme_primary as string) ?? null,
+      theme_bg: (r.theme_bg as string) ?? null,
+      theme_style: (r.theme_style as string) ?? null,
       email: (r.email as string) ?? null,
       website: (r.website as string) ?? null,
       facebook: (r.facebook as string) ?? null,
@@ -299,3 +304,30 @@ export const getHomeStats = createServerFn({ method: "GET" }).handler(
     };
   },
 );
+
+/** Old handle -> current handle, so previous /username links keep working (301). */
+export const resolveLegacyHandle = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) =>
+    z.object({ username: z.string().max(64) }).parse(data),
+  )
+  .handler(async ({ data }): Promise<string | null> => {
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
+
+    const { data: row } = await supabase
+      .from("business_username_history")
+      .select("business_id")
+      .eq("username", data.username.toLowerCase())
+      .maybeSingle();
+
+    if (!row) return null;
+
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("username")
+      .eq("id", row.business_id)
+      .eq("status", "approved")
+      .maybeSingle();
+
+    return biz?.username ?? null;
+  });

@@ -44,6 +44,10 @@ export type BusinessCardData = {
 };
 
 export type BusinessDetail = BusinessCardData & {
+  logo_url: string | null;
+  theme_primary: string | null;
+  theme_bg: string | null;
+  theme_style: string | null;
   email: string | null;
   website: string | null;
   facebook: string | null;

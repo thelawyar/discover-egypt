@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
+import { ArrowRight, ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTaxonomy } from "@/lib/directory.functions";
 import { CityPicker } from "@/components/CityPicker";
@@ -15,6 +15,12 @@ import {
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
+import { isHexColor } from "@/lib/business-theme";
+import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
+import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
+import { HoursEditor } from "@/components/dashboard/HoursEditor";
+import { BusinessStats } from "@/components/dashboard/BusinessStats";
+import { QrCodeButton } from "@/components/QrCodeButton";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +71,10 @@ type FormState = {
   instagram: string;
   products: string[];
   cover_image_url: string | null;
+  logo_url: string | null;
+  theme_primary: string | null;
+  theme_bg: string | null;
+  theme_style: string;
 };
 
 const EMPTY: FormState = {
@@ -83,6 +93,10 @@ const EMPTY: FormState = {
   instagram: "",
   products: [],
   cover_image_url: null,
+  logo_url: null,
+  theme_primary: null,
+  theme_bg: null,
+  theme_style: "classic",
 };
 
 function BusinessForm() {
@@ -150,6 +164,23 @@ function BusinessForm() {
     },
   });
 
+  const siteOrigin =
+    typeof window !== "undefined" ? window.location.origin : "https://durtown.com";
+
+  const { data: history } = useQuery({
+    queryKey: ["username-history", id],
+    enabled: !isNew,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_username_history")
+        .select("id,username,created_at")
+        .eq("business_id", id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (!existing) return;
     setForm({
@@ -168,6 +199,10 @@ function BusinessForm() {
       instagram: existing.instagram ?? "",
       products: existing.products ?? [],
       cover_image_url: existing.cover_image_url ?? null,
+      logo_url: existing.logo_url ?? null,
+      theme_primary: existing.theme_primary ?? null,
+      theme_bg: existing.theme_bg ?? null,
+      theme_style: existing.theme_style ?? "classic",
     });
   }, [existing]);
 
@@ -261,6 +296,11 @@ function BusinessForm() {
         if (handleError) throw new Error(handleError);
       }
 
+      if (form.theme_primary && !isHexColor(form.theme_primary))
+        throw new Error("اللون الأساسي يجب أن يكون بصيغة #RRGGBB");
+      if (form.theme_bg && !isHexColor(form.theme_bg))
+        throw new Error("لون الخلفية يجب أن يكون بصيغة #RRGGBB");
+
       const payload = {
         ...parsed.data,
         ...(handle ? { username: normalizeUsername(handle) } : {}),
@@ -274,6 +314,10 @@ function BusinessForm() {
         instagram: form.instagram.trim() || null,
         products: form.products,
         cover_image_url: form.cover_image_url,
+        logo_url: form.logo_url,
+        theme_primary: form.theme_primary,
+        theme_bg: form.theme_bg,
+        theme_style: form.theme_style,
         owner_id: user!.id,
       };
 
@@ -372,6 +416,49 @@ function BusinessForm() {
                   {USERNAME_HINT} يمكنك استخدام هذا الرابط في كروت العمل وصفحات
                   التواصل الاجتماعي.
                 </p>
+                {existing?.username ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      asChild
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full"
+                    >
+                      <a
+                        href={`/${existing.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="size-3.5" /> فتح الصفحة
+                      </a>
+                    </Button>
+                    <QrCodeButton
+                      url={`${siteOrigin}/${existing.username}`}
+                      fileName={existing.username}
+                    />
+                  </div>
+                ) : null}
+                {history?.length ? (
+                  <div className="rounded-lg bg-muted p-2.5">
+                    <p className="text-[11px] font-bold">
+                      سجل الروابط السابقة (تحوّل تلقائياً 301 للرابط الحالي)
+                    </p>
+                    <ul className="mt-1 space-y-0.5">
+                      {history.map((h) => (
+                        <li
+                          key={h.id}
+                          className="flex justify-between gap-2 text-[11px] text-muted-foreground"
+                        >
+                          <span dir="ltr">/{h.username}</span>
+                          <span>
+                            {new Date(h.created_at).toLocaleDateString("ar-EG")}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
@@ -611,6 +698,33 @@ function BusinessForm() {
               />
             </label>
           </section>
+
+          <ThemeEditor
+            value={{
+              logo_url: form.logo_url,
+              theme_primary: form.theme_primary,
+              theme_bg: form.theme_bg,
+              theme_style: form.theme_style,
+            }}
+            onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+            userId={user?.id ?? ""}
+            businessName={form.name || "اسم النشاط"}
+            coverUrl={form.cover_image_url}
+          />
+
+          {!isNew ? (
+            <>
+              <GalleryEditor businessId={id} userId={user?.id ?? ""} />
+              <HoursEditor businessId={id} />
+              <BusinessStats businessId={id} />
+            </>
+          ) : (
+            <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+              بعد حفظ النشاط ستتمكن من إضافة معرض الصور ومواعيد العمل ومتابعة
+              إحصائيات الزيارات.
+            </p>
+          )}
+
 
           <div className="flex justify-end gap-2">
             <Button asChild type="button" variant="outline" className="rounded-full">

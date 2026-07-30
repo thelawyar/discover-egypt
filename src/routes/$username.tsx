@@ -1,6 +1,6 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { getBusiness } from "@/lib/directory.functions";
+import { getBusiness, resolveLegacyHandle } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { absoluteOgImage, ogImageMeta } from "@/lib/og";
 import { BusinessProfile } from "@/components/BusinessProfile";
@@ -24,7 +24,20 @@ export const Route = createFileRoute("/$username")({
         staleTime: Infinity,
       }),
     ]);
-    if (!data) throw notFound();
+    if (!data) {
+      // Old handle? keep the link alive with a permanent redirect.
+      const current = await resolveLegacyHandle({
+        data: { username: params.username },
+      });
+      if (current && current !== params.username) {
+        throw redirect({
+          to: "/$username",
+          params: { username: current },
+          statusCode: 301,
+        });
+      }
+      throw notFound();
+    }
     const rating = data.reviews.length
       ? data.reviews.reduce((s, r) => s + r.rating, 0) / data.reviews.length
       : null;
@@ -33,7 +46,7 @@ export const Route = createFileRoute("/$username")({
       username: data.username,
       name: data.name,
       description: data.description,
-      image: data.cover_image_url ?? data.images[0]?.url ?? null,
+      image: data.cover_image_url ?? data.images[0]?.url ?? data.logo_url ?? null,
       address: data.address,
       phone: data.phone,
       website: data.website,
