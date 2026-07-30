@@ -21,10 +21,18 @@ const searchSchema = z.object({
   city: fallback(z.string(), "").default(""),
   gov: fallback(z.string(), "").default(""),
   cat: fallback(z.string(), "").default(""),
+  prod: fallback(z.string(), "").default(""),
+  sort: fallback(z.enum(["best", "newest", "popular"]), "best").default("best"),
   page: fallback(z.number().int(), 1).default(1),
 });
 
 type SearchParams = z.infer<typeof searchSchema>;
+
+const SORTS = [
+  ["best", "الأفضل مطابقة"],
+  ["popular", "الأعلى تفاعلاً"],
+  ["newest", "الأحدث إضافة"],
+] as const;
 
 const taxonomyQuery = queryOptions({
   queryKey: ["taxonomy"],
@@ -37,6 +45,8 @@ function resultsQuery(deps: {
   city: string;
   gov: string;
   cat: string;
+  prod: string;
+  sort: "best" | "newest" | "popular";
   page: number;
 }) {
   return queryOptions({
@@ -48,11 +58,14 @@ function resultsQuery(deps: {
           city: deps.city || undefined,
           gov: deps.gov || undefined,
           cat: deps.cat || undefined,
+          prod: deps.prod || undefined,
+          sort: deps.sort,
           page: deps.page,
         },
       }),
   });
 }
+
 
 export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
