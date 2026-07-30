@@ -208,6 +208,17 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
     background: "var(--biz-card)",
   };
   const softStyle = { background: "var(--biz-soft)" };
+  // Contact buttons follow the owner's chosen button shape/style.
+  const actionStyle = theme.buttonOutlined
+    ? {
+        borderRadius: "var(--biz-btn-radius)",
+        border: `1.5px solid var(--biz-primary)`,
+        background: "transparent",
+      }
+    : {
+        borderRadius: "var(--biz-btn-radius)",
+        background: "var(--biz-soft)",
+      };
 
   return (
     <div style={themeVars(theme)}>
