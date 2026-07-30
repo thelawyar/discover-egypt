@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   Check,
   Copy,
+  History,
   Link2,
   Loader2,
   LocateFixed,
@@ -24,6 +25,15 @@ import { citiesForGovernorate, normalizeLocationParams } from "@/lib/location-fi
 import { PageShell } from "@/components/SiteHeader";
 import { searchTokens } from "@/lib/highlight";
 import { Button } from "@/components/ui/button";
+import {
+  clearLastSearch,
+  readLastSearch,
+  saveLastSearch,
+  sameSearchState,
+  shortShareUrl,
+  type SearchState,
+} from "@/lib/search-share";
+
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
