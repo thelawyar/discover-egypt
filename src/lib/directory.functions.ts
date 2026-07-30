@@ -427,6 +427,69 @@ export const getHomeStats = createServerFn({ method: "GET" }).handler(
   },
 );
 
+export const HOME_PER_PAGE = 12;
+
+/** Paginated home feed with optional category / governorate chip filters. */
+export const getHomeFeed = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        page: z.number().optional(),
+        cat: z.string().max(64).optional(),
+        gov: z.string().max(64).optional(),
+      })
+      .parse(data ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
+
+    const perPage = 12;
+    const page = Math.max(1, Math.min(100, data.page ?? 1));
+    const from = (page - 1) * perPage;
+
+    let query = supabase
+      .from("businesses")
+      .select(CARD_SELECT, { count: "exact" })
+      .eq("status", "approved");
+
+    if (data.cat) {
+      const { data: cat } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("slug", data.cat)
+        .maybeSingle();
+      query = query.eq("category_id", cat?.id ?? NO_MATCH);
+    }
+
+    if (data.gov) {
+      const govId = UUID_RE.test(data.gov)
+        ? data.gov
+        : ((
+            await supabase
+              .from("governorates")
+              .select("id")
+              .eq("slug", data.gov)
+              .maybeSingle()
+          ).data?.id ?? NO_MATCH);
+      query = query.eq("governorate_id", govId);
+    }
+
+    const { data: rows, count } = await query
+      .order("is_featured", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(from, from + perPage - 1);
+
+    return {
+      items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
+      total: count ?? 0,
+      page,
+      perPage,
+    };
+  });
+
+
+
 /** Old handle -> current handle, so previous /username links keep working (301). */
 export const resolveLegacyHandle = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) =>
