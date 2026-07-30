@@ -15,6 +15,12 @@ import {
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
+import { isHexColor } from "@/lib/business-theme";
+import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
+import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
+import { HoursEditor } from "@/components/dashboard/HoursEditor";
+import { BusinessStats } from "@/components/dashboard/BusinessStats";
+import { QrCodeButton } from "@/components/QrCodeButton";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +71,10 @@ type FormState = {
   instagram: string;
   products: string[];
   cover_image_url: string | null;
+  logo_url: string | null;
+  theme_primary: string | null;
+  theme_bg: string | null;
+  theme_style: string;
 };
 
 const EMPTY: FormState = {
@@ -83,6 +93,10 @@ const EMPTY: FormState = {
   instagram: "",
   products: [],
   cover_image_url: null,
+  logo_url: null,
+  theme_primary: null,
+  theme_bg: null,
+  theme_style: "classic",
 };
 
 function BusinessForm() {
