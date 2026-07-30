@@ -220,8 +220,13 @@ export const Route = createFileRoute("/$username")({
               latitude: loaderData.latitude,
               longitude: loaderData.longitude,
             },
+            hasMap: `https://www.google.com/maps/search/?api=1&query=${loaderData.latitude},${loaderData.longitude}`,
           }
         : {}),
+      ...(openingHours(loaderData.hours ?? []).length
+        ? { openingHoursSpecification: openingHours(loaderData.hours ?? []) }
+        : {}),
+
       ...(loaderData.rating && loaderData.reviewCount
         ? {
             aggregateRating: {
