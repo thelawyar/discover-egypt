@@ -204,6 +204,102 @@ export function SearchBar({
         </button>
       </div>
 
+      {suggestOpen && !cityOpen && debounced.length >= 2 ? (
+        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-raised">
+          {suggestQuery.isFetching && !hasSuggestions ? (
+            <p className="flex items-center justify-center gap-2 p-4 text-xs text-muted-foreground">
+              <Loader2 className="size-3.5 animate-spin" /> جارٍ البحث...
+            </p>
+          ) : null}
+
+          {suggestions?.businesses.length ? (
+            <div className="p-1">
+              <p className="px-3 py-1 text-[11px] font-bold text-muted-foreground">
+                نتائج سريعة
+              </p>
+              {suggestions.businesses.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => {
+                    setSuggestOpen(false);
+                    navigate({ to: "/$username", params: { username: b.username } });
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-right hover:bg-muted"
+                >
+                  {b.cover_image_url ? (
+                    <img
+                      src={b.cover_image_url}
+                      alt=""
+                      loading="lazy"
+                      className="size-9 shrink-0 rounded-md object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      <Store className="size-4" />
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">
+                      <Highlight text={b.name} terms={tokens} />
+                    </span>
+                    <span className="block truncate text-[11px] text-muted-foreground">
+                      {[b.category_name, b.city_name].filter(Boolean).join(" · ")}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          {suggestions?.categories.length || suggestions?.cities.length ? (
+            <div className="border-t border-border p-1">
+              {suggestions.categories.map((c) => (
+                <button
+                  key={`cat-${c.slug}`}
+                  type="button"
+                  onClick={() => go(c.name)}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-right text-sm hover:bg-muted"
+                >
+                  <Tag className="size-3.5 text-muted-foreground" />
+                  <Highlight text={c.name} terms={tokens} />
+                  <span className="text-[11px] text-muted-foreground">تصنيف</span>
+                </button>
+              ))}
+              {suggestions.cities.map((c) => (
+                <button
+                  key={`city-${c.slug}`}
+                  type="button"
+                  onClick={() => go("", c.slug)}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-right text-sm hover:bg-muted"
+                >
+                  <MapPin className="size-3.5 text-muted-foreground" />
+                  <Highlight text={c.name} terms={tokens} />
+                  <span className="text-[11px] text-muted-foreground">مدينة</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => go(q)}
+            className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-right text-xs font-bold text-primary hover:bg-muted"
+          >
+            <Search className="size-3.5" />
+            عرض كل النتائج عن «{debounced}»
+          </button>
+
+          {!suggestQuery.isFetching && !hasSuggestions ? (
+            <p className="px-3 pb-3 text-[11px] text-muted-foreground">
+              لا توجد اقتراحات مطابقة، جرّب كلمة أخرى.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+
+
       {cityOpen ? (
         <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-raised">
           <div className="border-b border-border p-2">
