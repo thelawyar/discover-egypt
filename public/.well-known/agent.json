@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/agentcommunicationprotocol/agent-card/main/schema.json",
+  "name": "اكتشف مدينتك (Discover Your Town)",
+  "slug": "discover-your-town",
+  "description": "دليل تجاري شامل للمدن المصرية: البحث عن الأنشطة التجارية بالاسم أو المجال أو المنتجات أو المدينة، وقراءة تفاصيل كل نشاط.",
+  "description_en": "Comprehensive business directory for Egyptian cities. Search businesses by name, category, products, or city and read full business profiles.",
+  "url": "/",
+  "documentation": "/llms.txt",
+  "languages": ["ar", "en"],
+  "capabilities": {
+    "markdown": {
+      "supported": true,
+      "how": "Append .md to any public URL or send `Accept: text/markdown`.",
+      "endpoint": "/api/public/md?path=/"
+    },
+    "mcp": {
+      "supported": true,
+      "endpoint": "/mcp",
+      "transport": "streamable-http",
+      "auth": "oauth2.1",
+      "metadata": "/.well-known/oauth-protected-resource"
+    },
+    "skills": {
+      "supported": true,
+      "manifest": "/.well-known/skills.json"
+    },
+    "commerce": {
+      "supported": false,
+      "note": "Directory only — leads are handled via phone, WhatsApp, and the contact form on each business page."
+    }
+  },
+  "contact": {
+    "signup": "/auth",
+    "support": "/"
+  }
+}
