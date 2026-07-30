@@ -36,6 +36,24 @@ export function GalleryEditor({
   const [uploading, setUploading] = useState(false);
   // Files waiting to be cropped one-by-one before upload.
   const [queue, setQueue] = useState<File[]>([]);
+  // Gallery image being previewed before it becomes the cover photo.
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [savingCover, setSavingCover] = useState(false);
+
+  const { data: cover, refetch: refetchCover } = useQuery({
+    queryKey: ["business-cover", businessId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("cover_image_url")
+        .eq("id", businessId)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.cover_image_url ?? null;
+    },
+  });
+  const refreshCover = () => refetchCover();
+
 
   const { data: images } = useQuery({
     queryKey: ["business-images", businessId],
