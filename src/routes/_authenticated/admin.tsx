@@ -35,6 +35,7 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
+  const [q, setQ] = useState("");
   const [view, setView] = useState<
     "moderation" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
   >("moderation");
@@ -54,6 +55,16 @@ function AdminPage() {
       return data;
     },
   });
+
+  // Simple client-side filter so long lists stay usable on mobile.
+  const term = q.trim().toLowerCase();
+  const filtered = (data ?? []).filter((b) => {
+    if (!term) return true;
+    const city = (b.cities as { name: string } | null)?.name ?? "";
+    const cat = (b.categories as { name: string } | null)?.name ?? "";
+    return `${b.name} ${city} ${cat}`.toLowerCase().includes(term);
+  });
+
 
   const update = useMutation({
     mutationFn: async (payload: {
@@ -146,19 +157,19 @@ function AdminPage() {
           </Button>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2 border-b border-border pb-3">
+        <div className="mt-5 -mx-4 flex gap-2 overflow-x-auto border-b border-border px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
           {([["moderation", "الأنشطة"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["ads", "الإعلانات"], ["searches", "كلمات البحث"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`rounded-full px-4 py-1.5 text-xs font-bold ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold ${
                 view === v ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted"
               }`}
             >
               {label}
             </button>
           ))}
-          <div className="ms-auto flex gap-2">
+          <div className="ms-auto flex shrink-0 gap-2">
             <Button asChild variant="outline" size="sm" className="rounded-full">
               <Link to="/admin-cities">المحافظات والمدن</Link>
             </Button>
@@ -175,12 +186,12 @@ function AdminPage() {
         {view === "searches" ? <AdminSearchTerms /> : null}
 
 
-        <div className={view !== "moderation" ? "hidden" : "mt-5 flex gap-2"}>
+        <div className={view !== "moderation" ? "hidden" : "mt-5 -mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0"}>
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`rounded-full px-4 py-1.5 text-xs font-medium ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-medium ${
                 tab === t
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-primary-soft"
@@ -191,15 +202,25 @@ function AdminPage() {
           ))}
         </div>
 
+        {view === "moderation" ? (
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="ابحث باسم النشاط أو المدينة أو التصنيف"
+            className="mt-4 w-full rounded-full border border-border bg-card px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-primary"
+          />
+        ) : null}
+
         {view !== "moderation" ? null : isLoading ? (
           <p className="py-20 text-center text-sm text-muted-foreground">جارٍ التحميل...</p>
-        ) : !data?.length ? (
+        ) : !filtered.length ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
-            لا توجد أنشطة في هذه القائمة.
+            لا توجد أنشطة مطابقة في هذه القائمة.
           </p>
         ) : (
           <div className="mt-6 space-y-3">
-            {data.map((b) => (
+            {filtered.map((b) => (
+
               <div
                 key={b.id}
                 className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-card"

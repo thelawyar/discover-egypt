@@ -8,6 +8,9 @@ import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { ContactNotifications } from "@/components/dashboard/ContactNotifications";
+import { MessagesInbox } from "@/components/dashboard/MessagesInbox";
+import { NotificationSettings } from "@/components/dashboard/NotificationSettings";
+import { useBusinessNotifications } from "@/hooks/useBusinessNotifications";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -31,6 +34,9 @@ const statusStyles: Record<string, string> = {
 function Dashboard() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  // Live toast + system notification for new messages/orders.
+  useBusinessNotifications();
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-businesses", user?.id],
@@ -88,9 +94,14 @@ function Dashboard() {
           </Button>
         </div>
 
-        <div className="mt-6">
-          <ContactNotifications />
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <MessagesInbox />
+          <div className="space-y-4">
+            <ContactNotifications />
+            <NotificationSettings />
+          </div>
         </div>
+
 
         {isLoading ? (
           <p className="py-20 text-center text-sm text-muted-foreground">جارٍ التحميل...</p>

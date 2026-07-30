@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { Button } from "@/components/ui/button";
+import { MessageForm } from "@/components/MessageForm";
 
 /** Where the visit came from, derived from the referrer. */
 function visitSource(): string {
@@ -377,6 +378,7 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
           </div>
 
           <aside className="space-y-4">
+            <MessageForm businessId={data.id} businessName={data.name} />
             <BusinessPageAds />
             {contacts.length ? (
               <div className="rounded-2xl border p-4" style={cardStyle}>

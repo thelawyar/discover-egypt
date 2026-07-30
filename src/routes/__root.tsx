@@ -16,6 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandingStyles } from "@/hooks/useSiteSettings";
 import { NotFoundPage } from "@/components/NotFoundPage";
+import { ThemeProvider, themeBootstrapScript } from "@/hooks/useTheme";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { registerServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
   return <NotFoundPage />;
@@ -115,9 +118,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body>
         {children}
@@ -141,15 +145,24 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  // Offline caching (published site only — never in dev/preview).
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrandingStyles />
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="top-center" dir="rtl" richColors />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrandingStyles />
+          <OfflineBanner />
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <Toaster position="top-center" dir="rtl" richColors />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
 
