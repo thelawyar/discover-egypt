@@ -1,0 +1,1 @@
+ALTER TABLE public.businesses ALTER COLUMN username SET DEFAULT public.random_username();

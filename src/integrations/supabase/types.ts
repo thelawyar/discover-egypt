@@ -254,7 +254,7 @@ export type Database = {
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           updated_at?: string
-          username: string
+          username?: string
           view_count?: number
           website?: string | null
           whatsapp?: string | null
