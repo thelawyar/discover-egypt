@@ -734,6 +734,7 @@ function BusinessForm() {
               <GalleryEditor businessId={id} userId={user?.id ?? ""} />
               <HoursEditor businessId={id} />
               <BusinessStats businessId={id} />
+              <ManagersEditor businessId={id} />
             </>
           ) : (
             <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
