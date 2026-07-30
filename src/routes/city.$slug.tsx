@@ -37,6 +37,7 @@ export const Route = createFileRoute("/city/$slug")({
       origin,
       name: data.city.name,
       gov: data.city.governorate_name,
+      govSlug: data.city.governorate_slug ?? null,
       total: data.total,
       page: data.page,
       pages: Math.max(1, Math.ceil(data.total / data.perPage)),
