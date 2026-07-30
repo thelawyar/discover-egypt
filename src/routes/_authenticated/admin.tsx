@@ -72,6 +72,32 @@ function AdminPage() {
     },
     onError: () => toast.error("تعذّر التحديث"),
   });
+  // Reassign a business to another registered user by email.
+  const setOwner = useMutation({
+    mutationFn: async (payload: { id: string; email: string }) => {
+      const { error } = await supabase.rpc("admin_set_business_owner", {
+        _business_id: payload.id,
+        _email: payload.email,
+      });
+      if (error) {
+        if (error.message.includes("user_not_found"))
+          throw new Error("لا يوجد مستخدم مسجّل بهذا البريد");
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("تم تغيير مالك النشاط");
+      queryClient.invalidateQueries({ queryKey: ["admin-businesses"] });
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "تعذّر تغيير المالك"),
+  });
+
+  function setOwnerFor(id: string) {
+    const email = prompt("بريد المالك الجديد (مستخدم مسجّل):")?.trim();
+    if (email) setOwner.mutate({ id, email });
+  }
+
 
   if (loading) {
     return (
