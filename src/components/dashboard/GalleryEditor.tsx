@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
@@ -40,7 +40,13 @@ export function GalleryEditor({
       if (!list.length) throw new Error("الحد الأقصى 12 صورة في المعرض");
       let order = current;
       for (const file of list) {
-        const url = await uploadBusinessImage(file, userId, { maxWidth: 1200 });
+        // Square crop + compression keeps the gallery grid tidy and fast to load.
+        const url = await uploadBusinessImage(file, userId, {
+          maxWidth: 1200,
+          crop: true,
+          ratio: 1,
+          quality: 0.82,
+        });
         const { error } = await supabase
           .from("business_images")
           .insert({ business_id: businessId, url, sort_order: order++ });
@@ -53,6 +59,23 @@ export function GalleryEditor({
     } finally {
       setUploading(false);
     }
+  }
+
+  /** Move an image one slot and renumber sort_order sequentially. */
+  async function move(index: number, dir: -1 | 1) {
+    const list = [...(images ?? [])];
+    const target = index + dir;
+    if (target < 0 || target >= list.length) return;
+    [list[index], list[target]] = [list[target], list[index]];
+    const updates = list.map((img, i) =>
+      supabase.from("business_images").update({ sort_order: i }).eq("id", img.id),
+    );
+    const results = await Promise.all(updates);
+    if (results.some((r) => r.error)) {
+      toast.error("تعذّر إعادة الترتيب");
+      return;
+    }
+    await refresh();
   }
 
   async function remove(id: string) {
@@ -69,13 +92,14 @@ export function GalleryEditor({
       <div>
         <h2 className="text-sm font-bold">معرض الصور</h2>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          حتى 12 صورة تظهر داخل صفحة النشاط.
+          حتى 12 صورة تظهر داخل صفحة النشاط، يتم قصّها مربعة وضغطها تلقائياً، ويمكنك
+          إعادة ترتيبها بالأسهم.
         </p>
       </div>
 
       {images?.length ? (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {images.map((img) => (
+          {images.map((img, index) => (
             <div
               key={img.id}
               className="relative overflow-hidden rounded-xl border border-border"
@@ -93,6 +117,26 @@ export function GalleryEditor({
               >
                 <X className="size-3.5" />
               </button>
+              <div className="absolute inset-x-1 bottom-1 flex justify-between">
+                <button
+                  type="button"
+                  aria-label="تحريك لليمين"
+                  onClick={() => move(index, -1)}
+                  disabled={index === 0}
+                  className="rounded-full bg-background/90 p-1 disabled:opacity-40"
+                >
+                  <ChevronRight className="size-3.5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="تحريك لليسار"
+                  onClick={() => move(index, 1)}
+                  disabled={index === images.length - 1}
+                  className="rounded-full bg-background/90 p-1 disabled:opacity-40"
+                >
+                  <ChevronLeft className="size-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
