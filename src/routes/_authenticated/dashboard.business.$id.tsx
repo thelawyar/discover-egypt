@@ -399,6 +399,49 @@ function BusinessForm() {
                   {USERNAME_HINT} يمكنك استخدام هذا الرابط في كروت العمل وصفحات
                   التواصل الاجتماعي.
                 </p>
+                {existing?.username ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      asChild
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full"
+                    >
+                      <a
+                        href={`/${existing.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="size-3.5" /> فتح الصفحة
+                      </a>
+                    </Button>
+                    <QrCodeButton
+                      url={`${siteOrigin}/${existing.username}`}
+                      fileName={existing.username}
+                    />
+                  </div>
+                ) : null}
+                {history?.length ? (
+                  <div className="rounded-lg bg-muted p-2.5">
+                    <p className="text-[11px] font-bold">
+                      سجل الروابط السابقة (تحوّل تلقائياً 301 للرابط الحالي)
+                    </p>
+                    <ul className="mt-1 space-y-0.5">
+                      {history.map((h) => (
+                        <li
+                          key={h.id}
+                          className="flex justify-between gap-2 text-[11px] text-muted-foreground"
+                        >
+                          <span dir="ltr">/{h.username}</span>
+                          <span>
+                            {new Date(h.created_at).toLocaleDateString("ar-EG")}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
