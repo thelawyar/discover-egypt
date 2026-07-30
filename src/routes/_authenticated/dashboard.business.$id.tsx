@@ -164,6 +164,23 @@ function BusinessForm() {
     },
   });
 
+  const siteOrigin =
+    typeof window !== "undefined" ? window.location.origin : "https://durtown.com";
+
+  const { data: history } = useQuery({
+    queryKey: ["username-history", id],
+    enabled: !isNew,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("business_username_history")
+        .select("id,username,created_at")
+        .eq("business_id", id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (!existing) return;
     setForm({
