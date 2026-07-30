@@ -31,18 +31,46 @@ export function SearchBar({
   const [cityOpen, setCityOpen] = useState(false);
   const [cityFilter, setCityFilter] = useState("");
   const [govId, setGovId] = useState<string | null>(null);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [debounced, setDebounced] = useState(initialQuery);
   const wrapRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => setQ(initialQuery), [initialQuery]);
   useEffect(() => setCityId(initialCity), [initialCity]);
 
+  // Debounce keystrokes before asking the server for suggestions.
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(q.trim()), 220);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const suggestQuery = useQuery({
+    queryKey: ["suggest", debounced],
+    enabled: suggestOpen && debounced.length >= 2,
+    staleTime: 1000 * 60,
+    queryFn: () => suggestSearch({ data: { q: debounced } }),
+  });
+
+  const suggestions = suggestQuery.data;
+  const tokens = searchTokens(debounced);
+  const hasSuggestions = Boolean(
+    suggestions &&
+      (suggestions.businesses.length ||
+        suggestions.categories.length ||
+        suggestions.cities.length),
+  );
+
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (!wrapRef.current?.contains(e.target as Node)) setCityOpen(false);
+      if (!wrapRef.current?.contains(e.target as Node)) {
+        setCityOpen(false);
+        setSuggestOpen(false);
+      }
     }
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
+
 
   const selectedCity = cities.find((c) => c.slug === cityId || c.id === cityId);
   const selectedGov = governorates.find((g) => g.id === govId) ?? null;
