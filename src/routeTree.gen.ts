@@ -29,6 +29,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_authenticated/dashboard.business.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -136,6 +137,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardBusinessIdRoute =
   AuthenticatedDashboardBusinessIdRouteImport.update({
     id: '/dashboard/business/$id',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
     | '/dashboard/'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
     | '/dashboard'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
     | '/_authenticated/dashboard/'
@@ -295,6 +307,7 @@ export interface RootRouteChildren {
   BusinessIdRoute: typeof BusinessIdRoute
   CitySlugRoute: typeof CitySlugRoute
   SCodeRoute: typeof SCodeRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicMdRoute: typeof ApiPublicMdRoute
 }
@@ -441,6 +454,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/business/$id': {
       id: '/_authenticated/dashboard/business/$id'
       path: '/dashboard/business/$id'
@@ -487,6 +507,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessIdRoute: BusinessIdRoute,
   CitySlugRoute: CitySlugRoute,
   SCodeRoute: SCodeRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicMdRoute: ApiPublicMdRoute,
 }
