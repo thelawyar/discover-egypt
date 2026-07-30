@@ -185,6 +185,10 @@ export const getBusiness = createServerFn({ method: "GET" })
 
     return {
       ...toCard(r),
+      logo_url: (r.logo_url as string) ?? null,
+      theme_primary: (r.theme_primary as string) ?? null,
+      theme_bg: (r.theme_bg as string) ?? null,
+      theme_style: (r.theme_style as string) ?? null,
       email: (r.email as string) ?? null,
       website: (r.website as string) ?? null,
       facebook: (r.facebook as string) ?? null,
