@@ -1,12 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Check, Copy, Link2, Loader2, LocateFixed, SearchX, X } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Link2,
+  Loader2,
+  LocateFixed,
+  RefreshCw,
+  SearchX,
+  X,
+} from "lucide-react";
 import { detectLocation } from "@/lib/geo-locate";
-import type { City, Governorate } from "@/lib/directory-types";
-import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
+import type { Category, City, Governorate } from "@/lib/directory-types";
+import { getTaxonomy, searchBusinesses, suggestSearch } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
@@ -131,13 +140,8 @@ export const Route = createFileRoute("/search")({
     return { origin, pages: Math.max(1, Math.ceil(results.total / 12)) };
   },
   component: SearchPage,
-  errorComponent: () => (
-    <PageShell>
-      <div className="mx-auto max-w-6xl px-4 py-20 text-center text-muted-foreground">
-        تعذّر تحميل نتائج البحث. حاول مرة أخرى.
-      </div>
-    </PageShell>
-  ),
+  errorComponent: ({ error }) => <ResultsError message={error.message} />,
+
 });
 
 function SearchPage() {
@@ -178,7 +182,14 @@ function SearchPage() {
             initialQuery={params.q}
             initialCity={params.city}
             size="compact"
+            onLiveChange={(term) =>
+              navigate({
+                replace: true,
+                search: (p: SearchParams) => ({ ...p, q: term, page: 1 }),
+              })
+            }
           />
+
         </div>
       </div>
 
@@ -290,17 +301,15 @@ function SearchPage() {
         />
 
         {results.items.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-24 text-center">
-            <SearchX className="size-10 text-muted-foreground" />
-            <p className="font-semibold">لا توجد نتائج مطابقة</p>
-            <p className="text-sm text-muted-foreground">
-              جرّب كلمات بحث مختلفة أو وسّع نطاق المدينة والتصنيف.
-            </p>
-            <Button asChild variant="outline" size="sm" className="mt-2 rounded-full">
-              <Link to="/">العودة للرئيسية</Link>
-            </Button>
-          </div>
+          <NoResults
+            params={params}
+            taxonomy={taxonomy}
+            onApply={(patch) =>
+              navigate({ search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }) })
+            }
+          />
         ) : (
+
           <ResultsWithAds
             items={results.items}
             targeting={{
@@ -501,5 +510,169 @@ function ProductFilter({
       placeholder="منتج أو خدمة"
       className="h-9 w-36 rounded-full border border-border bg-card px-3 text-xs outline-none focus:ring-2 focus:ring-primary"
     />
+  );
+}
+
+/** Loader/network failure: explain and let the user retry without reloading. */
+function ResultsError({ message }: { message?: string }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <PageShell>
+      <div className="mx-auto flex max-w-md flex-col items-center gap-3 px-4 py-24 text-center">
+        <RefreshCw className="size-9 text-muted-foreground" />
+        <p className="font-semibold">تعذّر تحميل نتائج البحث</p>
+        <p className="text-xs text-muted-foreground">
+          {message || "تحقق من اتصالك بالإنترنت ثم أعد المحاولة."}
+        </p>
+        <Button
+          size="sm"
+          className="mt-2 rounded-full"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await router.invalidate();
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
+          إعادة المحاولة
+        </Button>
+        <Button asChild variant="outline" size="sm" className="rounded-full">
+          <Link to="/">العودة للرئيسية</Link>
+        </Button>
+      </div>
+    </PageShell>
+  );
+}
+
+/** Empty state with query fixes and alternative filters instead of a dead end. */
+function NoResults({
+  params,
+  taxonomy,
+  onApply,
+}: {
+  params: SearchParams;
+  taxonomy: { cities: City[]; governorates: Governorate[]; categories: Category[] };
+  onApply: (patch: Partial<SearchParams>) => void;
+}) {
+  const term = params.q.trim();
+  const words = term.split(/\s+/).filter(Boolean);
+
+  const suggest = useQuery({
+    queryKey: ["suggest", term],
+    enabled: term.length >= 2,
+    staleTime: 1000 * 60,
+    queryFn: () => suggestSearch({ data: { q: term } }),
+  });
+
+  const relaxed: { label: string; patch: Partial<SearchParams> }[] = [];
+  if (words.length > 1)
+    relaxed.push({
+      label: `ابحث عن «${words[0]}» فقط`,
+      patch: { q: words[0] },
+    });
+  if (params.prod)
+    relaxed.push({ label: "تجاهل فلتر المنتج", patch: { prod: "" } });
+  if (params.cat)
+    relaxed.push({ label: "كل التصنيفات", patch: { cat: "" } });
+  if (params.city)
+    relaxed.push({ label: "كل مدن المحافظة", patch: { city: "" } });
+  if (params.gov)
+    relaxed.push({ label: "كل المحافظات", patch: { gov: "", city: "" } });
+  if (term) relaxed.push({ label: "امسح كلمة البحث", patch: { q: "" } });
+
+  const altCats = (suggest.data?.categories ?? []).filter(
+    (c) => c.slug !== params.cat,
+  );
+  const altCities = (suggest.data?.cities ?? []).filter(
+    (c) => c.slug !== params.city,
+  );
+  const popularCats = taxonomy.categories.slice(0, 8);
+
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 py-16 text-center">
+      <SearchX className="size-10 text-muted-foreground" />
+      <div>
+        <p className="font-semibold">
+          {term ? `لا توجد نتائج مطابقة لـ «${term}»` : "لا توجد نتائج مطابقة"}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          راجع الإملاء أو استخدم كلمات أعم، أو جرّب أحد الاقتراحات التالية.
+        </p>
+      </div>
+
+      {relaxed.length ? (
+        <div className="w-full">
+          <p className="mb-2 text-xs font-bold text-muted-foreground">وسّع نطاق البحث</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {relaxed.map((r) => (
+              <button
+                key={r.label}
+                type="button"
+                onClick={() => onApply(r.patch)}
+                className="rounded-full border border-border bg-card px-3 py-1.5 text-xs hover:border-primary hover:text-primary"
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {altCats.length || altCities.length ? (
+        <div className="w-full">
+          <p className="mb-2 text-xs font-bold text-muted-foreground">
+            ربما تقصد
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {altCats.map((c) => (
+              <button
+                key={`cat-${c.slug}`}
+                type="button"
+                onClick={() => onApply({ q: "", cat: c.slug })}
+                className="rounded-full bg-primary-soft px-3 py-1.5 text-xs text-accent-foreground"
+              >
+                تصنيف: {c.name}
+              </button>
+            ))}
+            {altCities.map((c) => (
+              <button
+                key={`city-${c.slug}`}
+                type="button"
+                onClick={() => onApply({ q: "", city: c.slug })}
+                className="rounded-full bg-primary-soft px-3 py-1.5 text-xs text-accent-foreground"
+              >
+                مدينة: {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="w-full">
+        <p className="mb-2 text-xs font-bold text-muted-foreground">تصنيفات شائعة</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {popularCats.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onApply({ q: "", cat: c.slug })}
+              className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Button asChild variant="outline" size="sm" className="rounded-full">
+        <Link to="/">العودة للرئيسية</Link>
+      </Button>
+    </div>
   );
 }
