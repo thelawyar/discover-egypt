@@ -235,6 +235,13 @@ function SearchPage() {
   const showLast =
     lastSearch && !sameSearchState(lastSearch, params as SearchState);
 
+  /** Full reset: forget the stored search and go back to the (search-only) homepage. */
+  function resetSearch() {
+    clearLastSearch();
+    setLastSearch(null);
+    navigate({ to: "/" });
+  }
+
   return (
     <PageShell>
       <div className="border-b border-border">
@@ -245,13 +252,16 @@ function SearchPage() {
             initialQuery={params.q}
             initialCity={params.city}
             size="compact"
+            onClear={resetSearch}
             onLiveChange={(term) =>
+              // Push (not replace) so the browser back button restores the
+              // previous term together with its filters and sort order.
               navigate({
-                replace: true,
                 search: (p: SearchParams) => ({ ...p, q: term, page: 1 }),
               })
             }
           />
+
 
           {showLast ? (
             <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
