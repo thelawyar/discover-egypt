@@ -11,7 +11,10 @@ export type SiteSettings = {
   adsense_enabled: boolean;
   adsense_client: string | null;
   adsense_slot: string | null;
+  adsense_slot_search: string | null;
+  adsense_slot_business: string | null;
   adsense_every: number;
+  ad_positions: string;
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -23,7 +26,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   adsense_enabled: false,
   adsense_client: null,
   adsense_slot: null,
+  adsense_slot_search: null,
+  adsense_slot_business: null,
   adsense_every: 4,
+  ad_positions: "3,6",
 };
 
 export const siteSettingsQuery = {
@@ -33,7 +39,7 @@ export const siteSettingsQuery = {
     const { data, error } = await supabase
       .from("site_settings")
       .select(
-        "site_name,tagline,logo_url,primary_color,accent_color,adsense_enabled,adsense_client,adsense_slot,adsense_every",
+        "site_name,tagline,logo_url,primary_color,accent_color,adsense_enabled,adsense_client,adsense_slot,adsense_slot_search,adsense_slot_business,adsense_every,ad_positions",
       )
       .eq("id", "default")
       .maybeSingle();

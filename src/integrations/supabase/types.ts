@@ -482,10 +482,13 @@ export type Database = {
       site_settings: {
         Row: {
           accent_color: string
+          ad_positions: string
           adsense_client: string | null
           adsense_enabled: boolean
           adsense_every: number
           adsense_slot: string | null
+          adsense_slot_business: string | null
+          adsense_slot_search: string | null
           id: string
           logo_url: string | null
           primary_color: string
@@ -495,10 +498,13 @@ export type Database = {
         }
         Insert: {
           accent_color?: string
+          ad_positions?: string
           adsense_client?: string | null
           adsense_enabled?: boolean
           adsense_every?: number
           adsense_slot?: string | null
+          adsense_slot_business?: string | null
+          adsense_slot_search?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string
@@ -508,10 +514,13 @@ export type Database = {
         }
         Update: {
           accent_color?: string
+          ad_positions?: string
           adsense_client?: string | null
           adsense_enabled?: boolean
           adsense_every?: number
           adsense_slot?: string | null
+          adsense_slot_business?: string | null
+          adsense_slot_search?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string
@@ -575,6 +584,8 @@ export type Database = {
         Returns: boolean
       }
       make_slug: { Args: { v: string }; Returns: string }
+      track_ad_click: { Args: { _ad_id: string }; Returns: undefined }
+      track_ad_impression: { Args: { _ad_id: string }; Returns: undefined }
     }
     Enums: {
       ad_placement: "home" | "search" | "business"
