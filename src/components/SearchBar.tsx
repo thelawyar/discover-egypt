@@ -153,7 +153,16 @@ export function SearchBar({
         <input
           value={q}
           autoFocus={autoFocus}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setSuggestOpen(true);
+            setCityOpen(false);
+          }}
+          onFocus={() => setSuggestOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setSuggestOpen(false);
+          }}
+          autoComplete="off"
           maxLength={100}
           placeholder="ابحث عن نشاط، مجال، أو منتج..."
           aria-label="ابحث في الدليل"
@@ -162,6 +171,7 @@ export function SearchBar({
             size === "hero" ? "text-base" : "text-sm",
           )}
         />
+
         {q ? (
           <button
             type="button"
