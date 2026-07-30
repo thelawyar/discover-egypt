@@ -18,6 +18,7 @@ import { detectLocation } from "@/lib/geo-locate";
 import type { Category, City, Governorate } from "@/lib/directory-types";
 import { getTaxonomy, searchBusinesses, suggestSearch } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
+import { ogImageMeta } from "@/lib/og";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { CityPicker } from "@/components/CityPicker";
@@ -91,7 +92,7 @@ export const Route = createFileRoute("/search")({
   loaderDeps: ({ search }) => search,
   head: ({ match, loaderData }) => {
     const ld = loaderData as unknown as
-      | { origin: string; pages: number; total: number; labels: { gov: string | null; city: string | null; cat: string | null } }
+      | { origin: string; pages: number; total: number; image: string | null; labels: { gov: string | null; city: string | null; cat: string | null } }
       | undefined;
     const sp = match.search ?? { q: "", city: "", gov: "", cat: "", prod: "", sort: "best", page: 1 };
     const term = sp.q?.trim();
@@ -132,6 +133,19 @@ export const Route = createFileRoute("/search")({
     const origin = ld?.origin ?? "";
     const build = (p: number) => {
       const usp = new URLSearchParams();
+      if (sp.q) usp.set("q", sp.q);
+      if (sp.city) usp.set("city", sp.city);
+      if (sp.gov) usp.set("gov", sp.gov);
+      if (sp.cat) usp.set("cat", sp.cat);
+      if (sp.prod) usp.set("prod", sp.prod);
+      if (sp.sort && sp.sort !== "best") usp.set("sort", sp.sort);
+      if (p > 1) usp.set("page", String(p));
+      const qs = usp.toString();
+      return `${origin}/search${qs ? `?${qs}` : ""}`;
+    };
+    /** Canonical drops the free-text term so filter pages stay the indexable copy. */
+    const canonicalBuild = (p: number) => {
+      const usp = new URLSearchParams();
       if (sp.city) usp.set("city", sp.city);
       if (sp.gov) usp.set("gov", sp.gov);
       if (sp.cat) usp.set("cat", sp.cat);
@@ -140,15 +154,15 @@ export const Route = createFileRoute("/search")({
       return `${origin}/search${qs ? `?${qs}` : ""}`;
     };
 
-    const canonical = build(page);
+    const canonical = canonicalBuild(page);
     // Free-text queries stay out of the index; filtered/browsable pages are indexable.
     const indexable = !term;
 
     const links: Record<string, string>[] = [{ rel: "canonical", href: canonical }];
-    if (indexable) {
-      if (page > 1) links.push({ rel: "prev", href: build(page - 1) });
-      if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
-    }
+    // Paging hints always help crawlers understand the sequence, indexable or not.
+    if (page > 1) links.push({ rel: "prev", href: build(page - 1) });
+    if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
+
 
     // Breadcrumb trail: home › governorate › city › category, as selected.
     const crumbs: { name: string; item: string }[] = [
@@ -179,15 +193,21 @@ export const Route = createFileRoute("/search")({
       })),
     };
 
+    const shareTitle = title.replace(" | اكتشف مدينتك", "");
     return {
       meta: [
         { title },
         { name: "description", content: desc.slice(0, 300) },
-        { property: "og:title", content: title },
+        { property: "og:title", content: shareTitle },
         { property: "og:description", content: desc.slice(0, 300) },
-        { property: "og:url", content: canonical },
-        { name: "twitter:title", content: title },
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "اكتشف مدينتك" },
+        { property: "og:locale", content: "ar_EG" },
+        { property: "og:url", content: build(page) },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: shareTitle },
         { name: "twitter:description", content: desc.slice(0, 300) },
+        ...ogImageMeta(ld?.image ?? null, origin, shareTitle),
         {
           name: "robots",
           content: indexable
@@ -195,6 +215,7 @@ export const Route = createFileRoute("/search")({
             : "noindex, follow",
         },
       ],
+
       links,
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
@@ -226,6 +247,7 @@ export const Route = createFileRoute("/search")({
       origin,
       pages: Math.max(1, Math.ceil(results.total / 12)),
       total: results.total,
+      image: results.items.find((b) => b.cover_image_url)?.cover_image_url ?? null,
       labels: {
         gov: taxonomy.governorates.find((g) => g.slug === deps.gov)?.name ?? null,
         city: taxonomy.cities.find((c) => c.slug === deps.city)?.name ?? null,
