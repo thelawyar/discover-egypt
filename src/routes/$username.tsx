@@ -47,6 +47,12 @@ export const Route = createFileRoute("/$username")({
       name: data.name,
       description: data.description,
       image: data.cover_image_url ?? data.images[0]?.url ?? data.logo_url ?? null,
+      gallery: [
+        data.cover_image_url,
+        data.logo_url,
+        ...data.images.map((i) => i.url),
+      ].filter((u): u is string => Boolean(u)),
+      whatsapp: data.whatsapp ?? null,
       address: data.address,
       phone: data.phone,
       website: data.website,
