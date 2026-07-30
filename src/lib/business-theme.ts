@@ -110,19 +110,61 @@ export function resolveTheme(input: BusinessThemeInput | null | undefined): Reso
     dark: { primary: "#60a5fa", bg: "#0f172a" },
   };
 
-  const primary = clean(input?.theme_primary, defaults[style].primary);
+  const contrast = Boolean(input?.theme_contrast);
+  const primaryRaw = clean(input?.theme_primary, defaults[style].primary);
   const bg = clean(input?.theme_bg, defaults[style].bg);
   const dark = isDarkColor(bg);
 
+  // High-contrast mode nudges the accent away from the background so text stays readable.
+  const primary = contrast
+    ? mix(primaryRaw, dark ? "#ffffff" : "#000000", 0.18)
+    : primaryRaw;
+
+  const fontRaw = (input?.theme_font ?? "cairo") as ThemeFontId;
+  const font: ThemeFontId = THEME_FONTS.some((f) => f.id === fontRaw)
+    ? fontRaw
+    : "cairo";
+
+  const buttonRaw = (input?.theme_button ?? "rounded") as ThemeButtonId;
+  const button: ThemeButtonId = THEME_BUTTONS.some((b) => b.id === buttonRaw)
+    ? buttonRaw
+    : "rounded";
+
+  const radius: Record<ThemeButtonId, string> = {
+    rounded: "0.75rem",
+    pill: "9999px",
+    square: "0.25rem",
+    outline: "0.75rem",
+  };
+
   return {
     style,
+    font,
+    fontFamily: THEME_FONTS.find((f) => f.id === font)!.family,
+    button,
+    buttonRadius: radius[button],
+    buttonOutlined: button === "outline",
+    contrast,
     primary,
+    onPrimary: isDarkColor(primary) ? "#ffffff" : "#0b0b0c",
     bg,
-    fg: dark ? "#f1f5f9" : "#131417",
+    fg: dark ? "#f8fafc" : contrast ? "#0a0a0b" : "#131417",
     card: dark ? mix(bg, "#ffffff", 0.08) : mix(bg, "#ffffff", 0.6),
-    border: dark ? mix(bg, "#ffffff", 0.16) : mix(bg, "#000000", 0.1),
-    muted: dark ? mix(bg, "#ffffff", 0.55) : mix(bg, "#000000", 0.45),
-    soft: mix(primary, bg, 0.86),
+    border: contrast
+      ? dark
+        ? mix(bg, "#ffffff", 0.34)
+        : mix(bg, "#000000", 0.28)
+      : dark
+        ? mix(bg, "#ffffff", 0.16)
+        : mix(bg, "#000000", 0.1),
+    muted: contrast
+      ? dark
+        ? mix(bg, "#ffffff", 0.78)
+        : mix(bg, "#000000", 0.68)
+      : dark
+        ? mix(bg, "#ffffff", 0.55)
+        : mix(bg, "#000000", 0.45),
+    soft: mix(primary, bg, contrast ? 0.78 : 0.86),
   };
 }
 
@@ -130,13 +172,19 @@ export function resolveTheme(input: BusinessThemeInput | null | undefined): Reso
 export function themeVars(theme: ResolvedTheme): CSSProperties {
   return {
     "--biz-primary": theme.primary,
+    "--biz-on-primary": theme.onPrimary,
     "--biz-bg": theme.bg,
     "--biz-fg": theme.fg,
     "--biz-card": theme.card,
     "--biz-border": theme.border,
     "--biz-muted": theme.muted,
     "--biz-soft": theme.soft,
+    "--biz-btn-radius": theme.buttonRadius,
+    fontFamily: theme.fontFamily,
     backgroundColor: "var(--biz-bg)",
     color: "var(--biz-fg)",
+  } as CSSProperties;
+}
+
   } as CSSProperties;
 }
