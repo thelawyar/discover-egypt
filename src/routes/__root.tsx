@@ -16,6 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { BrandingStyles } from "@/hooks/useSiteSettings";
 import { NotFoundPage } from "@/components/NotFoundPage";
+import { ThemeProvider, themeBootstrapScript } from "@/hooks/useTheme";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { registerServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
   return <NotFoundPage />;
