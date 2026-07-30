@@ -8,6 +8,9 @@ import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
 import { ContactNotifications } from "@/components/dashboard/ContactNotifications";
+import { MessagesInbox } from "@/components/dashboard/MessagesInbox";
+import { NotificationSettings } from "@/components/dashboard/NotificationSettings";
+import { useBusinessNotifications } from "@/hooks/useBusinessNotifications";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
