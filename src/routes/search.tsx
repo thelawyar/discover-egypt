@@ -18,6 +18,7 @@ import { detectLocation } from "@/lib/geo-locate";
 import type { Category, City, Governorate } from "@/lib/directory-types";
 import { getTaxonomy, searchBusinesses, suggestSearch } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
+import { ogImageMeta } from "@/lib/og";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { CityPicker } from "@/components/CityPicker";
@@ -91,7 +92,7 @@ export const Route = createFileRoute("/search")({
   loaderDeps: ({ search }) => search,
   head: ({ match, loaderData }) => {
     const ld = loaderData as unknown as
-      | { origin: string; pages: number; total: number; labels: { gov: string | null; city: string | null; cat: string | null } }
+      | { origin: string; pages: number; total: number; image: string | null; labels: { gov: string | null; city: string | null; cat: string | null } }
       | undefined;
     const sp = match.search ?? { q: "", city: "", gov: "", cat: "", prod: "", sort: "best", page: 1 };
     const term = sp.q?.trim();
@@ -246,6 +247,7 @@ export const Route = createFileRoute("/search")({
       origin,
       pages: Math.max(1, Math.ceil(results.total / 12)),
       total: results.total,
+      image: results.items.find((b) => b.cover_image_url)?.cover_image_url ?? null,
       labels: {
         gov: taxonomy.governorates.find((g) => g.slug === deps.gov)?.name ?? null,
         city: taxonomy.cities.find((c) => c.slug === deps.city)?.name ?? null,
