@@ -341,7 +341,20 @@ function SearchPage() {
 
 
       <div className="mx-auto max-w-6xl px-4 py-6">
+        {/* Single dynamic H1 describing exactly what this filtered page lists. */}
+        <h1 className="mb-4 text-xl font-extrabold sm:text-2xl">
+          {resultsHeading({
+            q: params.q,
+            prod: params.prod,
+            page: params.page,
+            gov: taxonomy.governorates.find((g) => g.slug === normalized.gov)?.name ?? null,
+            city: taxonomy.cities.find((c) => c.slug === normalized.city)?.name ?? null,
+            cat: taxonomy.categories.find((c) => c.slug === params.cat)?.name ?? null,
+          })}
+        </h1>
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
+
           <select
             value={normalized.gov}
             onChange={(e) =>
