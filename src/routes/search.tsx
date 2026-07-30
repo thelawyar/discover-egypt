@@ -209,6 +209,19 @@ function SearchPage() {
     selectedGov?.id ?? null,
   );
 
+  // Remember the last search so returning visitors get a one-click shortcut.
+  const [lastSearch, setLastSearch] = useState<SearchState | null>(null);
+  useEffect(() => {
+    setLastSearch(readLastSearch());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    saveLastSearch(params as SearchState);
+  }, [params]);
+
+  const showLast =
+    lastSearch && !sameSearchState(lastSearch, params as SearchState);
+
   return (
     <PageShell>
       <div className="border-b border-border">
@@ -227,8 +240,34 @@ function SearchPage() {
             }
           />
 
+          {showLast ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+              <History className="size-3.5" />
+              <span>آخر بحث لك:</span>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate({ search: () => ({ ...lastSearch, page: 1 }) })
+                }
+                className="rounded-full bg-primary-soft px-3 py-1 font-medium text-accent-foreground hover:opacity-80"
+              >
+                {lastSearchLabel(lastSearch, taxonomy)}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearLastSearch();
+                  setLastSearch(null);
+                }}
+                className="underline"
+              >
+                إخفاء
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
+
 
       <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-5 flex flex-wrap items-center gap-2">
