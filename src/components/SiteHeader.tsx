@@ -105,7 +105,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4">
-          <Link to="/" className="shrink-0">
+          <Link to="/" className="min-w-0 shrink">
             <Brand />
           </Link>
           <SiteHeader />
