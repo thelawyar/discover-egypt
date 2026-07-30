@@ -4,6 +4,8 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getTaxonomy, getHomeStats } from "@/lib/directory.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { BusinessCard } from "@/components/BusinessCard";
+import { HomeFeed } from "@/components/home/HomeFeed";
+
 import { Brand, SiteHeader } from "@/components/SiteHeader";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { ogImageMeta } from "@/lib/og";
