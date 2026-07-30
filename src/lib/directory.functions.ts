@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { arNorm } from "./ar-normalize";
 import type {
   BusinessCardData,
   BusinessDetail,
@@ -114,7 +115,7 @@ export const searchBusinesses = createServerFn({ method: "GET" })
 
       // Split the query into words so "عيادة اسنان المنصورة" matches a business
       // whose words are spread across name / description / products / city.
-      const tokens = term
+      const tokens = arNorm(term)
         .replace(/[%,()]/g, " ")
         .split(/\s+/)
         .filter((t) => t.length >= 2)
@@ -123,11 +124,14 @@ export const searchBusinesses = createServerFn({ method: "GET" })
       const clausesPerToken = await Promise.all(
         tokens.map(async (token) => {
           const [cats, cities, govs] = await Promise.all([
-            supabase.from("categories").select("id").ilike("name", `%${token}%`),
-            supabase.from("cities").select("id").ilike("name", `%${token}%`),
-            supabase.from("governorates").select("id").ilike("name", `%${token}%`),
+            supabase.from("categories").select("id").ilike("name_norm", `%${token}%`),
+            supabase.from("cities").select("id").ilike("name_norm", `%${token}%`),
+            supabase
+              .from("governorates")
+              .select("id")
+              .ilike("name_norm", `%${token}%`),
           ]);
-          const parts = [`search_text.ilike.%${token}%`];
+          const parts = [`search_norm.ilike.%${token}%`];
           const catList = (cats.data ?? []).map((c) => c.id);
           const cityList = (cities.data ?? []).map((c) => c.id);
           const govList = (govs.data ?? []).map((g) => g.id);
@@ -158,7 +162,7 @@ export const searchBusinesses = createServerFn({ method: "GET" })
         if (catId) query = query.eq("category_id", catId);
         if (product.length >= 2)
           query = query.or(
-            `products.cs.{"${product}"},search_text.ilike.%${product}%`,
+            `products.cs.{"${product}"},search_norm.ilike.%${arNorm(product)}%`,
           );
 
         if (clausesPerToken.length) {
@@ -219,7 +223,8 @@ export const suggestSearch = createServerFn({ method: "GET" })
     z.object({ q: z.string().max(100) }).parse(data),
   )
   .handler(async ({ data }) => {
-    const term = data.q.trim().replace(/[%,()]/g, " ").slice(0, 60);
+    const raw = data.q.trim().replace(/[%,()]/g, " ").slice(0, 60);
+    const term = arNorm(raw);
     if (term.length < 2)
       return { businesses: [], categories: [], cities: [] };
 
@@ -231,16 +236,20 @@ export const suggestSearch = createServerFn({ method: "GET" })
         .from("businesses")
         .select("id,username,name,cover_image_url,categories(name),cities(name)")
         .eq("status", "approved")
-        .ilike("search_text", `%${term}%`)
+        .ilike("search_norm", `%${term}%`)
         .order("is_featured", { ascending: false })
         .limit(6),
       supabase
         .from("categories")
         .select("name,slug")
         .eq("status", "approved")
-        .ilike("name", `%${term}%`)
+        .ilike("name_norm", `%${term}%`)
         .limit(4),
-      supabase.from("cities").select("name,slug").ilike("name", `%${term}%`).limit(4),
+      supabase
+        .from("cities")
+        .select("name,slug")
+        .ilike("name_norm", `%${term}%`)
+        .limit(4),
     ]);
 
     return {
