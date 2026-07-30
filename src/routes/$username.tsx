@@ -7,7 +7,69 @@ import { BusinessProfile } from "@/components/BusinessProfile";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
+const SCHEMA_DAYS = [
+  "https://schema.org/Sunday",
+  "https://schema.org/Monday",
+  "https://schema.org/Tuesday",
+  "https://schema.org/Wednesday",
+  "https://schema.org/Thursday",
+  "https://schema.org/Friday",
+  "https://schema.org/Saturday",
+];
+
+/** Normalizes an Egyptian number into a dialable tel: link. */
+function telHref(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, "");
+  return `tel:${digits.startsWith("+") ? digits : digits.startsWith("0") ? `+2${digits}` : `+${digits}`}`;
+}
+
+/** ContactPoint entries for phone + WhatsApp, each with a clickable url. */
+function contactPoints(phone: string | null, whatsapp: string | null) {
+  const points: Record<string, unknown>[] = [];
+  if (phone)
+    points.push({
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      telephone: telHref(phone).replace("tel:", ""),
+      url: telHref(phone),
+      availableLanguage: ["ar", "en"],
+    });
+  if (whatsapp)
+    points.push({
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      telephone: whatsapp,
+      url: `https://wa.me/${whatsapp.replace(/[^\d]/g, "")}`,
+      availableLanguage: ["ar", "en"],
+    });
+  return points;
+}
+
+/** schema.org openingHoursSpecification from the business_hours rows. */
+function openingHours(
+  rows: { day_of_week: number; opens_at: string | null; closes_at: string | null; is_closed: boolean }[],
+) {
+  return rows
+    .filter((h) => SCHEMA_DAYS[h.day_of_week])
+    .map((h) =>
+      h.is_closed || !h.opens_at || !h.closes_at
+        ? {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: SCHEMA_DAYS[h.day_of_week],
+            opens: "00:00",
+            closes: "00:00",
+          }
+        : {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: SCHEMA_DAYS[h.day_of_week],
+            opens: h.opens_at.slice(0, 5),
+            closes: h.closes_at.slice(0, 5),
+          },
+    );
+}
+
 function businessQuery(handle: string) {
+
   return queryOptions({
     queryKey: ["business", handle],
     queryFn: () => getBusiness({ data: { id: handle } }),
