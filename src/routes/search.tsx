@@ -6,7 +6,7 @@ import { SearchX } from "lucide-react";
 import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
-import { BusinessCard } from "@/components/BusinessCard";
+import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
@@ -215,11 +215,7 @@ function SearchPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {results.items.map((b) => (
-              <BusinessCard key={b.id} item={b} />
-            ))}
-          </div>
+          <ResultsWithAds items={results.items} />
         )}
 
         {pages > 1 ? (
