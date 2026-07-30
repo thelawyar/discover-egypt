@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Plus, Star, UserCog, X } from "lucide-react";
+import { Check, History, Plus, Star, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
@@ -16,6 +16,8 @@ import { SeoStatusPanel } from "@/components/SeoStatus";
 import { AdminAds } from "@/components/AdminAds";
 import { AdminSearchTerms } from "@/components/AdminSearchTerms";
 import { AdminInsights } from "@/components/AdminInsights";
+import { ModerationLog } from "@/components/AdminModerationLog";
+
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -37,6 +39,7 @@ function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
   const [q, setQ] = useState("");
+  const [openLog, setOpenLog] = useState<string | null>(null);
   const [view, setView] = useState<
     "moderation" | "insights" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
   >("moderation");
@@ -48,7 +51,9 @@ function AdminPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("businesses")
-        .select("id,name,description,status,is_featured,cover_image_url,categories(name),cities(name)")
+        .select(
+          "id,name,description,status,is_featured,rejection_reason,created_at,updated_at,cover_image_url,categories(name),cities(name)",
+        )
         .eq("status", tab)
         .order("created_at", { ascending: false })
         .limit(100);
@@ -56,6 +61,25 @@ function AdminPage() {
       return data;
     },
   });
+
+  // Queue counters so the admin sees the review backlog at a glance.
+  const { data: counts } = useQuery({
+    queryKey: ["admin-business-counts"],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const entries = await Promise.all(
+        TABS.map(async (s) => {
+          const { count } = await supabase
+            .from("businesses")
+            .select("id", { count: "exact", head: true })
+            .eq("status", s);
+          return [s, count ?? 0] as const;
+        }),
+      );
+      return Object.fromEntries(entries) as Record<(typeof TABS)[number], number>;
+    },
+  });
+
 
   // Simple client-side filter so long lists stay usable on mobile.
   const term = q.trim().toLowerCase();
@@ -78,10 +102,13 @@ function AdminPage() {
       const { error } = await supabase.from("businesses").update(fields).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
       toast.success("تم التحديث");
       queryClient.invalidateQueries({ queryKey: ["admin-businesses"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-business-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["moderation-log", vars.id] });
     },
+
     onError: () => toast.error("تعذّر التحديث"),
   });
   // Reassign a business to another registered user by email.
@@ -200,6 +227,8 @@ function AdminPage() {
               }`}
             >
               {STATUS_LABELS[t]}
+              {counts ? ` (${counts[t].toLocaleString("ar-EG")})` : ""}
+
             </button>
           ))}
         </div>
@@ -225,79 +254,129 @@ function AdminPage() {
 
               <div
                 key={b.id}
-                className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-card"
+                className="rounded-2xl border border-border bg-card p-4 shadow-card"
               >
-                <div className="min-w-40 flex-1">
-                  <Link
-                    to="/business/$id"
-                    params={{ id: b.id }}
-                    className="font-bold hover:text-primary"
-                  >
-                    {b.name}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">
-                    {(b.categories as { name: string } | null)?.name ?? "—"} ·{" "}
-                    {(b.cities as { name: string } | null)?.name ?? "—"}
-                  </p>
-                </div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="min-w-40 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        to="/business/$id"
+                        params={{ id: b.id }}
+                        className="font-bold hover:text-primary"
+                      >
+                        {b.name}
+                      </Link>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          b.status === "approved"
+                            ? "bg-success/15 text-success"
+                            : b.status === "rejected"
+                              ? "bg-destructive/15 text-destructive"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {STATUS_LABELS[b.status]}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {(b.categories as { name: string } | null)?.name ?? "—"} ·{" "}
+                      {(b.cities as { name: string } | null)?.name ?? "—"} ·{" "}
+                      {new Date(b.created_at as string).toLocaleDateString("ar-EG")}
+                    </p>
+                    {b.status === "rejected" && b.rejection_reason ? (
+                      <p className="mt-1 text-[11px] text-destructive">
+                        سبب الرفض: {b.rejection_reason}
+                      </p>
+                    ) : null}
+                  </div>
 
-                <div className="flex flex-wrap gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full"
-                    onClick={() => setOwnerFor(b.id)}
-                  >
-                    <UserCog className="size-3.5" /> المالك
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={b.is_featured ? "default" : "outline"}
-                    className="rounded-full"
-                    onClick={() =>
-                      update.mutate({ id: b.id, is_featured: !b.is_featured })
-                    }
-                  >
-                    <Star className="size-3.5" /> مميز
-                  </Button>
-
-                  {b.status !== "approved" ? (
-                    <Button
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() =>
-                        update.mutate({
-                          id: b.id,
-                          status: "approved",
-                          rejection_reason: null,
-                        })
-                      }
-                    >
-                      <Check className="size-3.5" /> اعتماد
-                    </Button>
-                  ) : null}
-                  {b.status !== "rejected" ? (
+                  <div className="flex flex-wrap gap-1.5">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="rounded-full text-destructive"
-                      onClick={() => {
-                        const reason = prompt("سبب الرفض؟") ?? "";
-                        update.mutate({
-                          id: b.id,
-                          status: "rejected",
-                          rejection_reason: reason.slice(0, 300) || null,
-                        });
-                      }}
+                      className="rounded-full"
+                      onClick={() => setOpenLog(openLog === b.id ? null : b.id)}
                     >
-                      <X className="size-3.5" /> رفض
+                      <History className="size-3.5" /> السجل
                     </Button>
-                  ) : null}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full"
+                      onClick={() => setOwnerFor(b.id)}
+                    >
+                      <UserCog className="size-3.5" /> المالك
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={b.is_featured ? "default" : "outline"}
+                      className="rounded-full"
+                      onClick={() =>
+                        update.mutate({ id: b.id, is_featured: !b.is_featured })
+                      }
+                    >
+                      <Star className="size-3.5" /> مميز
+                    </Button>
+
+                    {b.status !== "pending" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => update.mutate({ id: b.id, status: "pending" })}
+                      >
+                        إعادة للمراجعة
+                      </Button>
+                    ) : null}
+                    {b.status !== "approved" ? (
+                      <Button
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() =>
+                          update.mutate({
+                            id: b.id,
+                            status: "approved",
+                            rejection_reason: null,
+                          })
+                        }
+                      >
+                        <Check className="size-3.5" /> اعتماد
+                      </Button>
+                    ) : null}
+                    {b.status !== "rejected" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full text-destructive"
+                        onClick={() => {
+                          const reason = prompt("سبب الرفض؟") ?? "";
+                          if (!reason.trim()) {
+                            toast.error("سبب الرفض مطلوب");
+                            return;
+                          }
+                          update.mutate({
+                            id: b.id,
+                            status: "rejected",
+                            rejection_reason: reason.slice(0, 300),
+                          });
+                        }}
+                      >
+                        <X className="size-3.5" /> رفض
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
+
+                {openLog === b.id ? (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <ModerationLog businessId={b.id} />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
         )}
+
       </div>
     </PageShell>
   );

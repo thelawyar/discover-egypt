@@ -71,8 +71,11 @@ const searchSchema = z.object({
   city: z.string().optional(),
   gov: z.string().optional(),
   cat: z.string().optional(),
+  prod: z.string().optional(),
+  sort: z.enum(["best", "newest", "popular"]).optional(),
   page: z.number().optional(),
 });
+
 
 export const searchBusinesses = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => searchSchema.parse(data))
@@ -136,6 +139,12 @@ export const searchBusinesses = createServerFn({ method: "GET" })
       );
 
       const from = (page - 1) * perPage;
+      // Product keyword: matches the products array or any indexed text.
+      const product = (data.prod ?? "")
+        .replace(/[%,(){}"']/g, " ")
+        .trim()
+        .slice(0, 40);
+      const sort = data.sort ?? "best";
 
       const build = (mode: "all" | "any") => {
         let query = supabase
@@ -146,6 +155,10 @@ export const searchBusinesses = createServerFn({ method: "GET" })
         if (cityId) query = query.eq("city_id", cityId);
         if (govId) query = query.eq("governorate_id", govId);
         if (catId) query = query.eq("category_id", catId);
+        if (product.length >= 2)
+          query = query.or(
+            `products.cs.{"${product}"},search_text.ilike.%${product}%`,
+          );
 
         if (clausesPerToken.length) {
           if (mode === "all") {
@@ -156,11 +169,21 @@ export const searchBusinesses = createServerFn({ method: "GET" })
           }
         }
 
-        return query
-          .order("is_featured", { ascending: false })
-          .order("created_at", { ascending: false })
-          .range(from, from + perPage - 1);
+        if (sort === "newest") {
+          query = query.order("created_at", { ascending: false });
+        } else if (sort === "popular") {
+          query = query
+            .order("view_count", { ascending: false })
+            .order("created_at", { ascending: false });
+        } else {
+          query = query
+            .order("is_featured", { ascending: false })
+            .order("created_at", { ascending: false });
+        }
+
+        return query.range(from, from + perPage - 1);
       };
+
 
       let { data: rows, count } = await build("all");
 

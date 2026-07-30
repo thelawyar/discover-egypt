@@ -21,10 +21,18 @@ const searchSchema = z.object({
   city: fallback(z.string(), "").default(""),
   gov: fallback(z.string(), "").default(""),
   cat: fallback(z.string(), "").default(""),
+  prod: fallback(z.string(), "").default(""),
+  sort: fallback(z.enum(["best", "newest", "popular"]), "best").default("best"),
   page: fallback(z.number().int(), 1).default(1),
 });
 
 type SearchParams = z.infer<typeof searchSchema>;
+
+const SORTS = [
+  ["best", "الأفضل مطابقة"],
+  ["popular", "الأعلى تفاعلاً"],
+  ["newest", "الأحدث إضافة"],
+] as const;
 
 const taxonomyQuery = queryOptions({
   queryKey: ["taxonomy"],
@@ -37,6 +45,8 @@ function resultsQuery(deps: {
   city: string;
   gov: string;
   cat: string;
+  prod: string;
+  sort: "best" | "newest" | "popular";
   page: number;
 }) {
   return queryOptions({
@@ -48,11 +58,14 @@ function resultsQuery(deps: {
           city: deps.city || undefined,
           gov: deps.gov || undefined,
           cat: deps.cat || undefined,
+          prod: deps.prod || undefined,
+          sort: deps.sort,
           page: deps.page,
         },
       }),
   });
 }
+
 
 export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
@@ -213,6 +226,34 @@ function SearchPage() {
               </option>
             ))}
           </select>
+
+          <ProductFilter
+            value={params.prod}
+            onApply={(v) =>
+              navigate({ search: (p: SearchParams) => ({ ...p, prod: v, page: 1 }) })
+            }
+          />
+
+          <select
+            value={params.sort}
+            onChange={(e) =>
+              navigate({
+                search: (p: SearchParams) => ({
+                  ...p,
+                  sort: e.target.value as SearchParams["sort"],
+                  page: 1,
+                }),
+              })
+            }
+            className="h-9 rounded-full border border-border bg-card px-3 text-xs"
+          >
+            {SORTS.map(([v, label]) => (
+              <option key={v} value={v}>
+                ترتيب: {label}
+              </option>
+            ))}
+          </select>
+
 
           <NearMeButton
             taxonomy={taxonomy}
@@ -407,6 +448,9 @@ function ActiveFilters({
     chips.push({ key: "gov", label: govName, patch: { gov: "", city: "" } });
   if (cityName) chips.push({ key: "city", label: cityName, patch: { city: "" } });
   if (catName) chips.push({ key: "cat", label: catName, patch: { cat: "" } });
+  if (params.prod)
+    chips.push({ key: "prod", label: `منتج: ${params.prod}`, patch: { prod: "" } });
+
 
   if (!chips.length) return null;
 
@@ -426,11 +470,36 @@ function ActiveFilters({
       ))}
       <button
         type="button"
-        onClick={() => onClear({ q: "", gov: "", city: "", cat: "" })}
+        onClick={() => onClear({ q: "", gov: "", city: "", cat: "", prod: "" })}
         className="text-[11px] text-muted-foreground underline"
       >
         مسح الكل
       </button>
     </div>
+  );
+}
+
+/** Free-text product/service filter committed on Enter or blur. */
+function ProductFilter({
+  value,
+  onApply,
+}: {
+  value: string;
+  onApply: (v: string) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+
+  return (
+    <input
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => draft.trim() !== value && onApply(draft.trim())}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") onApply(draft.trim());
+      }}
+      placeholder="منتج أو خدمة"
+      className="h-9 w-36 rounded-full border border-border bg-card px-3 text-xs outline-none focus:ring-2 focus:ring-primary"
+    />
   );
 }
