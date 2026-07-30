@@ -101,6 +101,80 @@ export function AdminInsights() {
     ...daily.map((d) => Number(d.views) + Number(d.card_clicks)),
   );
 
+  /** Same dataset for CSV and PDF: KPIs with period-over-period comparison. */
+  function buildTables(): ReportTable[] {
+    if (!data) return [];
+    const diff = (cur: number, prev: number) =>
+      prev ? `${Math.round(((cur - prev) / prev) * 100)}%` : cur ? "جديد" : "0%";
+    const kpi = (
+      label: string,
+      cur: number,
+      prev: number,
+    ): (string | number)[] => [label, cur, prev, cur - prev, diff(cur, prev)];
+
+    return [
+      {
+        title: `مؤشرات آخر ${days} يوم مقارنة بالفترة السابقة`,
+        headers: ["المؤشر", "الفترة الحالية", "الفترة السابقة", "الفرق", "نسبة التغير"],
+        rows: [
+          kpi("عمليات البحث", Number(data.searches), Number(data.prev_searches)),
+          kpi("نقرات كروت النتائج", Number(data.card_clicks), Number(data.prev_card_clicks)),
+          kpi("زيارات صفحات الأنشطة", Number(data.views), Number(data.prev_views)),
+          kpi("نقرات التواصل", Number(data.contact_clicks), Number(data.prev_contact_clicks)),
+          ["عمليات بحث بدون نتائج", Number(data.zero_searches), "-", "-", "-"],
+        ],
+      },
+      {
+        title: "النشاط اليومي",
+        headers: ["اليوم", "زيارات", "نقرات كروت", "نقرات تواصل"],
+        rows: daily.map((d) => [
+          d.day,
+          Number(d.views),
+          Number(d.card_clicks),
+          Number(d.contact_clicks),
+        ]),
+      },
+      {
+        title: "أكثر الأنشطة تفاعلاً",
+        headers: ["النشاط", "الرابط", "زيارات", "كروت", "تواصل"],
+        rows: (data.top_businesses ?? []).map((b) => [
+          b.name,
+          `/${b.username}`,
+          Number(b.views),
+          Number(b.card_clicks),
+          Number(b.contact_clicks),
+        ]),
+      },
+      {
+        title: "أكثر كلمات البحث",
+        headers: ["الكلمة", "مرات البحث", "متوسط النتائج"],
+        rows: (data.top_terms ?? []).map((t) => [
+          t.term,
+          Number(t.searches),
+          Number(t.avg_results ?? 0),
+        ]),
+      },
+    ];
+  }
+
+  function exportCsv() {
+    const tables = buildTables();
+    if (!tables.length) return toast.error("لا توجد بيانات للتصدير");
+    downloadCsv(`insights-${days}d-${new Date().toISOString().slice(0, 10)}`, tables);
+    toast.success("تم تنزيل ملف CSV");
+  }
+
+  function exportPdf() {
+    const tables = buildTables();
+    if (!tables.length) return toast.error("لا توجد بيانات للتصدير");
+    const ok = printReport({
+      title: "تقرير إحصائيات الدليل",
+      subtitle: `آخر ${days} يوم — مقارنة بالفترة السابقة · ${new Date().toLocaleDateString("ar-EG")}`,
+      tables,
+    });
+    if (!ok) toast.error("اسمح بالنوافذ المنبثقة لحفظ التقرير PDF");
+  }
+
   return (
     <div className="mt-5 space-y-5">
       <div className="flex flex-wrap items-center gap-2">
@@ -117,7 +191,31 @@ export function AdminInsights() {
             آخر {d} يوم
           </button>
         ))}
+
+        <div className="ms-auto flex gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="rounded-full"
+            disabled={!data}
+            onClick={exportCsv}
+          >
+            <FileDown className="size-3.5" /> CSV
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="rounded-full"
+            disabled={!data}
+            onClick={exportPdf}
+          >
+            <Printer className="size-3.5" /> PDF
+          </Button>
+        </div>
       </div>
+
 
       {isLoading ? (
         <p className="py-16 text-center text-sm text-muted-foreground">
