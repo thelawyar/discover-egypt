@@ -1,8 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Search, MapPin, X, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Search, MapPin, X, ChevronRight, Store, Tag, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { suggestSearch } from "@/lib/directory.functions";
+import { Highlight, searchTokens } from "@/lib/highlight";
 import type { City, Governorate } from "@/lib/directory-types";
+
 
 type Props = {
   cities: City[];
