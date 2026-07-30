@@ -124,6 +124,15 @@ export const Route = createFileRoute("/$username")({
           }
         : {}),
       ...(loaderData.phone ? { telephone: loaderData.phone } : {}),
+      ...(loaderData.whatsapp
+        ? {
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer support",
+              telephone: loaderData.whatsapp,
+            },
+          }
+        : {}),
       ...(loaderData.website ? { sameAs: [loaderData.website] } : {}),
       address: {
         "@type": "PostalAddress",
