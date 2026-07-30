@@ -83,8 +83,19 @@ function ProfilePage() {
     queryClient.invalidateQueries({ queryKey: ["my-profile"] });
   }
 
-  async function onPickAvatar(file: File | undefined) {
-    if (!file || !user) return;
+  function onSelectFile(file: File | undefined) {
+    if (fileRef.current) fileRef.current.value = "";
+    if (!file) return;
+    const invalid = validateImageFile(file);
+    if (invalid) {
+      toast.error(invalid);
+      return;
+    }
+    setPendingFile(file);
+  }
+
+  async function onCroppedAvatar(file: File) {
+    if (!user) return;
     setUploading(true);
     try {
       const { url } = await uploadBusinessImage(file, user.id, {
@@ -100,13 +111,14 @@ function ProfilePage() {
       if (error) throw error;
       toast.success("تم تحديث الصورة الشخصية");
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      setPendingFile(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذّر رفع الصورة");
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
+
 
   async function changePassword() {
     if (password.length < 8) {
