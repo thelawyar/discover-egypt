@@ -228,7 +228,16 @@ function SearchPage() {
             </Button>
           </div>
         ) : (
-          <ResultsWithAds items={results.items} />
+          <ResultsWithAds
+            items={results.items}
+            targeting={{
+              governorateId: selectedGov?.id ?? null,
+              cityId:
+                taxonomy.cities.find((c) => c.slug === normalized.city)?.id ?? null,
+              categoryId:
+                taxonomy.categories.find((c) => c.slug === params.cat)?.id ?? null,
+            }}
+          />
         )}
 
         {pages > 1 ? (
