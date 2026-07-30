@@ -470,7 +470,7 @@ function ActiveFilters({
       ))}
       <button
         type="button"
-        onClick={() => onClear({ q: "", gov: "", city: "", cat: "" })}
+        onClick={() => onClear({ q: "", gov: "", city: "", cat: "", prod: "" })}
         className="text-[11px] text-muted-foreground underline"
       >
         مسح الكل
