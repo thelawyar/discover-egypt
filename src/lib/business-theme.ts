@@ -2,16 +2,28 @@ import type { CSSProperties } from "react";
 
 /** Visual presets for the public one-page mini-site (durtown.com/<username>). */
 export type ThemeStyleId = "classic" | "soft" | "dark";
+export type ThemeFontId = "cairo" | "tajawal" | "almarai" | "amiri";
+export type ThemeButtonId = "rounded" | "pill" | "square" | "outline";
 
 export type BusinessThemeInput = {
   theme_primary?: string | null;
   theme_bg?: string | null;
   theme_style?: string | null;
+  theme_font?: string | null;
+  theme_button?: string | null;
+  theme_contrast?: boolean | null;
 };
 
 export type ResolvedTheme = {
   style: ThemeStyleId;
+  font: ThemeFontId;
+  fontFamily: string;
+  button: ThemeButtonId;
+  buttonRadius: string;
+  buttonOutlined: boolean;
+  contrast: boolean;
   primary: string;
+  onPrimary: string;
   bg: string;
   fg: string;
   card: string;
@@ -24,6 +36,20 @@ export const THEME_STYLES: { id: ThemeStyleId; label: string }[] = [
   { id: "classic", label: "كلاسيكي" },
   { id: "soft", label: "ناعم" },
   { id: "dark", label: "داكن" },
+];
+
+export const THEME_FONTS: { id: ThemeFontId; label: string; family: string }[] = [
+  { id: "cairo", label: "Cairo — عصري", family: '"Cairo", system-ui, sans-serif' },
+  { id: "tajawal", label: "Tajawal — بسيط", family: '"Tajawal", system-ui, sans-serif' },
+  { id: "almarai", label: "Almarai — واضح", family: '"Almarai", system-ui, sans-serif' },
+  { id: "amiri", label: "Amiri — كلاسيكي", family: '"Amiri", Georgia, serif' },
+];
+
+export const THEME_BUTTONS: { id: ThemeButtonId; label: string }[] = [
+  { id: "rounded", label: "زوايا ناعمة" },
+  { id: "pill", label: "دائري" },
+  { id: "square", label: "زوايا حادة" },
+  { id: "outline", label: "محدد بإطار" },
 ];
 
 export const THEME_PRESETS = [
