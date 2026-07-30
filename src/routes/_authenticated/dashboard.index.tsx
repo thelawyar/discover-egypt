@@ -10,6 +10,7 @@ import { STATUS_LABELS } from "@/lib/directory-types";
 import { ContactNotifications } from "@/components/dashboard/ContactNotifications";
 import { MessagesInbox } from "@/components/dashboard/MessagesInbox";
 import { NotificationSettings } from "@/components/dashboard/NotificationSettings";
+import { StatusNotifications } from "@/components/dashboard/StatusNotifications";
 import { useBusinessNotifications } from "@/hooks/useBusinessNotifications";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
@@ -104,6 +105,7 @@ function Dashboard() {
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <MessagesInbox />
           <div className="space-y-4">
+            <StatusNotifications />
             <ContactNotifications />
             <NotificationSettings />
           </div>
