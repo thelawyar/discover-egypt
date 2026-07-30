@@ -18,6 +18,7 @@ import { BrandingStyles } from "@/hooks/useSiteSettings";
 import { NotFoundPage } from "@/components/NotFoundPage";
 import { ThemeProvider, themeBootstrapScript } from "@/hooks/useTheme";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { registerServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
@@ -170,6 +171,7 @@ function RootComponent() {
         <AuthProvider>
           <BrandingStyles />
           <OfflineBanner />
+          <UpdatePrompt />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <Toaster position="top-center" dir="rtl" richColors />
