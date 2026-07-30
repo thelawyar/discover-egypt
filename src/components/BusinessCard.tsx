@@ -1,8 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Phone, Star, Store } from "lucide-react";
 import type { BusinessCardData } from "@/lib/directory-types";
+import { Highlight, matchesTerms } from "@/lib/highlight";
 
-export function BusinessCard({ item }: { item: BusinessCardData }) {
+export function BusinessCard({
+  item,
+  terms = [],
+}: {
+  item: BusinessCardData;
+  terms?: string[];
+}) {
   return (
     <Link
       to="/$username"
@@ -33,38 +40,48 @@ export function BusinessCard({ item }: { item: BusinessCardData }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="line-clamp-1 text-base font-bold text-foreground">
-            {item.name}
+            <Highlight text={item.name} terms={terms} />
           </h3>
           {item.category_name ? (
             <span className="shrink-0 rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-medium text-accent-foreground">
-              {item.category_name}
+              <Highlight text={item.category_name} terms={terms} />
             </span>
           ) : null}
         </div>
 
         {item.description ? (
           <p className="line-clamp-2 text-sm text-muted-foreground">
-            {item.description}
+            <Highlight text={item.description} terms={terms} />
           </p>
         ) : null}
 
         {item.products.length ? (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {item.products.slice(0, 3).map((p) => (
-              <span
-                key={p}
-                className="rounded-md bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
-              >
-                {p}
-              </span>
-            ))}
+            {[...item.products]
+              .sort(
+                (a, b) =>
+                  Number(matchesTerms(b, terms)) - Number(matchesTerms(a, terms)),
+              )
+              .slice(0, 3)
+              .map((p) => (
+                <span
+                  key={p}
+                  className={`rounded-md px-2 py-0.5 text-[11px] ${
+                    matchesTerms(p, terms)
+                      ? "bg-primary-soft text-accent-foreground"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  <Highlight text={p} terms={terms} />
+                </span>
+              ))}
           </div>
         ) : null}
 
         <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 pt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <MapPin className="size-3.5" />
-            {item.city_name ?? "—"}
+            <Highlight text={item.city_name ?? "—"} terms={terms} />
             {item.governorate_name ? ` · ${item.governorate_name}` : ""}
           </span>
           {item.phone ? (

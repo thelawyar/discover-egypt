@@ -16,8 +16,10 @@ export function ResultsWithAds({
   placement = "search",
   pageType = "search",
   targeting,
+  terms = [],
 }: {
   items: BusinessCardData[];
+  terms?: string[];
   placement?: AdPlacement;
   pageType?: AdPageType;
   targeting?: AdTargeting;
@@ -49,7 +51,7 @@ export function ResultsWithAds({
         }
         return (
           <Fragment key={item.id}>
-            <BusinessCard item={item} />
+            <BusinessCard item={item} terms={terms} />
             {adNode}
           </Fragment>
         );
