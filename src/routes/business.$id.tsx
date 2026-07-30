@@ -15,6 +15,7 @@ import {
 import { getBusiness } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { absoluteOgImage, ogImageMeta } from "@/lib/og";
+import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { WEEK_DAYS } from "@/lib/directory-types";
@@ -327,6 +328,7 @@ function BusinessPage() {
           </div>
 
           <aside className="space-y-4">
+            <BusinessPageAds />
             <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
               <h2 className="mb-3 text-sm font-bold">بيانات التواصل</h2>
               <div className="space-y-2">
