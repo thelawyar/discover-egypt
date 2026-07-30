@@ -34,6 +34,9 @@ const statusStyles: Record<string, string> = {
 function Dashboard() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  // Live toast + system notification for new messages/orders.
+  useBusinessNotifications();
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-businesses", user?.id],
