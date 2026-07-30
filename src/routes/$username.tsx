@@ -166,28 +166,31 @@ export const Route = createFileRoute("/$username")({
         : {}),
     };
 
+    // Home › governorate › city › business.
+    const trail: { name: string; item: string }[] = [
+      { name: "الرئيسية", item: `${origin}/` },
+    ];
+    if (loaderData.governorate_name && loaderData.governorate_slug)
+      trail.push({
+        name: loaderData.governorate_name,
+        item: `${origin}/search?gov=${encodeURIComponent(loaderData.governorate_slug)}`,
+      });
+    if (loaderData.city_name && loaderData.city_slug)
+      trail.push({
+        name: loaderData.city_name,
+        item: `${origin}/city/${encodeURIComponent(loaderData.city_slug)}`,
+      });
+    trail.push({ name: loaderData.name, item: `${origin}${url}` });
+
     const breadcrumb = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "الرئيسية", item: `${origin}/` },
-        ...(loaderData.city_slug && loaderData.city_name
-          ? [
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: loaderData.city_name,
-                item: `${origin}/city/${loaderData.city_slug}`,
-              },
-            ]
-          : []),
-        {
-          "@type": "ListItem",
-          position: loaderData.city_slug ? 3 : 2,
-          name: loaderData.name,
-          item: `${origin}${url}`,
-        },
-      ],
+      itemListElement: trail.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.name,
+        item: c.item,
+      })),
     };
 
     return {
@@ -199,6 +202,10 @@ export const Route = createFileRoute("/$username")({
       ],
     };
   },
+  headers: () => ({
+    "X-Robots-Tag": "index, follow, max-image-preview:large, max-snippet:-1",
+  }),
+
   component: BusinessHandlePage,
   notFoundComponent: () => (
     <PageShell>
