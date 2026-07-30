@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapSearchDotxmlRouteImport } from './routes/sitemap-search[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
@@ -36,6 +37,11 @@ import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapSearchDotxmlRoute = SitemapSearchDotxmlRouteImport.update({
+  id: '/sitemap-search.xml',
+  path: '/sitemap-search.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
+  '/sitemap-search.xml': typeof SitemapSearchDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
+  '/sitemap-search.xml': typeof SitemapSearchDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
+  '/sitemap-search.xml': typeof SitemapSearchDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/search'
+    | '/sitemap-search.xml'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/search'
+    | '/sitemap-search.xml'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/search'
+    | '/sitemap-search.xml'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   McpRoute: typeof McpRoute
   SearchRoute: typeof SearchRoute
+  SitemapSearchDotxmlRoute: typeof SitemapSearchDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-search.xml': {
+      id: '/sitemap-search.xml'
+      path: '/sitemap-search.xml'
+      fullPath: '/sitemap-search.xml'
+      preLoaderRoute: typeof SitemapSearchDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -520,6 +540,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   McpRoute: McpRoute,
   SearchRoute: SearchRoute,
+  SitemapSearchDotxmlRoute: SitemapSearchDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
