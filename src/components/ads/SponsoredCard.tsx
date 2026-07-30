@@ -1,13 +1,23 @@
+import { useEffect, useRef } from "react";
 import { ExternalLink, Store } from "lucide-react";
-import type { Ad } from "@/hooks/useAds";
+import { trackAdClick, trackAdImpression, type Ad } from "@/hooks/useAds";
 
 /** Paid ad rendered with the same visual weight as a business card. */
 export function SponsoredCard({ ad }: { ad: Ad }) {
+  const seen = useRef(false);
+
+  useEffect(() => {
+    if (seen.current) return;
+    seen.current = true;
+    trackAdImpression(ad.id);
+  }, [ad.id]);
+
   return (
     <a
       href={ad.target_url}
       target="_blank"
       rel="nofollow sponsored noopener"
+      onClick={() => trackAdClick(ad.id)}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:shadow-raised"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
