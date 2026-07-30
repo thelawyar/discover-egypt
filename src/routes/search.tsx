@@ -478,3 +478,28 @@ function ActiveFilters({
     </div>
   );
 }
+
+/** Free-text product/service filter committed on Enter or blur. */
+function ProductFilter({
+  value,
+  onApply,
+}: {
+  value: string;
+  onApply: (v: string) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+
+  return (
+    <input
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => draft.trim() !== value && onApply(draft.trim())}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") onApply(draft.trim());
+      }}
+      placeholder="منتج أو خدمة"
+      className="h-9 w-36 rounded-full border border-border bg-card px-3 text-xs outline-none focus:ring-2 focus:ring-primary"
+    />
+  );
+}
