@@ -39,6 +39,7 @@ function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
   const [q, setQ] = useState("");
+  const [openLog, setOpenLog] = useState<string | null>(null);
   const [view, setView] = useState<
     "moderation" | "insights" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
   >("moderation");
@@ -50,7 +51,9 @@ function AdminPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("businesses")
-        .select("id,name,description,status,is_featured,cover_image_url,categories(name),cities(name)")
+        .select(
+          "id,name,description,status,is_featured,rejection_reason,created_at,updated_at,cover_image_url,categories(name),cities(name)",
+        )
         .eq("status", tab)
         .order("created_at", { ascending: false })
         .limit(100);
@@ -58,6 +61,25 @@ function AdminPage() {
       return data;
     },
   });
+
+  // Queue counters so the admin sees the review backlog at a glance.
+  const { data: counts } = useQuery({
+    queryKey: ["admin-business-counts"],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const entries = await Promise.all(
+        TABS.map(async (s) => {
+          const { count } = await supabase
+            .from("businesses")
+            .select("id", { count: "exact", head: true })
+            .eq("status", s);
+          return [s, count ?? 0] as const;
+        }),
+      );
+      return Object.fromEntries(entries) as Record<(typeof TABS)[number], number>;
+    },
+  });
+
 
   // Simple client-side filter so long lists stay usable on mobile.
   const term = q.trim().toLowerCase();
