@@ -128,7 +128,14 @@ function Dashboard() {
                   </div>
 
                   <div className="min-w-40 flex-1">
-                    <p className="font-bold">{b.name}</p>
+                    <p className="font-bold">
+                      {b.name}
+                      {b.owner_id !== user?.id ? (
+                        <span className="ms-2 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                          صلاحية تعديل
+                        </span>
+                      ) : null}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {(b.categories as { name: string } | null)?.name ?? "—"} ·{" "}
                       {(b.cities as { name: string } | null)?.name ?? "—"}
@@ -152,17 +159,20 @@ function Dashboard() {
                         <Pencil className="size-4" />
                       </Link>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="حذف"
-                      onClick={() => {
-                        if (confirm(`حذف "${b.name}" نهائياً؟`)) remove.mutate(b.id);
-                      }}
-                    >
-                      <Trash2 className="size-4 text-destructive" />
-                    </Button>
+                    {b.owner_id === user?.id ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="حذف"
+                        onClick={() => {
+                          if (confirm(`حذف "${b.name}" نهائياً؟`)) remove.mutate(b.id);
+                        }}
+                      >
+                        <Trash2 className="size-4 text-destructive" />
+                      </Button>
+                    ) : null}
                   </div>
+
                 </div>
               );
             })}
