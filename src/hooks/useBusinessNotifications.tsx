@@ -9,6 +9,12 @@ export type NotificationPrefs = {
   notify_messages: boolean;
   notify_contact_clicks: boolean;
   sound_enabled: boolean;
+  notify_approved_inapp: boolean;
+  notify_rejected_inapp: boolean;
+  notify_withdrawn_inapp: boolean;
+  notify_approved_email: boolean;
+  notify_rejected_email: boolean;
+  notify_withdrawn_email: boolean;
 };
 
 export const DEFAULT_PREFS: NotificationPrefs = {
@@ -16,7 +22,16 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   notify_messages: true,
   notify_contact_clicks: true,
   sound_enabled: true,
+  notify_approved_inapp: true,
+  notify_rejected_inapp: true,
+  notify_withdrawn_inapp: true,
+  notify_approved_email: true,
+  notify_rejected_email: true,
+  notify_withdrawn_email: false,
 };
+
+const PREF_COLUMNS =
+  "push_enabled,notify_messages,notify_contact_clicks,sound_enabled,notify_approved_inapp,notify_rejected_inapp,notify_withdrawn_inapp,notify_approved_email,notify_rejected_email,notify_withdrawn_email";
 
 /** The current user's notification preferences (created on first save). */
 export function useNotificationPrefs() {
@@ -27,7 +42,7 @@ export function useNotificationPrefs() {
     queryFn: async (): Promise<NotificationPrefs> => {
       const { data, error } = await supabase
         .from("notification_settings")
-        .select("push_enabled,notify_messages,notify_contact_clicks,sound_enabled")
+        .select(PREF_COLUMNS)
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;

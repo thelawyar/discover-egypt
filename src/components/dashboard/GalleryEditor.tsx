@@ -1,10 +1,28 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Loader2, X, ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  ImagePlus,
+  Loader2,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Star,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
 import { ImageCropDialog, validateImageFile } from "@/components/ImageCropDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 
 /** Manage the photo gallery shown on the public mini-site. */
 export function GalleryEditor({
@@ -18,6 +36,24 @@ export function GalleryEditor({
   const [uploading, setUploading] = useState(false);
   // Files waiting to be cropped one-by-one before upload.
   const [queue, setQueue] = useState<File[]>([]);
+  // Gallery image being previewed before it becomes the cover photo.
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [savingCover, setSavingCover] = useState(false);
+
+  const { data: cover, refetch: refetchCover } = useQuery({
+    queryKey: ["business-cover", businessId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("cover_image_url")
+        .eq("id", businessId)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.cover_image_url ?? null;
+    },
+  });
+  const refreshCover = () => refetchCover();
+
 
   const { data: images } = useQuery({
     queryKey: ["business-images", businessId],
@@ -108,22 +144,43 @@ export function GalleryEditor({
     await refresh();
   }
 
+  /** Pin the previewed gallery image as the business cover photo. */
+  async function confirmCover() {
+    if (!coverPreview) return;
+    setSavingCover(true);
+    const { error } = await supabase
+      .from("businesses")
+      .update({ cover_image_url: coverPreview, cover_thumb_url: null })
+      .eq("id", businessId);
+    setSavingCover(false);
+    if (error) {
+      toast.error("تعذّر تعيين صورة الغلاف");
+      return;
+    }
+    setCoverPreview(null);
+    await queryClient.invalidateQueries({ queryKey: ["business", businessId] });
+    await refreshCover();
+    toast.success("تم تعيين صورة الغلاف — سيراجعها الفريق قبل النشر");
+  }
+
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card">
       <div>
         <h2 className="text-sm font-bold">معرض الصور</h2>
         <p className="mt-1 text-[11px] text-muted-foreground">
           حتى 12 صورة تظهر داخل صفحة النشاط، يتم قصّها مربعة وضغطها تلقائياً، ويمكنك
-          إعادة ترتيبها بالأسهم.
+          إعادة ترتيبها بالأسهم، واختيار أي صورة لتكون غلاف النشاط.
         </p>
       </div>
 
       {images?.length ? (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {images.map((img, index) => (
+          {images.map((img, index) => {
+            const isCover = cover === img.url;
+            return (
             <div
               key={img.id}
-              className="relative overflow-hidden rounded-xl border border-border"
+              className={`relative overflow-hidden rounded-xl border ${isCover ? "border-primary ring-2 ring-primary" : "border-border"}`}
             >
               <img
                 src={img.url}
@@ -138,6 +195,16 @@ export function GalleryEditor({
               >
                 <X className="size-3.5" />
               </button>
+              <button
+                type="button"
+                aria-label={isCover ? "صورة الغلاف الحالية" : "تعيين كصورة غلاف"}
+                title={isCover ? "صورة الغلاف الحالية" : "تعيين كصورة غلاف"}
+                onClick={() => setCoverPreview(img.url)}
+                className={`absolute top-1 right-1 rounded-full p-1 ${isCover ? "bg-primary text-primary-foreground" : "bg-background/90"}`}
+              >
+                {isCover ? <Check className="size-3.5" /> : <Star className="size-3.5" />}
+              </button>
+
               <div className="absolute inset-x-1 bottom-1 flex justify-between">
                 <button
                   type="button"
@@ -159,7 +226,8 @@ export function GalleryEditor({
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : null}
 
@@ -190,6 +258,45 @@ export function GalleryEditor({
         onCancel={() => setQueue((q) => q.slice(1))}
         onConfirm={uploadCropped}
       />
+
+      <Dialog
+        open={!!coverPreview}
+        onOpenChange={(open) => !open && setCoverPreview(null)}
+      >
+        <DialogContent className="sm:max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>معاينة صورة الغلاف</DialogTitle>
+            <DialogDescription>
+              هكذا ستظهر الصورة كغلاف لصفحة نشاطك. تأكد منها قبل الحفظ.
+            </DialogDescription>
+          </DialogHeader>
+          {coverPreview ? (
+            <img
+              src={coverPreview}
+              alt="معاينة صورة الغلاف"
+              className="aspect-[16/9] w-full rounded-xl border border-border object-cover"
+            />
+          ) : null}
+          <DialogFooter className="gap-2 sm:justify-start">
+            <Button
+              className="rounded-full"
+              disabled={savingCover || cover === coverPreview}
+              onClick={confirmCover}
+            >
+              {savingCover ? <Loader2 className="size-4 animate-spin" /> : null}
+              {cover === coverPreview ? "هي الغلاف الحالي" : "تثبيت كصورة غلاف"}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setCoverPreview(null)}
+            >
+              إلغاء
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
+
   );
 }

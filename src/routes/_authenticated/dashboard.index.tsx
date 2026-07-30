@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Store, ListChecks } from "lucide-react";
+import { Plus, Pencil, Trash2, Store, ListChecks, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -108,8 +108,14 @@ function Dashboard() {
             <StatusNotifications />
             <ContactNotifications />
             <NotificationSettings />
+            <Button asChild variant="outline" className="w-full rounded-full">
+              <Link to="/dashboard/notifications">
+                <Bell className="size-4" /> إعدادات تنبيهات حسابي (داخلي/بريد)
+              </Link>
+            </Button>
           </div>
         </div>
+
 
 
         {isLoading ? (
