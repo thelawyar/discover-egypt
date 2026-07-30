@@ -150,6 +150,35 @@ export const Route = createFileRoute("/search")({
       if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
     }
 
+    // Breadcrumb trail: home › governorate › city › category, as selected.
+    const crumbs: { name: string; item: string }[] = [
+      { name: "الرئيسية", item: `${origin}/` },
+    ];
+    if (ld?.labels.gov)
+      crumbs.push({
+        name: ld.labels.gov,
+        item: `${origin}/search?gov=${encodeURIComponent(sp.gov)}`,
+      });
+    if (ld?.labels.city)
+      crumbs.push({ name: ld.labels.city, item: `${origin}/city/${encodeURIComponent(sp.city)}` });
+    if (cat)
+      crumbs.push({
+        name: cat,
+        item: `${origin}/search?cat=${encodeURIComponent(sp.cat)}`,
+      });
+    if (term) crumbs.push({ name: `نتائج «${term}»`, item: canonical });
+
+    const breadcrumb = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: crumbs.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.name,
+        item: c.item,
+      })),
+    };
+
     return {
       meta: [
         { title },
@@ -159,11 +188,30 @@ export const Route = createFileRoute("/search")({
         { property: "og:url", content: canonical },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc.slice(0, 300) },
-        { name: "robots", content: indexable ? "index, follow" : "noindex, follow" },
+        {
+          name: "robots",
+          content: indexable
+            ? "index, follow, max-image-preview:large, max-snippet:-1"
+            : "noindex, follow",
+        },
       ],
       links,
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+      ],
     };
   },
+  /** Same directive at the HTTP layer so crawlers that skip the HTML still obey it. */
+  headers: ({ match }) => {
+    const sp = match.search as SearchParams | undefined;
+    const indexable = !sp?.q?.trim();
+    return {
+      "X-Robots-Tag": indexable
+        ? "index, follow, max-image-preview:large, max-snippet:-1"
+        : "noindex, follow",
+    };
+  },
+
   loader: async ({ context, deps }) => {
     const [taxonomy, results, origin] = await Promise.all([
       context.queryClient.ensureQueryData(taxonomyQuery),
