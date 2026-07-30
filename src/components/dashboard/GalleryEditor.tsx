@@ -208,7 +208,8 @@ export function GalleryEditor({
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : null}
 
