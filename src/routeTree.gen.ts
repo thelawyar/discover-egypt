@@ -23,6 +23,7 @@ import { Route as AuthenticatedAdminCitiesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin-categories'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
 import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_authenticated/dashboard.business.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -97,6 +98,11 @@ const AuthenticatedDashboardIndexRoute =
     path: '/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicMdRoute = ApiPublicMdRouteImport.update({
+  id: '/api/public/md',
+  path: '/api/public/md',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardBusinessIdRoute =
   AuthenticatedDashboardBusinessIdRouteImport.update({
     id: '/dashboard/business/$id',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/api/public/md': typeof ApiPublicMdRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/api/public/md': typeof ApiPublicMdRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/api/public/md': typeof ApiPublicMdRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/api/public/md'
     | '/dashboard/'
     | '/dashboard/business/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/api/public/md'
     | '/dashboard'
     | '/dashboard/business/$id'
   id:
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/api/public/md'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/business/$id'
   fileRoutesById: FileRoutesById
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   BusinessIdRoute: typeof BusinessIdRoute
   CitySlugRoute: typeof CitySlugRoute
   SCodeRoute: typeof SCodeRoute
+  ApiPublicMdRoute: typeof ApiPublicMdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/md': {
+      id: '/api/public/md'
+      path: '/api/public/md'
+      fullPath: '/api/public/md'
+      preLoaderRoute: typeof ApiPublicMdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/business/$id': {
       id: '/_authenticated/dashboard/business/$id'
       path: '/dashboard/business/$id'
@@ -359,17 +379,8 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessIdRoute: BusinessIdRoute,
   CitySlugRoute: CitySlugRoute,
   SCodeRoute: SCodeRoute,
+  ApiPublicMdRoute: ApiPublicMdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
