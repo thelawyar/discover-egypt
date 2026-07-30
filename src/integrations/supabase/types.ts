@@ -570,6 +570,33 @@ export type Database = {
           },
         ]
       }
+      search_queries: {
+        Row: {
+          category: string | null
+          city: string | null
+          created_at: string
+          id: string
+          results_count: number
+          term: string
+        }
+        Insert: {
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          results_count?: number
+          term: string
+        }
+        Update: {
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          results_count?: number
+          term?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           accent_color: string
@@ -699,9 +726,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_search_query: {
+        Args: {
+          _category?: string
+          _city?: string
+          _results: number
+          _term: string
+        }
+        Returns: undefined
+      }
       make_slug: { Args: { v: string }; Returns: string }
       normalize_username: { Args: { v: string }; Returns: string }
       random_username: { Args: never; Returns: string }
+      search_term_stats: {
+        Args: { _days?: number; _limit?: number }
+        Returns: {
+          avg_results: number
+          last_results: number
+          last_searched: string
+          searches: number
+          term: string
+          zero_rate: number
+        }[]
+      }
       track_ad_click: { Args: { _ad_id: string }; Returns: undefined }
       track_ad_impression: { Args: { _ad_id: string }; Returns: undefined }
       track_business_event: {
