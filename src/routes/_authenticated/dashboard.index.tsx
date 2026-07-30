@@ -108,8 +108,14 @@ function Dashboard() {
             <StatusNotifications />
             <ContactNotifications />
             <NotificationSettings />
+            <Button asChild variant="outline" className="w-full rounded-full">
+              <Link to="/dashboard/notifications">
+                <Bell className="size-4" /> إعدادات تنبيهات حسابي (داخلي/بريد)
+              </Link>
+            </Button>
           </div>
         </div>
+
 
 
         {isLoading ? (
