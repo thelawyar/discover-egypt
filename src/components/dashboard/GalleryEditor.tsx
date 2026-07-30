@@ -258,6 +258,45 @@ export function GalleryEditor({
         onCancel={() => setQueue((q) => q.slice(1))}
         onConfirm={uploadCropped}
       />
+
+      <Dialog
+        open={!!coverPreview}
+        onOpenChange={(open) => !open && setCoverPreview(null)}
+      >
+        <DialogContent className="sm:max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>معاينة صورة الغلاف</DialogTitle>
+            <DialogDescription>
+              هكذا ستظهر الصورة كغلاف لصفحة نشاطك. تأكد منها قبل الحفظ.
+            </DialogDescription>
+          </DialogHeader>
+          {coverPreview ? (
+            <img
+              src={coverPreview}
+              alt="معاينة صورة الغلاف"
+              className="aspect-[16/9] w-full rounded-xl border border-border object-cover"
+            />
+          ) : null}
+          <DialogFooter className="gap-2 sm:justify-start">
+            <Button
+              className="rounded-full"
+              disabled={savingCover || cover === coverPreview}
+              onClick={confirmCover}
+            >
+              {savingCover ? <Loader2 className="size-4 animate-spin" /> : null}
+              {cover === coverPreview ? "هي الغلاف الحالي" : "تثبيت كصورة غلاف"}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setCoverPreview(null)}
+            >
+              إلغاء
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
+
   );
 }
