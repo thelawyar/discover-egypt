@@ -121,22 +121,36 @@ export function SearchBar({
 
   function go(term: string, cityOverride?: string) {
     setSuggestOpen(false);
+    setCityOpen(false);
+    const trimmed = term.trim();
+    setQ(trimmed);
+    setDebounced(trimmed);
     navigate({
       to: "/search",
-      search: {
-        q: term.trim(),
+      search: (prev: Record<string, unknown>) => ({
+        ...prev,
+        q: trimmed,
         city: cityOverride ?? cityId,
         gov: (cityOverride ?? cityId) ? "" : (selectedGov?.slug ?? ""),
-        cat: "",
         page: 1,
-      },
+      }),
     });
+  }
+
+  /** Clearing must apply instantly, not wait for a submit. */
+  function clearQuery() {
+    setQ("");
+    setDebounced("");
+    setSuggestOpen(false);
+    if (onLiveChange) onLiveChange("");
+    else go("");
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     go(q);
   }
+
 
 
 
