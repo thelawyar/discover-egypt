@@ -234,6 +234,53 @@ export type Database = {
           },
         ]
       }
+      business_messages: {
+        Row: {
+          body: string
+          business_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          kind: string
+          sender_email: string | null
+          sender_name: string
+          sender_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          business_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind?: string
+          sender_email?: string | null
+          sender_name: string
+          sender_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind?: string
+          sender_email?: string | null
+          sender_name?: string
+          sender_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_messages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_page_events: {
         Row: {
           business_id: string
@@ -534,6 +581,36 @@ export type Database = {
           name?: string
           slug?: string
           sort_order?: number
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          created_at: string
+          notify_contact_clicks: boolean
+          notify_messages: boolean
+          push_enabled: boolean
+          sound_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          notify_contact_clicks?: boolean
+          notify_messages?: boolean
+          push_enabled?: boolean
+          sound_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          notify_contact_clicks?: boolean
+          notify_messages?: boolean
+          push_enabled?: boolean
+          sound_enabled?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
