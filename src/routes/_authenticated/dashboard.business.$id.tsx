@@ -12,6 +12,7 @@ import {
   cityBelongsToGovernorate,
   CITY_MISMATCH_MESSAGE,
 } from "@/lib/location-filter";
+import { normalizeEgyptWhatsApp } from "@/lib/phone";
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
@@ -66,6 +67,7 @@ type FormState = {
   address: string;
   phone: string;
   whatsapp: string;
+  cover_thumb_url: string;
   email: string;
   website: string;
   facebook: string;
@@ -91,6 +93,7 @@ const EMPTY: FormState = {
   address: "",
   phone: "",
   whatsapp: "",
+  cover_thumb_url: "",
   email: "",
   website: "",
   facebook: "",
@@ -200,6 +203,7 @@ function BusinessForm() {
       address: existing.address ?? "",
       phone: existing.phone ?? "",
       whatsapp: existing.whatsapp ?? "",
+      cover_thumb_url: (existing as { cover_thumb_url?: string | null }).cover_thumb_url ?? "",
       email: existing.email ?? "",
       website: existing.website ?? "",
       facebook: existing.facebook ?? "",
@@ -263,16 +267,20 @@ function BusinessForm() {
         return path;
       };
 
-      const [largePath] = await Promise.all([
+      const [largePath, thumbPath] = await Promise.all([
         upload(large, "1200"),
         upload(thumb, "600"),
       ]);
 
       const { data: signed, error: signError } = await supabase.storage
         .from("business-images")
-        .createSignedUrl(largePath, 60 * 60 * 24 * 365);
+        .createSignedUrls([largePath, thumbPath], 60 * 60 * 24 * 365);
       if (signError) throw signError;
-      set("cover_image_url", signed.signedUrl);
+      const signedLarge = signed.find((s) => s.path === largePath)?.signedUrl;
+      const signedThumb = signed.find((s) => s.path === thumbPath)?.signedUrl;
+      if (!signedLarge) throw new Error("sign_failed");
+      set("cover_image_url", signedLarge);
+      set("cover_thumb_url", signedThumb ?? "");
       const saved = Math.max(0, Math.round((1 - large.blob.size / file.size) * 100));
       toast.success(`تم رفع الصورة بعد ضغطها (توفير ${saved}% من الحجم)`);
     } catch {
@@ -317,7 +325,8 @@ function BusinessForm() {
         description: form.description.trim() || null,
         address: form.address.trim() || null,
         phone: form.phone.trim() || null,
-        whatsapp: form.whatsapp.trim() || null,
+        whatsapp: normalizeEgyptWhatsApp(form.whatsapp) || null,
+        cover_thumb_url: form.cover_thumb_url.trim() || null,
         email: form.email.trim() || null,
         website: form.website.trim() || null,
         facebook: form.facebook.trim() || null,
@@ -668,8 +677,19 @@ function BusinessForm() {
                     dir="ltr"
                     value={form[key]}
                     maxLength={255}
+                    placeholder={key === "whatsapp" ? "+201012345678" : undefined}
                     onChange={(e) => set(key, e.target.value)}
+                    onBlur={
+                      key === "whatsapp"
+                        ? (e) => set("whatsapp", normalizeEgyptWhatsApp(e.target.value))
+                        : undefined
+                    }
                   />
+                  {key === "whatsapp" ? (
+                    <p className="text-[11px] text-muted-foreground">
+                      يُضاف مفتاح مصر (+20) تلقائياً إذا لم تكتبه.
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
