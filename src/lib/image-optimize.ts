@@ -105,3 +105,35 @@ export async function buildCoverVariants(file: File) {
   ]);
   return { large, thumb };
 }
+
+/**
+ * Generic responsive pair (full size + thumbnail) in WebP when supported.
+ * Used by gallery and ad uploads so every stored image ships a light variant.
+ */
+export async function buildImageVariants(
+  file: File,
+  options: {
+    maxWidth: number;
+    thumbWidth?: number;
+    crop?: boolean;
+    ratio?: number;
+    quality?: number;
+  },
+) {
+  const [large, thumb] = await Promise.all([
+    optimizeImage(file, {
+      maxWidth: options.maxWidth,
+      crop: options.crop,
+      ratio: options.ratio,
+      quality: options.quality ?? 0.82,
+    }),
+    optimizeImage(file, {
+      maxWidth: Math.min(options.thumbWidth ?? 480, options.maxWidth),
+      crop: options.crop,
+      ratio: options.ratio,
+      quality: 0.7,
+    }),
+  ]);
+  return { large, thumb };
+}
+

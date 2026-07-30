@@ -12,7 +12,11 @@ import {
   cityBelongsToGovernorate,
   CITY_MISMATCH_MESSAGE,
 } from "@/lib/location-filter";
-import { normalizeEgyptWhatsApp } from "@/lib/phone";
+import {
+  isValidWhatsApp,
+  normalizeEgyptWhatsApp,
+  whatsAppPreview,
+} from "@/lib/phone";
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
@@ -50,7 +54,15 @@ const schema = z.object({
   city_id: z.string().uuid({ message: "اختر المدينة" }),
   address: z.string().trim().max(250).optional(),
   phone: z.string().trim().max(30).optional(),
-  whatsapp: z.string().trim().max(30).optional(),
+  whatsapp: z
+    .string()
+    .trim()
+    .max(30)
+    .optional()
+    .refine((v) => !v || isValidWhatsApp(v), {
+      message:
+        "رقم واتساب غير صحيح. اكتب رقماً مصرياً مثل 01012345678 أو رقماً دولياً كاملاً بمفتاح الدولة.",
+    }),
   email: z.string().trim().max(255).optional(),
   website: z.string().trim().max(255).optional(),
   facebook: z.string().trim().max(255).optional(),
@@ -686,10 +698,19 @@ function BusinessForm() {
                     }
                   />
                   {key === "whatsapp" ? (
-                    <p className="text-[11px] text-muted-foreground">
-                      يُضاف مفتاح مصر (+20) تلقائياً إذا لم تكتبه.
-                    </p>
+                    form.whatsapp.trim() && !isValidWhatsApp(form.whatsapp) ? (
+                      <p className="text-[11px] font-semibold text-destructive">
+                        رقم واتساب غير صحيح — اكتب رقماً مصرياً مثل 01012345678 أو رقماً
+                        دولياً كاملاً بمفتاح الدولة.
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground">
+                        {whatsAppPreview(form.whatsapp) ||
+                          "يُضاف مفتاح مصر (+20) تلقائياً إذا لم تكتبه."}
+                      </p>
+                    )
                   ) : null}
+
                 </div>
               ))}
             </div>

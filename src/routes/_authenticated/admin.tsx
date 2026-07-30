@@ -15,6 +15,7 @@ import { AdminCategories } from "@/components/AdminCategories";
 import { SeoStatusPanel } from "@/components/SeoStatus";
 import { AdminAds } from "@/components/AdminAds";
 import { AdminSearchTerms } from "@/components/AdminSearchTerms";
+import { AdminInsights } from "@/components/AdminInsights";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -37,7 +38,7 @@ function AdminPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
   const [q, setQ] = useState("");
   const [view, setView] = useState<
-    "moderation" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
+    "moderation" | "insights" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
   >("moderation");
   const queryClient = useQueryClient();
 
@@ -158,7 +159,7 @@ function AdminPage() {
         </div>
 
         <div className="mt-5 -mx-4 flex gap-2 overflow-x-auto border-b border-border px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
-          {([["moderation", "الأنشطة"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["ads", "الإعلانات"], ["searches", "كلمات البحث"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+          {([["moderation", "الأنشطة"], ["insights", "الإحصائيات"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["ads", "الإعلانات"], ["searches", "كلمات البحث"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -179,6 +180,7 @@ function AdminPage() {
 
 
         {view === "branding" ? <BrandingSettings /> : null}
+        {view === "insights" ? <AdminInsights /> : null}
         {view === "users" ? <AdminUsers /> : null}
         {view === "categories" ? <AdminCategories /> : null}
         {view === "ads" ? <AdminAds /> : null}

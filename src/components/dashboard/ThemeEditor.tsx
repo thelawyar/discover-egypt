@@ -46,7 +46,7 @@ export function ThemeEditor({
   async function uploadLogo(file: File) {
     setUploading(true);
     try {
-      const url = await uploadBusinessImage(file, userId, { maxWidth: 512 });
+      const { url } = await uploadBusinessImage(file, userId, { maxWidth: 512 });
       onChange({ logo_url: url });
       toast.success("تم رفع الشعار");
     } catch (err) {

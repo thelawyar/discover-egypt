@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Check, Copy, Link2, SearchX, X } from "lucide-react";
+import { Check, Copy, Link2, Loader2, LocateFixed, SearchX, X } from "lucide-react";
+import { detectLocation } from "@/lib/geo-locate";
+import type { City, Governorate } from "@/lib/directory-types";
 import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
@@ -212,12 +214,27 @@ function SearchPage() {
             ))}
           </select>
 
+          <NearMeButton
+            taxonomy={taxonomy}
+            onDetect={(loc) =>
+              navigate({
+                search: (p: SearchParams) => ({
+                  ...p,
+                  gov: loc.gov,
+                  city: loc.city,
+                  page: 1,
+                }),
+              })
+            }
+          />
+
           <span className="ms-auto text-xs text-muted-foreground">
             {results.total.toLocaleString("ar-EG")} نتيجة
           </span>
 
           <ShareResults />
         </div>
+
 
         <ActiveFilters
           params={params}
@@ -287,6 +304,55 @@ function SearchPage() {
         ) : null}
       </div>
     </PageShell>
+  );
+}
+
+/** Detects the visitor's city and applies it as a filter. */
+function NearMeButton({
+  taxonomy,
+  onDetect,
+}: {
+  taxonomy: { cities: City[]; governorates: Governorate[] };
+  onDetect: (loc: { gov: string; city: string }) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const match = await detectLocation(taxonomy);
+      onDetect({ gov: match.gov, city: match.city });
+      setMessage(`نتائج قريبة منك: ${match.label}`);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "تعذّر تحديد موقعك");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="rounded-full"
+        disabled={busy}
+        onClick={run}
+      >
+        {busy ? (
+          <Loader2 className="size-3.5 animate-spin" />
+        ) : (
+          <LocateFixed className="size-3.5" />
+        )}
+        {busy ? "جارٍ تحديد موقعك..." : "اكتشف موقعي"}
+      </Button>
+      {message ? (
+        <span className="text-[11px] text-muted-foreground">{message}</span>
+      ) : null}
+    </div>
   );
 }
 
