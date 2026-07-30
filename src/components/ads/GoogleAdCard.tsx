@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { adsenseSlotFor, type AdPageType } from "@/lib/ads-config";
 
 declare global {
   interface Window {
@@ -11,12 +12,12 @@ declare global {
  * Google AdSense unit styled like a result card, with a small in-frame label
  * so users can tell it apart from organic results.
  */
-export function GoogleAdCard() {
+export function GoogleAdCard({ pageType = "search" }: { pageType?: AdPageType }) {
   const settings = useSiteSettings();
   const ref = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
   const client = settings.adsense_client?.trim();
-  const slot = settings.adsense_slot?.trim();
+  const slot = adsenseSlotFor(settings, pageType);
   const enabled = Boolean(settings.adsense_enabled && client && slot);
 
   useEffect(() => {
