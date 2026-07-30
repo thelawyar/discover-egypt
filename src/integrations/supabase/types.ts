@@ -47,6 +47,94 @@ export type Database = {
         }
         Relationships: []
       }
+      ads: {
+        Row: {
+          advertiser: string | null
+          body: string | null
+          category_id: string | null
+          city_id: string | null
+          click_count: number
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          governorate_id: string | null
+          id: string
+          image_url: string | null
+          impression_count: number
+          is_active: boolean
+          placement: Database["public"]["Enums"]["ad_placement"]
+          priority: number
+          starts_at: string
+          target_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser?: string | null
+          body?: string | null
+          category_id?: string | null
+          city_id?: string | null
+          click_count?: number
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          governorate_id?: string | null
+          id?: string
+          image_url?: string | null
+          impression_count?: number
+          is_active?: boolean
+          placement?: Database["public"]["Enums"]["ad_placement"]
+          priority?: number
+          starts_at?: string
+          target_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser?: string | null
+          body?: string | null
+          category_id?: string | null
+          city_id?: string | null
+          click_count?: number
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          governorate_id?: string | null
+          id?: string
+          image_url?: string | null
+          impression_count?: number
+          is_active?: boolean
+          placement?: Database["public"]["Enums"]["ad_placement"]
+          priority?: number
+          starts_at?: string
+          target_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ads_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ads_governorate_id_fkey"
+            columns: ["governorate_id"]
+            isOneToOne: false
+            referencedRelation: "governorates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_hours: {
         Row: {
           business_id: string
@@ -391,6 +479,10 @@ export type Database = {
       site_settings: {
         Row: {
           accent_color: string
+          adsense_client: string | null
+          adsense_enabled: boolean
+          adsense_every: number
+          adsense_slot: string | null
           id: string
           logo_url: string | null
           primary_color: string
@@ -400,6 +492,10 @@ export type Database = {
         }
         Insert: {
           accent_color?: string
+          adsense_client?: string | null
+          adsense_enabled?: boolean
+          adsense_every?: number
+          adsense_slot?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string
@@ -409,6 +505,10 @@ export type Database = {
         }
         Update: {
           accent_color?: string
+          adsense_client?: string | null
+          adsense_enabled?: boolean
+          adsense_every?: number
+          adsense_slot?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string
@@ -474,6 +574,7 @@ export type Database = {
       make_slug: { Args: { v: string }; Returns: string }
     }
     Enums: {
+      ad_placement: "home" | "search" | "business"
       app_role: "admin" | "moderator" | "user"
       business_status: "pending" | "approved" | "rejected"
     }
@@ -603,6 +704,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_placement: ["home", "search", "business"],
       app_role: ["admin", "moderator", "user"],
       business_status: ["pending", "approved", "rejected"],
     },
