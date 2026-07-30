@@ -19,18 +19,18 @@ export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
   const { site_name: name, logo_url: logo } = useSiteSettings();
   const cls =
     size === "lg"
-      ? "text-4xl sm:text-5xl"
+      ? "text-2xl sm:text-4xl md:text-5xl"
       : "truncate text-base sm:text-xl";
-  const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-8 sm:h-9";
+  const imgCls = size === "lg" ? "h-14 sm:h-20 md:h-24" : "h-8 sm:h-9";
   return (
-    <span className="inline-flex min-w-0 items-center gap-2">
+    <span className="inline-flex min-w-0 flex-wrap items-center justify-center gap-2">
       <img
         src={logo || townLogo.url}
         alt={name}
         className={`${imgCls} w-auto shrink-0`}
       />
       <span
-        className={`truncate font-extrabold tracking-tight text-foreground ${cls}`}
+        className={`font-extrabold tracking-tight text-foreground ${cls}`}
       >
         {name}
       </span>
