@@ -191,15 +191,25 @@ function AdminPage() {
           ))}
         </div>
 
+        {view === "moderation" ? (
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="ابحث باسم النشاط أو المدينة أو التصنيف"
+            className="mt-4 w-full rounded-full border border-border bg-card px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-primary"
+          />
+        ) : null}
+
         {view !== "moderation" ? null : isLoading ? (
           <p className="py-20 text-center text-sm text-muted-foreground">جارٍ التحميل...</p>
-        ) : !data?.length ? (
+        ) : !filtered.length ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
-            لا توجد أنشطة في هذه القائمة.
+            لا توجد أنشطة مطابقة في هذه القائمة.
           </p>
         ) : (
           <div className="mt-6 space-y-3">
-            {data.map((b) => (
+            {filtered.map((b) => (
+
               <div
                 key={b.id}
                 className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-card"
