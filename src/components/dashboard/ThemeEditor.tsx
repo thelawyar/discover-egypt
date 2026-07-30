@@ -3,6 +3,8 @@ import { ImagePlus, Loader2, X, Store, Phone, Star } from "lucide-react";
 import { toast } from "sonner";
 import {
   THEME_STYLES,
+  THEME_FONTS,
+  THEME_BUTTONS,
   THEME_PRESETS,
   resolveTheme,
   themeVars,
