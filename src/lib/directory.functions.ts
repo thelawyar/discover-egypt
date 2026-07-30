@@ -71,8 +71,11 @@ const searchSchema = z.object({
   city: z.string().optional(),
   gov: z.string().optional(),
   cat: z.string().optional(),
+  prod: z.string().optional(),
+  sort: z.enum(["best", "newest", "popular"]).optional(),
   page: z.number().optional(),
 });
+
 
 export const searchBusinesses = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => searchSchema.parse(data))
