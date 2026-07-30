@@ -44,11 +44,48 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+/**
+ * Markdown content negotiation for AI agents: a `.md` suffix or an
+ * `Accept: text/markdown` request for a public page is served from the
+ * Markdown renderer instead of the HTML app.
+ */
+function markdownRewrite(request: Request): Request | null {
+  if (request.method !== "GET") return null;
+  const url = new URL(request.url);
+  const path = url.pathname;
+  if (
+    path.startsWith("/api/") ||
+    path.startsWith("/_") ||
+    path.startsWith("/.well-known/") ||
+    path === "/mcp" ||
+    path.startsWith("/mcp/") ||
+    path === "/llms.txt" ||
+    path === "/robots.txt" ||
+    path === "/sitemap.xml"
+  ) {
+    return null;
+  }
+
+  const accept = request.headers.get("accept") ?? "";
+  const wantsMarkdown =
+    /text\/markdown|text\/x-markdown/i.test(accept) && !/text\/html/i.test(accept);
+  const hasMdSuffix = path.endsWith(".md");
+  if (!wantsMarkdown && !hasMdSuffix) return null;
+
+  const target = new URL("/api/public/md", url.origin);
+  target.searchParams.set(
+    "path",
+    (hasMdSuffix ? path.slice(0, -3) : path) + url.search,
+  );
+  return new Request(target, { headers: request.headers });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const rewritten = markdownRewrite(request);
+      const response = await handler.fetch(rewritten ?? request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
@@ -59,3 +96,4 @@ export default {
     }
   },
 };
+
