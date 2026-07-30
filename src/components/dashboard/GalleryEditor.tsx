@@ -1,10 +1,28 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, Loader2, X, ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  ImagePlus,
+  Loader2,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Star,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
 import { ImageCropDialog, validateImageFile } from "@/components/ImageCropDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 
 /** Manage the photo gallery shown on the public mini-site. */
 export function GalleryEditor({
