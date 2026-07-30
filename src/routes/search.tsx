@@ -373,7 +373,7 @@ function SearchPage() {
             {results.total.toLocaleString("ar-EG")} نتيجة
           </span>
 
-          <ShareResults params={params} origin={loaderData?.origin ?? ""} />
+          <ShareResults params={params} />
         </div>
 
 
