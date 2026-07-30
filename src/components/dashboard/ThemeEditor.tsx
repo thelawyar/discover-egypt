@@ -83,6 +83,64 @@ export function ThemeEditor({
         </div>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>الخط</Label>
+          <div className="flex flex-wrap gap-2">
+            {THEME_FONTS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => onChange({ theme_font: f.id })}
+                style={{ fontFamily: f.family }}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  theme.font === f.id
+                    ? "border-primary bg-primary-soft text-accent-foreground"
+                    : "border-border"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>نمط الأزرار</Label>
+          <div className="flex flex-wrap gap-2">
+            {THEME_BUTTONS.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => onChange({ theme_button: b.id })}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  theme.button === b.id
+                    ? "border-primary bg-primary-soft text-accent-foreground"
+                    : "border-border"
+                }`}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <label className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+        <span>
+          <span className="block text-xs font-semibold">تحسين التباين</span>
+          <span className="block text-[11px] text-muted-foreground">
+            ألوان أوضح ونصوص أعلى تباينًا لسهولة القراءة.
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          className="size-4"
+          checked={value.theme_contrast}
+          onChange={(e) => onChange({ theme_contrast: e.target.checked })}
+        />
+      </label>
+
       <div className="space-y-2">
         <Label>ألوان جاهزة</Label>
         <div className="flex flex-wrap gap-2">
