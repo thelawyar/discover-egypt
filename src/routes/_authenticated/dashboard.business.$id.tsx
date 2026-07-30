@@ -331,7 +331,8 @@ function BusinessForm() {
         theme_font: form.theme_font,
         theme_button: form.theme_button,
         theme_contrast: form.theme_contrast,
-        owner_id: user!.id,
+        // Ownership is set only when creating; editors/managers must not steal it.
+        ...(isNew ? { owner_id: user!.id } : {}),
       };
 
       if (isNew) {
