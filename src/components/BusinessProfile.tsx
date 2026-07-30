@@ -208,6 +208,17 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
     background: "var(--biz-card)",
   };
   const softStyle = { background: "var(--biz-soft)" };
+  // Contact buttons follow the owner's chosen button shape/style.
+  const actionStyle = theme.buttonOutlined
+    ? {
+        borderRadius: "var(--biz-btn-radius)",
+        border: `1.5px solid var(--biz-primary)`,
+        background: "transparent",
+      }
+    : {
+        borderRadius: "var(--biz-btn-radius)",
+        background: "var(--biz-soft)",
+      };
 
   return (
     <div style={themeVars(theme)}>
@@ -381,8 +392,8 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
                           ? { target: "_blank", rel: "noopener noreferrer" }
                           : {})}
                         onClick={() => trackContact(data.id, c.key)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
-                        style={softStyle}
+                        className="flex items-center gap-2 px-3 py-2 text-sm"
+                        style={actionStyle}
                       >
                         <Icon className="size-4" style={{ color: "var(--biz-primary)" }} />
                         <span {...(c.ltr ? { dir: "ltr" } : {})}>{c.label}</span>

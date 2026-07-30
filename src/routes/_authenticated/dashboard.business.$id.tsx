@@ -75,6 +75,9 @@ type FormState = {
   theme_primary: string | null;
   theme_bg: string | null;
   theme_style: string;
+  theme_font: string;
+  theme_button: string;
+  theme_contrast: boolean;
 };
 
 const EMPTY: FormState = {
@@ -97,6 +100,9 @@ const EMPTY: FormState = {
   theme_primary: null,
   theme_bg: null,
   theme_style: "classic",
+  theme_font: "cairo",
+  theme_button: "rounded",
+  theme_contrast: false,
 };
 
 function BusinessForm() {
@@ -203,6 +209,9 @@ function BusinessForm() {
       theme_primary: existing.theme_primary ?? null,
       theme_bg: existing.theme_bg ?? null,
       theme_style: existing.theme_style ?? "classic",
+      theme_font: existing.theme_font ?? "cairo",
+      theme_button: existing.theme_button ?? "rounded",
+      theme_contrast: Boolean(existing.theme_contrast),
     });
   }, [existing]);
 
@@ -318,6 +327,9 @@ function BusinessForm() {
         theme_primary: form.theme_primary,
         theme_bg: form.theme_bg,
         theme_style: form.theme_style,
+        theme_font: form.theme_font,
+        theme_button: form.theme_button,
+        theme_contrast: form.theme_contrast,
         owner_id: user!.id,
       };
 
@@ -705,6 +717,9 @@ function BusinessForm() {
               theme_primary: form.theme_primary,
               theme_bg: form.theme_bg,
               theme_style: form.theme_style,
+              theme_font: form.theme_font,
+              theme_button: form.theme_button,
+              theme_contrast: form.theme_contrast,
             }}
             onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
             userId={user?.id ?? ""}

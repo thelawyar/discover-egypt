@@ -53,11 +53,11 @@ async function encode(
 
 /**
  * Resize to fit within maxWidth (keeps aspect ratio).
- * When `crop` is set, the image is center-cropped to the 1.91:1 Open Graph ratio.
+ * When `crop` is set, the image is center-cropped to `ratio` (default 1.91:1 Open Graph).
  */
 export async function optimizeImage(
   file: File,
-  options: { maxWidth: number; crop?: boolean; quality?: number },
+  options: { maxWidth: number; crop?: boolean; quality?: number; ratio?: number },
 ): Promise<OptimizedImage> {
   const source = await loadBitmap(file);
   const sw = "width" in source ? source.width : 0;
@@ -73,12 +73,13 @@ export async function optimizeImage(
   let ch = sh;
 
   if (options.crop) {
-    targetH = Math.round(targetW / OG_RATIO);
-    if (sw / sh > OG_RATIO) {
-      cw = Math.round(sh * OG_RATIO);
+    const ratio = options.ratio && options.ratio > 0 ? options.ratio : OG_RATIO;
+    targetH = Math.round(targetW / ratio);
+    if (sw / sh > ratio) {
+      cw = Math.round(sh * ratio);
       sx = Math.round((sw - cw) / 2);
     } else {
-      ch = Math.round(sw / OG_RATIO);
+      ch = Math.round(sw / ratio);
       sy = Math.round((sh - ch) / 2);
     }
   }

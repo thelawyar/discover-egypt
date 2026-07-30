@@ -294,6 +294,9 @@ export type Database = {
           search_text: string
           status: Database["public"]["Enums"]["business_status"]
           theme_bg: string | null
+          theme_button: string
+          theme_contrast: boolean
+          theme_font: string
           theme_primary: string | null
           theme_style: string
           updated_at: string
@@ -326,6 +329,9 @@ export type Database = {
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           theme_bg?: string | null
+          theme_button?: string
+          theme_contrast?: boolean
+          theme_font?: string
           theme_primary?: string | null
           theme_style?: string
           updated_at?: string
@@ -358,6 +364,9 @@ export type Database = {
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           theme_bg?: string | null
+          theme_button?: string
+          theme_contrast?: boolean
+          theme_font?: string
           theme_primary?: string | null
           theme_style?: string
           updated_at?: string
@@ -653,9 +662,30 @@ export type Database = {
         Args: { _grant: boolean; _user_id: string }
         Returns: boolean
       }
+      business_page_events_export: {
+        Args: { _business_id: string; _days?: number }
+        Returns: {
+          created_at: string
+          event_type: string
+          label: string
+          source: string
+        }[]
+      }
       business_page_stats: {
         Args: { _business_id: string; _days?: number }
         Returns: Json
+      }
+      business_recent_contacts: {
+        Args: { _since?: string }
+        Returns: {
+          business_id: string
+          business_name: string
+          created_at: string
+          id: string
+          label: string
+          source: string
+          username: string
+        }[]
       }
       claim_admin_invite: { Args: { _token: string }; Returns: boolean }
       create_admin_invite: {

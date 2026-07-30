@@ -57,6 +57,7 @@ export const Route = createFileRoute("/$username")({
       latitude: data.latitude,
       longitude: data.longitude,
       rating,
+      updated_at: data.updated_at,
       reviewCount: data.reviews.length,
     };
   },
@@ -86,6 +87,10 @@ export const Route = createFileRoute("/$username")({
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
+    if (loaderData.updated_at) {
+      // Helps crawlers refresh the preview after a theme/content update.
+      meta.push({ property: "og:updated_time", content: loaderData.updated_at });
+    }
     const image = absoluteOgImage(loaderData.image, origin);
     meta.push(...ogImageMeta(loaderData.image, origin, loaderData.name));
 

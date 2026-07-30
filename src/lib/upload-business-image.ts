@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export async function uploadBusinessImage(
   file: File,
   userId: string,
-  options: { maxWidth: number; crop?: boolean },
+  options: { maxWidth: number; crop?: boolean; ratio?: number; quality?: number },
 ): Promise<string> {
   if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
     throw new Error("الصيغ المدعومة: PNG أو JPG أو WEBP");
@@ -17,7 +17,8 @@ export async function uploadBusinessImage(
   const image = await optimizeImage(file, {
     maxWidth: options.maxWidth,
     crop: options.crop,
-    quality: 0.84,
+    ratio: options.ratio,
+    quality: options.quality ?? 0.84,
   });
   const path = `${userId}/${crypto.randomUUID()}.${image.ext}`;
 
