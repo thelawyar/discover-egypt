@@ -239,7 +239,36 @@ export const Route = createFileRoute("/search")({
 
 });
 
+/** Dynamic, filter-aware H1 text for the results page. */
+function resultsHeading(s: {
+  q: string;
+  prod: string;
+  page: number;
+  gov: string | null;
+  city: string | null;
+  cat: string | null;
+}): string {
+  const term = s.q.trim();
+  const prod = s.prod.trim();
+  const place = s.city ?? s.gov;
+  const parts = [
+    term
+      ? `نتائج البحث عن «${term}»`
+      : s.cat
+        ? `${s.cat}`
+        : prod
+          ? `أنشطة توفر «${prod}»`
+          : "كل الأنشطة التجارية",
+    term && s.cat ? `في ${s.cat}` : null,
+    term && prod ? `تشمل «${prod}»` : null,
+    place ? `في ${place}` : null,
+    s.page > 1 ? `- صفحة ${s.page}` : null,
+  ].filter(Boolean);
+  return parts.join(" ");
+}
+
 function SearchPage() {
+
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
   
