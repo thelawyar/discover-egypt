@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
+import { BackButton } from "@/components/BackButton";
 import { BrandingSettings } from "@/components/BrandingSettings";
 import { AdminUsers } from "@/components/AdminUsers";
 import { AdminCategories } from "@/components/AdminCategories";
@@ -105,7 +106,8 @@ function AdminPage() {
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-extrabold">لوحة الإدارة</h1>
+            <BackButton fallback="/" />
+            <h1 className="mt-2 text-xl font-extrabold">لوحة الإدارة</h1>
             <p className="mt-1 text-xs text-muted-foreground">
               مراجعة الأنشطة والتصنيفات المرسلة واعتمادها أو رفضها.
             </p>

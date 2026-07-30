@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/_authenticated/admin-cities")({
   head: () => ({
@@ -232,7 +233,8 @@ function AdminCitiesPage() {
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-extrabold">المحافظات والمدن</h1>
+            <BackButton fallback="/admin" label="لوحة الإدارة" />
+            <h1 className="mt-2 text-xl font-extrabold">المحافظات والمدن</h1>
             <p className="mt-1 text-xs text-muted-foreground">
               فعّل أو عطّل المدن، عدّل الأسماء، واربطها بالمحافظة الصحيحة.
             </p>

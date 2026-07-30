@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { AdminCategories } from "@/components/AdminCategories";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/_authenticated/admin-categories")({
   head: () => ({
@@ -52,7 +53,8 @@ function AdminCategoriesPage() {
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-extrabold">إدارة التصنيفات</h1>
+            <BackButton fallback="/admin" label="رجوع" />
+            <h1 className="mt-2 text-xl font-extrabold">إدارة التصنيفات</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               أضف تصنيفاً جديداً أو عدّل اسمه أو راجع اقتراحات المستخدمين.
             </p>
