@@ -173,7 +173,14 @@ function SearchPage() {
             initialQuery={params.q}
             initialCity={params.city}
             size="compact"
+            onLiveChange={(term) =>
+              navigate({
+                replace: true,
+                search: (p: SearchParams) => ({ ...p, q: term, page: 1 }),
+              })
+            }
           />
+
         </div>
       </div>
 
