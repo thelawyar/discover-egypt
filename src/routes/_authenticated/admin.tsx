@@ -35,6 +35,7 @@ const TABS = ["pending", "approved", "rejected"] as const;
 function AdminPage() {
   const { isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<(typeof TABS)[number]>("pending");
+  const [q, setQ] = useState("");
   const [view, setView] = useState<
     "moderation" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
   >("moderation");
