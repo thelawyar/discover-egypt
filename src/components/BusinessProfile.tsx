@@ -130,7 +130,7 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
       _business_id: data.id,
       _event_type: "view",
       _source: visitSource(),
-      _label: null,
+      _label: undefined,
     });
   }, [data.id]);
 
