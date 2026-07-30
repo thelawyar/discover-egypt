@@ -227,6 +227,8 @@ function AdminPage() {
               }`}
             >
               {STATUS_LABELS[t]}
+              {counts ? ` (${counts[t].toLocaleString("ar-EG")})` : ""}
+
             </button>
           ))}
         </div>
