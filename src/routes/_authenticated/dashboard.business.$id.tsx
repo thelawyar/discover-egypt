@@ -699,6 +699,33 @@ function BusinessForm() {
             </label>
           </section>
 
+          <ThemeEditor
+            value={{
+              logo_url: form.logo_url,
+              theme_primary: form.theme_primary,
+              theme_bg: form.theme_bg,
+              theme_style: form.theme_style,
+            }}
+            onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+            userId={user?.id ?? ""}
+            businessName={form.name || "اسم النشاط"}
+            coverUrl={form.cover_image_url}
+          />
+
+          {!isNew ? (
+            <>
+              <GalleryEditor businessId={id} userId={user?.id ?? ""} />
+              <HoursEditor businessId={id} />
+              <BusinessStats businessId={id} />
+            </>
+          ) : (
+            <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+              بعد حفظ النشاط ستتمكن من إضافة معرض الصور ومواعيد العمل ومتابعة
+              إحصائيات الزيارات.
+            </p>
+          )}
+
+
           <div className="flex justify-end gap-2">
             <Button asChild type="button" variant="outline" className="rounded-full">
               <Link to="/dashboard">إلغاء</Link>
