@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://pdgpjjlcxtjitpsmoqgi.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "discover-egypt",
+      "version": "0.1.0",
+      "title": "اكتشف مدينتك"
+    },
+    "tools": [
+      {
+        "name": "search_businesses",
+        "title": "Search businesses",
+        "description": "Search the Egyptian city directory for approved businesses by keyword, city slug/name, or category slug/name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Free-text keyword (name, service, product)."
+            },
+            "city": {
+              "type": "string",
+              "description": "City slug or Arabic name."
+            },
+            "category": {
+              "type": "string",
+              "description": "Category slug or Arabic name."
+            },
+            "limit": {
+              "type": "number",
+              "description": "Max results (1-50, default 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_taxonomy",
+        "title": "List cities and categories",
+        "description": "List the governorates, cities, and business categories (with slugs) used to filter directory searches.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_business",
+        "title": "Get business profile",
+        "description": "Read the full public profile of one approved business by its username (durtown.com/<username>) or id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "handle": {
+              "type": "string",
+              "description": "Business username or UUID."
+            }
+          },
+          "required": [
+            "handle"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
