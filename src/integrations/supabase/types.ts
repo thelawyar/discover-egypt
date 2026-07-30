@@ -628,8 +628,14 @@ export type Database = {
       notification_settings: {
         Row: {
           created_at: string
+          notify_approved_email: boolean
+          notify_approved_inapp: boolean
           notify_contact_clicks: boolean
           notify_messages: boolean
+          notify_rejected_email: boolean
+          notify_rejected_inapp: boolean
+          notify_withdrawn_email: boolean
+          notify_withdrawn_inapp: boolean
           push_enabled: boolean
           sound_enabled: boolean
           updated_at: string
@@ -637,8 +643,14 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          notify_approved_email?: boolean
+          notify_approved_inapp?: boolean
           notify_contact_clicks?: boolean
           notify_messages?: boolean
+          notify_rejected_email?: boolean
+          notify_rejected_inapp?: boolean
+          notify_withdrawn_email?: boolean
+          notify_withdrawn_inapp?: boolean
           push_enabled?: boolean
           sound_enabled?: boolean
           updated_at?: string
@@ -646,8 +658,14 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          notify_approved_email?: boolean
+          notify_approved_inapp?: boolean
           notify_contact_clicks?: boolean
           notify_messages?: boolean
+          notify_rejected_email?: boolean
+          notify_rejected_inapp?: boolean
+          notify_withdrawn_email?: boolean
+          notify_withdrawn_inapp?: boolean
           push_enabled?: boolean
           sound_enabled?: boolean
           updated_at?: string
