@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as UsernameRouteImport } from './routes/$username'
@@ -23,8 +24,11 @@ import { Route as AuthenticatedAdminSetupRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminCitiesRouteImport } from './routes/_authenticated/admin-cities'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin-categories'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_authenticated/dashboard.business.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -35,6 +39,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
@@ -98,6 +107,18 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/dashboard/',
@@ -109,6 +130,12 @@ const ApiPublicMdRoute = ApiPublicMdRouteImport.update({
   path: '/api/public/md',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedDashboardBusinessIdRoute =
   AuthenticatedDashboardBusinessIdRouteImport.update({
     id: '/dashboard/business/$id',
@@ -121,8 +148,11 @@ export interface FileRoutesByFullPath {
   '/$username': typeof UsernameRoute
   '/auth': typeof AuthRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin-cities': typeof AuthenticatedAdminCitiesRoute
@@ -130,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
@@ -139,8 +170,11 @@ export interface FileRoutesByTo {
   '/$username': typeof UsernameRoute
   '/auth': typeof AuthRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-categories': typeof AuthenticatedAdminCategoriesRoute
   '/admin-cities': typeof AuthenticatedAdminCitiesRoute
@@ -148,6 +182,7 @@ export interface FileRoutesByTo {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
@@ -159,8 +194,11 @@ export interface FileRoutesById {
   '/$username': typeof UsernameRoute
   '/auth': typeof AuthRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/admin-categories': typeof AuthenticatedAdminCategoriesRoute
   '/_authenticated/admin-cities': typeof AuthenticatedAdminCitiesRoute
@@ -168,6 +206,7 @@ export interface FileRoutesById {
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
   '/s/$code': typeof SCodeRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
@@ -179,8 +218,11 @@ export interface FileRouteTypes {
     | '/$username'
     | '/auth'
     | '/llms.txt'
+    | '/mcp'
     | '/search'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-categories'
     | '/admin-cities'
@@ -188,6 +230,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
     | '/dashboard/'
     | '/dashboard/business/$id'
@@ -197,8 +240,11 @@ export interface FileRouteTypes {
     | '/$username'
     | '/auth'
     | '/llms.txt'
+    | '/mcp'
     | '/search'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-categories'
     | '/admin-cities'
@@ -206,6 +252,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
     | '/dashboard'
     | '/dashboard/business/$id'
@@ -216,8 +263,11 @@ export interface FileRouteTypes {
     | '/$username'
     | '/auth'
     | '/llms.txt'
+    | '/mcp'
     | '/search'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/admin-categories'
     | '/_authenticated/admin-cities'
@@ -225,6 +275,7 @@ export interface FileRouteTypes {
     | '/business/$id'
     | '/city/$slug'
     | '/s/$code'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/business/$id'
@@ -236,11 +287,15 @@ export interface RootRouteChildren {
   UsernameRoute: typeof UsernameRoute
   AuthRoute: typeof AuthRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  McpRoute: typeof McpRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BusinessIdRoute: typeof BusinessIdRoute
   CitySlugRoute: typeof CitySlugRoute
   SCodeRoute: typeof SCodeRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicMdRoute: typeof ApiPublicMdRoute
 }
 
@@ -258,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/llms.txt': {
@@ -344,6 +406,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
       path: '/dashboard'
@@ -356,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/md'
       fullPath: '/api/public/md'
       preLoaderRoute: typeof ApiPublicMdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard/business/$id': {
@@ -395,11 +478,16 @@ const rootRouteChildren: RootRouteChildren = {
   UsernameRoute: UsernameRoute,
   AuthRoute: AuthRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  McpRoute: McpRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   BusinessIdRoute: BusinessIdRoute,
   CitySlugRoute: CitySlugRoute,
   SCodeRoute: SCodeRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicMdRoute: ApiPublicMdRoute,
 }
 export const routeTree = rootRouteImport
