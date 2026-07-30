@@ -200,8 +200,6 @@ function SearchPage() {
 
 
 
-  const { data: results } = useSuspenseQuery(resultsQuery(params));
-
   const perPage = 12;
   const pages = Math.max(1, Math.ceil(results.total / perPage));
   const normalized = normalizeLocationParams(taxonomy, {
