@@ -377,9 +377,10 @@ export const getSitemapData = createServerFn({ method: "GET" }).handler(
     const { getPublicClient } = await import("./supabase-public.server");
     const supabase = getPublicClient();
 
-    const [cities, categories, businesses] = await Promise.all([
+    const [cities, categories, governorates, businesses] = await Promise.all([
       supabase.from("cities").select("slug").order("name"),
       supabase.from("categories").select("slug").order("sort_order"),
+      supabase.from("governorates").select("slug").order("name"),
       supabase
         .from("businesses")
         .select("id,username,updated_at")
@@ -391,6 +392,7 @@ export const getSitemapData = createServerFn({ method: "GET" }).handler(
     return {
       cities: (cities.data ?? []).map((c) => c.slug),
       categories: (categories.data ?? []).map((c) => c.slug),
+      governorates: (governorates.data ?? []).map((g) => g.slug),
       businesses: (businesses.data ?? []).map((b) => ({
         id: b.id,
         username: b.username,

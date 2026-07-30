@@ -17,6 +17,8 @@ type Props = {
   autoFocus?: boolean;
   /** When set, the query is applied instantly (debounced) without a submit. */
   onLiveChange?: (term: string) => void;
+  /** Called when the visitor clears the box (✕ or ESC). */
+  onClear?: () => void;
 };
 
 export function SearchBar({
@@ -27,6 +29,7 @@ export function SearchBar({
   size = "hero",
   autoFocus = false,
   onLiveChange,
+  onClear,
 }: Props) {
   const navigate = useNavigate();
   const [q, setQ] = useState(initialQuery);
@@ -142,7 +145,8 @@ export function SearchBar({
     setQ("");
     setDebounced("");
     setSuggestOpen(false);
-    if (onLiveChange) onLiveChange("");
+    if (onClear) onClear();
+    else if (onLiveChange) onLiveChange("");
     else go("");
   }
 
@@ -186,7 +190,11 @@ export function SearchBar({
           }}
           onFocus={() => setSuggestOpen(true)}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setSuggestOpen(false);
+            if (e.key !== "Escape") return;
+            e.preventDefault();
+            // First ESC closes the suggestions, the next one clears like ✕.
+            if (suggestOpen && debounced.length >= 2) setSuggestOpen(false);
+            else clearQuery();
           }}
           autoComplete="off"
           maxLength={100}

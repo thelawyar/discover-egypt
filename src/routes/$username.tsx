@@ -47,6 +47,12 @@ export const Route = createFileRoute("/$username")({
       name: data.name,
       description: data.description,
       image: data.cover_image_url ?? data.images[0]?.url ?? data.logo_url ?? null,
+      gallery: [
+        data.cover_image_url,
+        data.logo_url,
+        ...data.images.map((i) => i.url),
+      ].filter((u): u is string => Boolean(u)),
+      whatsapp: data.whatsapp ?? null,
       address: data.address,
       phone: data.phone,
       website: data.website,
@@ -94,14 +100,39 @@ export const Route = createFileRoute("/$username")({
     const image = absoluteOgImage(loaderData.image, origin);
     meta.push(...ogImageMeta(loaderData.image, origin, loaderData.name));
 
+    // Every gallery/cover image, absolute — richer LocalBusiness result.
+    const images = Array.from(
+      new Set(
+        (loaderData.gallery ?? [])
+          .map((src) => absoluteOgImage(src, origin))
+          .filter((u): u is string => Boolean(u)),
+      ),
+    );
+
     const jsonLd: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
+      "@id": `${origin}${url}#business`,
       name: loaderData.name,
       description: desc,
       url: `${origin}${url}`,
-      ...(image ? { image } : {}),
+      ...(images.length ? { image: images } : image ? { image } : {}),
+      ...(loaderData.category_name
+        ? {
+            additionalType: loaderData.category_name,
+            knowsAbout: loaderData.category_name,
+          }
+        : {}),
       ...(loaderData.phone ? { telephone: loaderData.phone } : {}),
+      ...(loaderData.whatsapp
+        ? {
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer support",
+              telephone: loaderData.whatsapp,
+            },
+          }
+        : {}),
       ...(loaderData.website ? { sameAs: [loaderData.website] } : {}),
       address: {
         "@type": "PostalAddress",

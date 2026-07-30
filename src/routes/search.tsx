@@ -235,6 +235,13 @@ function SearchPage() {
   const showLast =
     lastSearch && !sameSearchState(lastSearch, params as SearchState);
 
+  /** Full reset: forget the stored search and go back to the (search-only) homepage. */
+  function resetSearch() {
+    clearLastSearch();
+    setLastSearch(null);
+    navigate({ to: "/" });
+  }
+
   return (
     <PageShell>
       <div className="border-b border-border">
@@ -245,13 +252,16 @@ function SearchPage() {
             initialQuery={params.q}
             initialCity={params.city}
             size="compact"
+            onClear={resetSearch}
             onLiveChange={(term) =>
+              // Push (not replace) so the browser back button restores the
+              // previous term together with its filters and sort order.
               navigate({
-                replace: true,
                 search: (p: SearchParams) => ({ ...p, q: term, page: 1 }),
               })
             }
           />
+
 
           {showLast ? (
             <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
@@ -388,7 +398,7 @@ function SearchPage() {
             // Clearing the query term (the × on the search chip) or "مسح الكل"
             // means leaving the results page — send the visitor back home, since
             // the homepage is search-only and there is nothing to browse without a term.
-            if (patch.q === "") navigate({ to: "/" });
+            if (patch.q === "") resetSearch();
             else
               navigate({
                 search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }),
@@ -522,8 +532,21 @@ function lastSearchLabel(
 function ShareResults({ params }: { params: SearchParams }) {
   const [copied, setCopied] = useState(false);
 
+  // Nothing to share when the search state is completely empty.
+  const hasState = Boolean(
+    params.q.trim() ||
+      params.city ||
+      params.gov ||
+      params.cat ||
+      params.prod.trim() ||
+      params.sort !== "best" ||
+      params.page > 1,
+  );
+
+  useEffect(() => setCopied(false), [params]);
+
   async function copy() {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !hasState) return;
     const base = window.location.origin;
 
     const url = shortShareUrl(base, params as SearchState);
@@ -543,13 +566,19 @@ function ShareResults({ params }: { params: SearchParams }) {
       size="sm"
       className="rounded-full"
       onClick={copy}
-      title="نسخ رابط قصير يحمل كل الفلاتر والفرز"
+      disabled={!hasState}
+      title={
+        hasState
+          ? "نسخ رابط قصير يحمل كل الفلاتر والفرز"
+          : "ابدأ بحثًا أو اختر فلترًا لتفعيل رابط المشاركة"
+      }
     >
       {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
       {copied ? "تم نسخ الرابط" : "نسخ رابط المشاركة"}
     </Button>
   );
 }
+
 
 
 /** Chips reflecting exactly what the shareable URL contains. */
