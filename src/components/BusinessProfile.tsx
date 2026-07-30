@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Globe,
   Mail,
@@ -18,8 +18,39 @@ import {
 } from "lucide-react";
 import type { BusinessDetail } from "@/lib/directory-types";
 import { WEEK_DAYS } from "@/lib/directory-types";
+import { resolveTheme, themeVars } from "@/lib/business-theme";
+import { supabase } from "@/integrations/supabase/client";
 import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
+import { QrCodeButton } from "@/components/QrCodeButton";
 import { Button } from "@/components/ui/button";
+
+/** Where the visit came from, derived from the referrer. */
+function visitSource(): string {
+  if (typeof document === "undefined") return "direct";
+  const ref = document.referrer;
+  if (!ref) return "direct";
+  try {
+    const host = new URL(ref).hostname.replace(/^www\./, "");
+    if (host === window.location.hostname) return "internal";
+    if (/google\./.test(host)) return "google";
+    if (/facebook\.|fb\./.test(host)) return "facebook";
+    if (/instagram\./.test(host)) return "instagram";
+    if (/wa\.me|whatsapp/.test(host)) return "whatsapp";
+    if (/t\.co|twitter\.|x\.com/.test(host)) return "twitter";
+    return host.slice(0, 60);
+  } catch {
+    return "direct";
+  }
+}
+
+function trackContact(businessId: string, label: string) {
+  void supabase.rpc("track_business_event", {
+    _business_id: businessId,
+    _event_type: "contact_click",
+    _source: visitSource(),
+    _label: label,
+  });
+}
 
 /** Shareable one-page mini-site link, like a Facebook page handle. */
 function HandleBar({ username, name }: { username: string; name: string }) {
@@ -51,12 +82,15 @@ function HandleBar({ username, name }: { username: string; name: string }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
-      <Link2 className="size-4 text-primary" />
+    <div
+      className="flex flex-wrap items-center gap-2 rounded-2xl border px-4 py-3"
+      style={{ borderColor: "var(--biz-border)", background: "var(--biz-card)" }}
+    >
+      <Link2 className="size-4" style={{ color: "var(--biz-primary)" }} />
       <span className="text-sm font-semibold" dir="ltr">
         {shortHost}/{username}
       </span>
-      <div className="ms-auto flex gap-2">
+      <div className="ms-auto flex flex-wrap gap-2">
         <Button variant="outline" size="sm" className="rounded-full" onClick={copy}>
           {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
           {copied ? "تم النسخ" : "نسخ الرابط"}
@@ -64,10 +98,12 @@ function HandleBar({ username, name }: { username: string; name: string }) {
         <Button variant="outline" size="sm" className="rounded-full" onClick={share}>
           <Share2 className="size-3.5" /> مشاركة
         </Button>
+        <QrCodeButton url={fullUrl} fileName={username} />
       </div>
     </div>
   );
 }
+
 
 /** Full public mini-site for one business. */
 export function BusinessProfile({ data }: { data: BusinessDetail }) {
