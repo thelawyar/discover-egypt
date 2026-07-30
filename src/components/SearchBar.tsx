@@ -201,13 +201,14 @@ export function SearchBar({
         {q ? (
           <button
             type="button"
-            onClick={() => setQ("")}
+            onClick={clearQuery}
             aria-label="مسح البحث"
             className="rounded-full p-1 text-muted-foreground hover:bg-muted"
           >
             <X className="size-4" />
           </button>
         ) : null}
+
 
         <span className="mx-1 h-6 w-px bg-border" />
 
