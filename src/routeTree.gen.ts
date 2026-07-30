@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as ApiPublicOgRouteImport } from './routes/api/public/og'
 import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -126,6 +127,11 @@ const AuthenticatedDashboardIndexRoute =
     path: '/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicOgRoute = ApiPublicOgRouteImport.update({
+  id: '/api/public/og',
+  path: '/api/public/og',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMdRoute = ApiPublicMdRouteImport.update({
   id: '/api/public/md',
   path: '/api/public/md',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
+  '/api/public/og': typeof ApiPublicOgRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
+  '/api/public/og': typeof ApiPublicOgRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/md': typeof ApiPublicMdRoute
+  '/api/public/og': typeof ApiPublicOgRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
+    | '/api/public/og'
     | '/dashboard/'
     | '/dashboard/business/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
+    | '/api/public/og'
     | '/dashboard'
     | '/dashboard/business/$id'
   id:
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/md'
+    | '/api/public/og'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/business/$id'
   fileRoutesById: FileRoutesById
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicMdRoute: typeof ApiPublicMdRoute
+  ApiPublicOgRoute: typeof ApiPublicOgRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/og': {
+      id: '/api/public/og'
+      path: '/api/public/og'
+      fullPath: '/api/public/og'
+      preLoaderRoute: typeof ApiPublicOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/md': {
       id: '/api/public/md'
       path: '/api/public/md'
@@ -510,6 +530,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicMdRoute: ApiPublicMdRoute,
+  ApiPublicOgRoute: ApiPublicOgRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
