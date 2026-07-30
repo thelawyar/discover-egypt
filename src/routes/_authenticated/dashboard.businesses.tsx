@@ -9,6 +9,9 @@ import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { STATUS_LABELS } from "@/lib/directory-types";
+import { StatusNotifications } from "@/components/dashboard/StatusNotifications";
+import { ModerationHistory } from "@/components/dashboard/ModerationHistory";
+import { QuickEditDialog, type QuickEditBusiness } from "@/components/dashboard/QuickEditDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard/businesses")({
   head: () => ({
@@ -35,6 +38,10 @@ type Row = {
   status: string;
   owner_id: string | null;
   rejection_reason: string | null;
+  description: string | null;
+  phone: string | null;
+  address: string | null;
+  products: string[] | null;
   cover_image_url: string | null;
   updated_at: string;
   categories: { name: string } | null;
@@ -57,6 +64,7 @@ function MyBusinessesPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<string>("pending");
+  const [editing, setEditing] = useState<QuickEditBusiness | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-businesses-status", user?.id],
@@ -71,7 +79,7 @@ function MyBusinessesPage() {
       const query = supabase
         .from("businesses")
         .select(
-          "id,name,username,status,owner_id,rejection_reason,cover_image_url,updated_at,categories(name),cities(name)",
+          "id,name,username,status,owner_id,rejection_reason,description,phone,address,products,cover_image_url,updated_at,categories(name),cities(name)",
         );
 
       const { data, error } = await (managedIds.length
@@ -117,6 +125,10 @@ function MyBusinessesPage() {
               <Plus className="size-4" /> أضف نشاطاً
             </Link>
           </Button>
+        </div>
+
+        <div className="mt-6">
+          <StatusNotifications />
         </div>
 
         <Tabs value={tab} onValueChange={setTab} className="mt-6">
@@ -165,11 +177,6 @@ function MyBusinessesPage() {
                       <p className="text-xs text-muted-foreground">
                         {b.categories?.name ?? "—"} · {b.cities?.name ?? "—"}
                       </p>
-                      {b.status === "rejected" && b.rejection_reason ? (
-                        <p className="mt-1 text-xs text-destructive">
-                          {b.rejection_reason}
-                        </p>
-                      ) : null}
                     </div>
 
                     <span
@@ -179,9 +186,18 @@ function MyBusinessesPage() {
                     </span>
 
                     <div className="flex flex-wrap gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => setEditing(b)}
+                      >
+                        <Pencil className="size-4" />
+                        {b.status === "rejected" ? "طلب التعديل" : "تعديل سريع"}
+                      </Button>
                       <Button asChild variant="ghost" size="sm" className="rounded-full">
                         <Link to="/dashboard/business/$id" params={{ id: b.id }}>
-                          <Pencil className="size-4" /> تعديل
+                          <Pencil className="size-4" /> التعديل الكامل
                         </Link>
                       </Button>
                       {b.status === "approved" ? (
@@ -210,6 +226,21 @@ function MyBusinessesPage() {
                         </Button>
                       ) : null}
                     </div>
+
+                    <div className="w-full">
+                      {b.status === "rejected" ? (
+                        <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-3">
+                          <p className="text-[11px] font-bold text-destructive">
+                            سبب الرفض / السحب
+                          </p>
+                          <p className="mt-1 text-xs text-destructive">
+                            {b.rejection_reason?.trim() ||
+                              "لم تُسجّل الإدارة سبباً محدداً — راجع البيانات وأعد الإرسال."}
+                          </p>
+                        </div>
+                      ) : null}
+                      <ModerationHistory businessId={b.id} />
+                    </div>
                   </div>
                 ))
               )}
@@ -217,6 +248,7 @@ function MyBusinessesPage() {
           ))}
         </Tabs>
       </div>
+      <QuickEditDialog business={editing} onClose={() => setEditing(null)} />
     </PageShell>
   );
 }

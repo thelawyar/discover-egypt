@@ -4,6 +4,7 @@ import { ImagePlus, Loader2, X, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
+import { ImageCropDialog, validateImageFile } from "@/components/ImageCropDialog";
 
 /** Manage the photo gallery shown on the public mini-site. */
 export function GalleryEditor({
@@ -15,6 +16,8 @@ export function GalleryEditor({
 }) {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
+  // Files waiting to be cropped one-by-one before upload.
+  const [queue, setQueue] = useState<File[]>([]);
 
   const { data: images } = useQuery({
     queryKey: ["business-images", businessId],
@@ -32,31 +35,48 @@ export function GalleryEditor({
   const refresh = () =>
     queryClient.invalidateQueries({ queryKey: ["business-images", businessId] });
 
-  async function add(files: FileList) {
+  /** Validate the picked files and queue the valid ones for cropping. */
+  function pick(files: FileList) {
+    const current = images?.length ?? 0;
+    const room = Math.max(0, 12 - current);
+    if (!room) {
+      toast.error("الحد الأقصى 12 صورة في المعرض");
+      return;
+    }
+    const picked = Array.from(files);
+    const valid: File[] = [];
+    for (const file of picked.slice(0, room)) {
+      const invalid = validateImageFile(file);
+      if (invalid) {
+        toast.error(`${file.name}: ${invalid}`);
+        continue;
+      }
+      valid.push(file);
+    }
+    if (picked.length > room) {
+      toast.warning(`تم اختيار ${room} صورة فقط — الحد الأقصى 12 صورة في المعرض.`);
+    }
+    if (valid.length) setQueue(valid);
+  }
+
+  /** Upload one cropped image and move to the next file in the queue. */
+  async function uploadCropped(cropped: File) {
     setUploading(true);
     try {
-      const current = images?.length ?? 0;
-      const list = Array.from(files).slice(0, Math.max(0, 12 - current));
-      if (!list.length) throw new Error("الحد الأقصى 12 صورة في المعرض");
-      let order = current;
-      for (const file of list) {
-        // Square crop + compression keeps the gallery grid tidy and fast to load.
-        const { url } = await uploadBusinessImage(file, userId, {
-          maxWidth: 1200,
-          thumbWidth: 480,
-          crop: true,
-          ratio: 1,
-          quality: 0.82,
-        });
-        const { error } = await supabase
-          .from("business_images")
-          .insert({ business_id: businessId, url, sort_order: order++ });
-        if (error) throw error;
-      }
+      const { url } = await uploadBusinessImage(cropped, userId, {
+        maxWidth: 1200,
+        thumbWidth: 480,
+        quality: 0.82,
+      });
+      const { error } = await supabase
+        .from("business_images")
+        .insert({ business_id: businessId, url, sort_order: images?.length ?? 0 });
+      if (error) throw error;
       await refresh();
-      toast.success("تمت إضافة الصور");
+      toast.success("تمت إضافة الصورة");
+      setQueue((q) => q.slice(1));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر رفع الصور");
+      toast.error(err instanceof Error ? err.message : "تعذّر رفع الصورة");
     } finally {
       setUploading(false);
     }
@@ -149,17 +169,27 @@ export function GalleryEditor({
         ) : (
           <ImagePlus className="size-4" />
         )}
-        {uploading ? "جارٍ الرفع..." : "أضف صوراً للمعرض"}
+        {uploading ? "جارٍ الرفع..." : "أضف صوراً للمعرض (قصّ ومعاينة قبل الحفظ)"}
         <input
           type="file"
           accept="image/*"
           multiple
           className="hidden"
           onChange={(e) => {
-            if (e.target.files?.length) add(e.target.files);
+            if (e.target.files?.length) pick(e.target.files);
+            e.target.value = "";
           }}
         />
       </label>
+      <ImageCropDialog
+        file={queue[0] ?? null}
+        ratio={1}
+        outputWidth={1200}
+        title={`قصّ صورة المعرض (${queue.length} متبقية)`}
+        busy={uploading}
+        onCancel={() => setQueue((q) => q.slice(1))}
+        onConfirm={uploadCropped}
+      />
     </section>
   );
 }
