@@ -175,8 +175,8 @@ export const searchBusinesses = createServerFn({ method: "GET" })
         await supabase.rpc("log_search_query", {
           _term: term,
           _results: count ?? 0,
-          _city: data.city ?? null,
-          _category: data.cat ?? null,
+          _city: data.city ?? undefined,
+          _category: data.cat ?? undefined,
         });
       }
 
@@ -245,10 +245,10 @@ export const getBusiness = createServerFn({ method: "GET" })
     const { data: row } = await supabase
       .from("businesses")
       .select(
-        CARD_SELECT +
+        CARD_SELECT.replace("cities(name)", "cities(name,slug)") +
           ",email,website,facebook,instagram,latitude,longitude,view_count," +
           "logo_url,theme_primary,theme_bg,theme_style,theme_font,theme_button," +
-          "theme_contrast,updated_at,cities(slug,name)",
+          "theme_contrast,updated_at",
       )
       .eq(UUID_RE.test(data.id) ? "id" : "username", data.id.toLowerCase())
       .eq("status", "approved")
