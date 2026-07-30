@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowRight, ImagePlus, Loader2, X } from "lucide-react";
+import { ArrowRight, ExternalLink, ImagePlus, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTaxonomy } from "@/lib/directory.functions";
 import { CityPicker } from "@/components/CityPicker";
