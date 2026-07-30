@@ -48,6 +48,10 @@ export type BusinessDetail = BusinessCardData & {
   theme_primary: string | null;
   theme_bg: string | null;
   theme_style: string | null;
+  theme_font: string | null;
+  theme_button: string | null;
+  theme_contrast: boolean;
+  updated_at: string | null;
   email: string | null;
   website: string | null;
   facebook: string | null;
