@@ -125,16 +125,22 @@ export const Route = createFileRoute("/$username")({
             knowsAbout: loaderData.category_name,
           }
         : {}),
-      ...(loaderData.phone ? { telephone: loaderData.phone } : {}),
-      ...(loaderData.whatsapp
+      ...(loaderData.phone
+        ? { telephone: telHref(loaderData.phone).replace("tel:", "") }
+        : {}),
+      ...(contactPoints(loaderData.phone, loaderData.whatsapp).length
+        ? { contactPoint: contactPoints(loaderData.phone, loaderData.whatsapp) }
+        : {}),
+      ...(loaderData.phone
         ? {
-            contactPoint: {
-              "@type": "ContactPoint",
-              contactType: "customer support",
-              telephone: loaderData.whatsapp,
+            potentialAction: {
+              "@type": "CommunicateAction",
+              name: "اتصل بنا",
+              target: telHref(loaderData.phone),
             },
           }
         : {}),
+
       ...(loaderData.website ? { sameAs: [loaderData.website] } : {}),
       address: {
         "@type": "PostalAddress",
