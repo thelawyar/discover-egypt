@@ -8,6 +8,10 @@ export type SiteSettings = {
   logo_url: string | null;
   primary_color: string;
   accent_color: string;
+  adsense_enabled: boolean;
+  adsense_client: string | null;
+  adsense_slot: string | null;
+  adsense_every: number;
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -16,6 +20,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   logo_url: null,
   primary_color: "#2f6df6",
   accent_color: "#eaf1ff",
+  adsense_enabled: false,
+  adsense_client: null,
+  adsense_slot: null,
+  adsense_every: 4,
 };
 
 export const siteSettingsQuery = {
@@ -24,7 +32,9 @@ export const siteSettingsQuery = {
   queryFn: async (): Promise<SiteSettings> => {
     const { data, error } = await supabase
       .from("site_settings")
-      .select("site_name,tagline,logo_url,primary_color,accent_color")
+      .select(
+        "site_name,tagline,logo_url,primary_color,accent_color,adsense_enabled,adsense_client,adsense_slot,adsense_every",
+      )
       .eq("id", "default")
       .maybeSingle();
     if (error) throw error;
