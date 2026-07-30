@@ -19,6 +19,7 @@ function rel(value: unknown, key: string): string | null {
 function toCard(row: Row): BusinessCardData {
   return {
     id: row.id as string,
+    username: (row.username as string) ?? "",
     name: row.name as string,
     description: (row.description as string) ?? null,
     address: (row.address as string) ?? null,
@@ -38,7 +39,7 @@ const UUID_RE =
 const NO_MATCH = "00000000-0000-0000-0000-000000000000";
 
 const CARD_SELECT =
-  "id,name,description,address,phone,whatsapp,cover_image_url,products,is_featured," +
+  "id,username,name,description,address,phone,whatsapp,cover_image_url,products,is_featured," +
   "categories(name),cities(name),governorates(name)";
 
 export const getTaxonomy = createServerFn({ method: "GET" }).handler(
@@ -154,28 +155,29 @@ export const getBusiness = createServerFn({ method: "GET" })
         CARD_SELECT +
           ",email,website,facebook,instagram,latitude,longitude,view_count,cities(slug,name)",
       )
-      .eq("id", data.id)
+      .eq(UUID_RE.test(data.id) ? "id" : "username", data.id.toLowerCase())
       .eq("status", "approved")
       .maybeSingle();
 
     if (!row) return null;
     const r = row as unknown as Row;
+    const businessId = r.id as string;
 
     const [images, hours, reviews] = await Promise.all([
       supabase
         .from("business_images")
         .select("id,url")
-        .eq("business_id", data.id)
+        .eq("business_id", businessId)
         .order("sort_order"),
       supabase
         .from("business_hours")
         .select("day_of_week,opens_at,closes_at,is_closed")
-        .eq("business_id", data.id)
+        .eq("business_id", businessId)
         .order("day_of_week"),
       supabase
         .from("reviews")
         .select("id,rating,comment,author_name,created_at")
-        .eq("business_id", data.id)
+        .eq("business_id", businessId)
         .order("created_at", { ascending: false })
         .limit(30),
     ]);
@@ -253,7 +255,7 @@ export const getSitemapData = createServerFn({ method: "GET" }).handler(
       supabase.from("categories").select("slug").order("sort_order"),
       supabase
         .from("businesses")
-        .select("id,updated_at")
+        .select("id,username,updated_at")
         .eq("status", "approved")
         .order("updated_at", { ascending: false })
         .limit(5000),
@@ -264,6 +266,7 @@ export const getSitemapData = createServerFn({ method: "GET" }).handler(
       categories: (categories.data ?? []).map((c) => c.slug),
       businesses: (businesses.data ?? []).map((b) => ({
         id: b.id,
+        username: b.username,
         updated_at: b.updated_at,
       })),
     };

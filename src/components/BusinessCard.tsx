@@ -5,8 +5,8 @@ import type { BusinessCardData } from "@/lib/directory-types";
 export function BusinessCard({ item }: { item: BusinessCardData }) {
   return (
     <Link
-      to="/business/$id"
-      params={{ id: item.id }}
+      to="/$username"
+      params={{ username: item.username }}
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:shadow-raised"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
