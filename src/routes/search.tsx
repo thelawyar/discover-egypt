@@ -227,6 +227,34 @@ function SearchPage() {
             ))}
           </select>
 
+          <ProductFilter
+            value={params.prod}
+            onApply={(v) =>
+              navigate({ search: (p: SearchParams) => ({ ...p, prod: v, page: 1 }) })
+            }
+          />
+
+          <select
+            value={params.sort}
+            onChange={(e) =>
+              navigate({
+                search: (p: SearchParams) => ({
+                  ...p,
+                  sort: e.target.value as SearchParams["sort"],
+                  page: 1,
+                }),
+              })
+            }
+            className="h-9 rounded-full border border-border bg-card px-3 text-xs"
+          >
+            {SORTS.map(([v, label]) => (
+              <option key={v} value={v}>
+                ترتيب: {label}
+              </option>
+            ))}
+          </select>
+
+
           <NearMeButton
             taxonomy={taxonomy}
             onDetect={(loc) =>
