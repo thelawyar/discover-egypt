@@ -17,7 +17,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
   const { site_name: name, logo_url: logo } = useSiteSettings();
-  const cls = size === "lg" ? "text-4xl sm:text-5xl" : "text-base sm:text-xl";
+  const cls =
+    size === "lg"
+      ? "text-4xl sm:text-5xl"
+      : "text-base sm:text-xl max-w-[38vw] sm:max-w-none";
   const imgCls = size === "lg" ? "h-20 sm:h-24" : "h-8 sm:h-9";
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
