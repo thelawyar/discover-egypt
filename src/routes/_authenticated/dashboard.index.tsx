@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { STATUS_LABELS } from "@/lib/directory-types";
+import { ContactNotifications } from "@/components/dashboard/ContactNotifications";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
@@ -74,6 +75,10 @@ function Dashboard() {
               <Plus className="size-4" /> أضف نشاطاً
             </Link>
           </Button>
+        </div>
+
+        <div className="mt-6">
+          <ContactNotifications />
         </div>
 
         {isLoading ? (
