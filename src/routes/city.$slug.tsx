@@ -68,7 +68,11 @@ export const Route = createFileRoute("/city/$slug")({
       { name: "description", content: desc },
       { property: "og:title", content: title },
       { property: "og:description", content: desc },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "اكتشف مدينتك" },
+      { property: "og:locale", content: "ar_EG" },
       { property: "og:url", content: pageUrl },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: desc },
     ];
