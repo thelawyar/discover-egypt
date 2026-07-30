@@ -392,8 +392,8 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
                           ? { target: "_blank", rel: "noopener noreferrer" }
                           : {})}
                         onClick={() => trackContact(data.id, c.key)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
-                        style={softStyle}
+                        className="flex items-center gap-2 px-3 py-2 text-sm"
+                        style={actionStyle}
                       >
                         <Icon className="size-4" style={{ color: "var(--biz-primary)" }} />
                         <span {...(c.ltr ? { dir: "ltr" } : {})}>{c.label}</span>
