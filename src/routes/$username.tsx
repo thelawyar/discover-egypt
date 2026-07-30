@@ -59,6 +59,7 @@ export const Route = createFileRoute("/$username")({
       city_name: data.city_name,
       city_slug: data.city_slug,
       governorate_name: data.governorate_name,
+      governorate_slug: data.governorate_slug,
       category_name: data.category_name,
       latitude: data.latitude,
       longitude: data.longitude,
