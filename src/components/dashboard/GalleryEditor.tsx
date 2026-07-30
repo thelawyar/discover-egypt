@@ -126,22 +126,43 @@ export function GalleryEditor({
     await refresh();
   }
 
+  /** Pin the previewed gallery image as the business cover photo. */
+  async function confirmCover() {
+    if (!coverPreview) return;
+    setSavingCover(true);
+    const { error } = await supabase
+      .from("businesses")
+      .update({ cover_image_url: coverPreview, cover_thumb_url: null })
+      .eq("id", businessId);
+    setSavingCover(false);
+    if (error) {
+      toast.error("تعذّر تعيين صورة الغلاف");
+      return;
+    }
+    setCoverPreview(null);
+    await queryClient.invalidateQueries({ queryKey: ["business", businessId] });
+    await refreshCover();
+    toast.success("تم تعيين صورة الغلاف — سيراجعها الفريق قبل النشر");
+  }
+
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card">
       <div>
         <h2 className="text-sm font-bold">معرض الصور</h2>
         <p className="mt-1 text-[11px] text-muted-foreground">
           حتى 12 صورة تظهر داخل صفحة النشاط، يتم قصّها مربعة وضغطها تلقائياً، ويمكنك
-          إعادة ترتيبها بالأسهم.
+          إعادة ترتيبها بالأسهم، واختيار أي صورة لتكون غلاف النشاط.
         </p>
       </div>
 
       {images?.length ? (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-          {images.map((img, index) => (
+          {images.map((img, index) => {
+            const isCover = cover === img.url;
+            return (
             <div
               key={img.id}
-              className="relative overflow-hidden rounded-xl border border-border"
+              className={`relative overflow-hidden rounded-xl border ${isCover ? "border-primary ring-2 ring-primary" : "border-border"}`}
             >
               <img
                 src={img.url}
@@ -156,6 +177,16 @@ export function GalleryEditor({
               >
                 <X className="size-3.5" />
               </button>
+              <button
+                type="button"
+                aria-label={isCover ? "صورة الغلاف الحالية" : "تعيين كصورة غلاف"}
+                title={isCover ? "صورة الغلاف الحالية" : "تعيين كصورة غلاف"}
+                onClick={() => setCoverPreview(img.url)}
+                className={`absolute top-1 right-1 rounded-full p-1 ${isCover ? "bg-primary text-primary-foreground" : "bg-background/90"}`}
+              >
+                {isCover ? <Check className="size-3.5" /> : <Star className="size-3.5" />}
+              </button>
+
               <div className="absolute inset-x-1 bottom-1 flex justify-between">
                 <button
                   type="button"
