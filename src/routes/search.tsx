@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { SearchX } from "lucide-react";
+import { Check, Copy, Link2, SearchX, X } from "lucide-react";
 import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
@@ -11,6 +11,7 @@ import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { CityPicker } from "@/components/CityPicker";
 import { citiesForGovernorate, normalizeLocationParams } from "@/lib/location-filter";
 import { PageShell } from "@/components/SiteHeader";
+import { searchTokens } from "@/lib/highlight";
 import { Button } from "@/components/ui/button";
 
 const searchSchema = z.object({
@@ -214,7 +215,21 @@ function SearchPage() {
           <span className="ms-auto text-xs text-muted-foreground">
             {results.total.toLocaleString("ar-EG")} نتيجة
           </span>
+
+          <ShareResults />
         </div>
+
+        <ActiveFilters
+          params={params}
+          govName={
+            taxonomy.governorates.find((g) => g.slug === normalized.gov)?.name ?? null
+          }
+          cityName={taxonomy.cities.find((c) => c.slug === normalized.city)?.name ?? null}
+          catName={taxonomy.categories.find((c) => c.slug === params.cat)?.name ?? null}
+          onClear={(patch) =>
+            navigate({ search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }) })
+          }
+        />
 
         {results.items.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-24 text-center">
@@ -237,6 +252,7 @@ function SearchPage() {
               categoryId:
                 taxonomy.categories.find((c) => c.slug === params.cat)?.id ?? null,
             }}
+            terms={searchTokens(params.q)}
           />
         )}
 
@@ -271,5 +287,84 @@ function SearchPage() {
         ) : null}
       </div>
     </PageShell>
+  );
+}
+
+
+/** Copies the current results URL (query + filters + page) for sharing. */
+function ShareResults() {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    if (typeof window === "undefined") return;
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="rounded-full"
+      onClick={copy}
+      title="نسخ رابط هذه النتائج بنفس الفلاتر"
+    >
+      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+      {copied ? "تم نسخ الرابط" : "مشاركة النتائج"}
+    </Button>
+  );
+}
+
+/** Chips reflecting exactly what the shareable URL contains. */
+function ActiveFilters({
+  params,
+  govName,
+  cityName,
+  catName,
+  onClear,
+}: {
+  params: SearchParams;
+  govName: string | null;
+  cityName: string | null;
+  catName: string | null;
+  onClear: (patch: Partial<SearchParams>) => void;
+}) {
+  const chips: { key: string; label: string; patch: Partial<SearchParams> }[] = [];
+  if (params.q) chips.push({ key: "q", label: `بحث: ${params.q}`, patch: { q: "" } });
+  if (govName)
+    chips.push({ key: "gov", label: govName, patch: { gov: "", city: "" } });
+  if (cityName) chips.push({ key: "city", label: cityName, patch: { city: "" } });
+  if (catName) chips.push({ key: "cat", label: catName, patch: { cat: "" } });
+
+  if (!chips.length) return null;
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2">
+      <Link2 className="size-3.5 text-muted-foreground" />
+      {chips.map((c) => (
+        <button
+          key={c.key}
+          type="button"
+          onClick={() => onClear(c.patch)}
+          className="flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-[11px] font-medium text-accent-foreground hover:opacity-80"
+        >
+          {c.label}
+          <X className="size-3" />
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={() => onClear({ q: "", gov: "", city: "", cat: "" })}
+        className="text-[11px] text-muted-foreground underline"
+      >
+        مسح الكل
+      </button>
+    </div>
   );
 }

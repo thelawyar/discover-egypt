@@ -1,8 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Search, MapPin, X, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Search, MapPin, X, ChevronRight, Store, Tag, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { suggestSearch } from "@/lib/directory.functions";
+import { Highlight, searchTokens } from "@/lib/highlight";
 import type { City, Governorate } from "@/lib/directory-types";
+
 
 type Props = {
   cities: City[];
@@ -27,18 +31,46 @@ export function SearchBar({
   const [cityOpen, setCityOpen] = useState(false);
   const [cityFilter, setCityFilter] = useState("");
   const [govId, setGovId] = useState<string | null>(null);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [debounced, setDebounced] = useState(initialQuery);
   const wrapRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => setQ(initialQuery), [initialQuery]);
   useEffect(() => setCityId(initialCity), [initialCity]);
 
+  // Debounce keystrokes before asking the server for suggestions.
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(q.trim()), 220);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const suggestQuery = useQuery({
+    queryKey: ["suggest", debounced],
+    enabled: suggestOpen && debounced.length >= 2,
+    staleTime: 1000 * 60,
+    queryFn: () => suggestSearch({ data: { q: debounced } }),
+  });
+
+  const suggestions = suggestQuery.data;
+  const tokens = searchTokens(debounced);
+  const hasSuggestions = Boolean(
+    suggestions &&
+      (suggestions.businesses.length ||
+        suggestions.categories.length ||
+        suggestions.cities.length),
+  );
+
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (!wrapRef.current?.contains(e.target as Node)) setCityOpen(false);
+      if (!wrapRef.current?.contains(e.target as Node)) {
+        setCityOpen(false);
+        setSuggestOpen(false);
+      }
     }
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
+
 
   const selectedCity = cities.find((c) => c.slug === cityId || c.id === cityId);
   const selectedGov = governorates.find((g) => g.id === govId) ?? null;
@@ -75,19 +107,25 @@ export function SearchBar({
     setGovId(null);
   }
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
+  function go(term: string, cityOverride?: string) {
+    setSuggestOpen(false);
     navigate({
       to: "/search",
       search: {
-        q: q.trim(),
-        city: cityId,
-        gov: cityId ? "" : (selectedGov?.slug ?? ""),
+        q: term.trim(),
+        city: cityOverride ?? cityId,
+        gov: (cityOverride ?? cityId) ? "" : (selectedGov?.slug ?? ""),
         cat: "",
         page: 1,
       },
     });
   }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    go(q);
+  }
+
 
 
   return (
@@ -115,7 +153,16 @@ export function SearchBar({
         <input
           value={q}
           autoFocus={autoFocus}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setSuggestOpen(true);
+            setCityOpen(false);
+          }}
+          onFocus={() => setSuggestOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setSuggestOpen(false);
+          }}
+          autoComplete="off"
           maxLength={100}
           placeholder="ابحث عن نشاط، مجال، أو منتج..."
           aria-label="ابحث في الدليل"
@@ -124,6 +171,7 @@ export function SearchBar({
             size === "hero" ? "text-base" : "text-sm",
           )}
         />
+
         {q ? (
           <button
             type="button"
@@ -155,6 +203,102 @@ export function SearchBar({
           </span>
         </button>
       </div>
+
+      {suggestOpen && !cityOpen && debounced.length >= 2 ? (
+        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-raised">
+          {suggestQuery.isFetching && !hasSuggestions ? (
+            <p className="flex items-center justify-center gap-2 p-4 text-xs text-muted-foreground">
+              <Loader2 className="size-3.5 animate-spin" /> جارٍ البحث...
+            </p>
+          ) : null}
+
+          {suggestions?.businesses.length ? (
+            <div className="p-1">
+              <p className="px-3 py-1 text-[11px] font-bold text-muted-foreground">
+                نتائج سريعة
+              </p>
+              {suggestions.businesses.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => {
+                    setSuggestOpen(false);
+                    navigate({ to: "/$username", params: { username: b.username } });
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-right hover:bg-muted"
+                >
+                  {b.cover_image_url ? (
+                    <img
+                      src={b.cover_image_url}
+                      alt=""
+                      loading="lazy"
+                      className="size-9 shrink-0 rounded-md object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      <Store className="size-4" />
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">
+                      <Highlight text={b.name} terms={tokens} />
+                    </span>
+                    <span className="block truncate text-[11px] text-muted-foreground">
+                      {[b.category_name, b.city_name].filter(Boolean).join(" · ")}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          {suggestions?.categories.length || suggestions?.cities.length ? (
+            <div className="border-t border-border p-1">
+              {suggestions.categories.map((c) => (
+                <button
+                  key={`cat-${c.slug}`}
+                  type="button"
+                  onClick={() => go(c.name)}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-right text-sm hover:bg-muted"
+                >
+                  <Tag className="size-3.5 text-muted-foreground" />
+                  <Highlight text={c.name} terms={tokens} />
+                  <span className="text-[11px] text-muted-foreground">تصنيف</span>
+                </button>
+              ))}
+              {suggestions.cities.map((c) => (
+                <button
+                  key={`city-${c.slug}`}
+                  type="button"
+                  onClick={() => go("", c.slug)}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-right text-sm hover:bg-muted"
+                >
+                  <MapPin className="size-3.5 text-muted-foreground" />
+                  <Highlight text={c.name} terms={tokens} />
+                  <span className="text-[11px] text-muted-foreground">مدينة</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => go(q)}
+            className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-right text-xs font-bold text-primary hover:bg-muted"
+          >
+            <Search className="size-3.5" />
+            عرض كل النتائج عن «{debounced}»
+          </button>
+
+          {!suggestQuery.isFetching && !hasSuggestions ? (
+            <p className="px-3 pb-3 text-[11px] text-muted-foreground">
+              لا توجد اقتراحات مطابقة، جرّب كلمة أخرى.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+
 
       {cityOpen ? (
         <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-raised">
