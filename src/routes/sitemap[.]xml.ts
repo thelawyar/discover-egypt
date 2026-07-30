@@ -39,7 +39,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             priority: "0.8",
           })),
           ...data.businesses.map((b) => ({
-            path: `/business/${b.id}`,
+            path: `/${encodeURIComponent(b.username ?? b.id)}`,
             lastmod: b.updated_at ? new Date(b.updated_at).toISOString() : undefined,
             changefreq: "monthly" as const,
             priority: "0.7",

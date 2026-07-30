@@ -226,6 +226,7 @@ export type Database = {
           search_text: string
           status: Database["public"]["Enums"]["business_status"]
           updated_at: string
+          username: string
           view_count: number
           website: string | null
           whatsapp: string | null
@@ -253,6 +254,7 @@ export type Database = {
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           updated_at?: string
+          username?: string
           view_count?: number
           website?: string | null
           whatsapp?: string | null
@@ -280,6 +282,7 @@ export type Database = {
           search_text?: string
           status?: Database["public"]["Enums"]["business_status"]
           updated_at?: string
+          username?: string
           view_count?: number
           website?: string | null
           whatsapp?: string | null
@@ -584,6 +587,8 @@ export type Database = {
         Returns: boolean
       }
       make_slug: { Args: { v: string }; Returns: string }
+      normalize_username: { Args: { v: string }; Returns: string }
+      random_username: { Args: never; Returns: string }
       track_ad_click: { Args: { _ad_id: string }; Returns: undefined }
       track_ad_impression: { Args: { _ad_id: string }; Returns: undefined }
     }

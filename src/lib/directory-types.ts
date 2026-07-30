@@ -28,6 +28,8 @@ export type Taxonomy = {
 
 export type BusinessCardData = {
   id: string;
+  /** Public handle used for the one-page mini-site URL: /<username>. */
+  username: string;
   name: string;
   description: string | null;
   address: string | null;

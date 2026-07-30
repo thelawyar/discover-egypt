@@ -41,7 +41,9 @@ export const Route = createFileRoute("/city/$slug")({
       page: data.page,
       pages: Math.max(1, Math.ceil(data.total / data.perPage)),
       image: data.items.find((i) => i.cover_image_url)?.cover_image_url ?? null,
-      items: data.items.slice(0, 10).map((i) => ({ id: i.id, name: i.name })),
+      items: data.items
+        .slice(0, 10)
+        .map((i) => ({ id: i.id, name: i.name, username: i.username })),
     };
   },
   head: ({ params, loaderData }) => {
@@ -95,7 +97,7 @@ export const Route = createFileRoute("/city/$slug")({
           "@type": "ListItem",
           position: (loaderData.page - 1) * 24 + i + 1,
           name: b.name,
-          url: `${origin}/business/${b.id}`,
+          url: `${origin}/${b.username}`,
         })),
       },
     };
