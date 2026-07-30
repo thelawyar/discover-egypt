@@ -53,7 +53,8 @@ export const Route = createFileRoute("/api/public/og")({
               "Cache-Control": "public, max-age=86400, s-maxage=604800",
             },
           });
-        } catch {
+        } catch (err) {
+          if (q.get("debug")) return new Response(String((err as Error)?.stack ?? err), { status: 500 });
           // Rasterizer unavailable: fall back to the static preview image.
           return Response.redirect(new URL("/og-default.jpg", url).toString(), 302);
         }
