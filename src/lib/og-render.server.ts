@@ -1,7 +1,6 @@
 /** Rasterizes SVG Open Graph cards to PNG at the edge (no filesystem, no native deps). */
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
-// Bundled as a WebAssembly module by the worker build.
-import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm?module";
+import { RESVG_WASM_GZ_B64 } from "./og-wasm.b64";
 import { CAIRO_BOLD_B64, CAIRO_REGULAR_B64 } from "./og-fonts.b64";
 
 let ready: Promise<void> | null = null;
@@ -21,12 +20,23 @@ function fontBuffers(): Uint8Array[] {
   return fonts;
 }
 
+/** Inflates the embedded gzip payload back into the raw wasm bytes. */
+async function wasmBytes(): Promise<Uint8Array> {
+  const gz = decode(RESVG_WASM_GZ_B64);
+  const stream = new Blob([gz as unknown as BlobPart])
+    .stream()
+    .pipeThrough(new DecompressionStream("gzip"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
 async function ensureWasm(): Promise<void> {
   if (!ready) {
-    ready = initWasm(resvgWasm as unknown as WebAssembly.Module).catch((e) => {
-      ready = null;
-      throw e;
-    });
+    ready = wasmBytes()
+      .then((bytes) => initWasm(bytes))
+      .catch((e) => {
+        ready = null;
+        throw e;
+      });
   }
   await ready;
 }
