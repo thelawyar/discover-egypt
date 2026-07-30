@@ -304,3 +304,30 @@ export const getHomeStats = createServerFn({ method: "GET" }).handler(
     };
   },
 );
+
+/** Old handle -> current handle, so previous /username links keep working (301). */
+export const resolveLegacyHandle = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) =>
+    z.object({ username: z.string().max(64) }).parse(data),
+  )
+  .handler(async ({ data }): Promise<string | null> => {
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
+
+    const { data: row } = await supabase
+      .from("business_username_history")
+      .select("business_id")
+      .eq("username", data.username.toLowerCase())
+      .maybeSingle();
+
+    if (!row) return null;
+
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("username")
+      .eq("id", row.business_id)
+      .eq("status", "approved")
+      .maybeSingle();
+
+    return biz?.username ?? null;
+  });
