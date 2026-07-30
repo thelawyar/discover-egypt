@@ -189,7 +189,8 @@ export const getBusiness = createServerFn({ method: "GET" })
       .select(
         CARD_SELECT +
           ",email,website,facebook,instagram,latitude,longitude,view_count," +
-          "logo_url,theme_primary,theme_bg,theme_style,cities(slug,name)",
+          "logo_url,theme_primary,theme_bg,theme_style,theme_font,theme_button," +
+          "theme_contrast,updated_at,cities(slug,name)",
       )
       .eq(UUID_RE.test(data.id) ? "id" : "username", data.id.toLowerCase())
       .eq("status", "approved")
