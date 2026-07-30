@@ -357,6 +357,7 @@ export type Database = {
           created_at: string
           governorate_id: string
           id: string
+          is_active: boolean
           is_new_city: boolean
           name: string
           slug: string
@@ -365,6 +366,7 @@ export type Database = {
           created_at?: string
           governorate_id: string
           id?: string
+          is_active?: boolean
           is_new_city?: boolean
           name: string
           slug: string
@@ -373,6 +375,7 @@ export type Database = {
           created_at?: string
           governorate_id?: string
           id?: string
+          is_active?: boolean
           is_new_city?: boolean
           name?: string
           slug?: string

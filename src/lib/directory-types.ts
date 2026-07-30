@@ -10,6 +10,7 @@ export type City = {
   slug: string;
   governorate_id: string;
   is_new_city: boolean;
+  is_active?: boolean;
 };
 
 export type Category = {

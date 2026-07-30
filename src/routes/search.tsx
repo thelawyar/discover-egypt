@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -7,6 +8,8 @@ import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
+import { CityPicker } from "@/components/CityPicker";
+import { citiesForGovernorate, normalizeLocationParams } from "@/lib/location-filter";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 
@@ -129,10 +132,25 @@ function SearchPage() {
 
   const perPage = 12;
   const pages = Math.max(1, Math.ceil(results.total / perPage));
-  const selectedGov = taxonomy.governorates.find((g) => g.slug === params.gov);
-  const govCities = selectedGov
-    ? taxonomy.cities.filter((c) => c.governorate_id === selectedGov.id)
-    : [];
+  const normalized = normalizeLocationParams(taxonomy, {
+    gov: params.gov,
+    city: params.city,
+  });
+
+  // Keep shareable URLs consistent: fix or drop mismatched gov/city params.
+  useEffect(() => {
+    if (normalized.gov === params.gov && normalized.city === params.city) return;
+    navigate({
+      replace: true,
+      search: (p: SearchParams) => ({ ...p, ...normalized, page: 1 }),
+    });
+  }, [normalized.gov, normalized.city, params.gov, params.city]);
+
+  const selectedGov = taxonomy.governorates.find((g) => g.slug === normalized.gov);
+  const govCities = citiesForGovernorate(
+    taxonomy.cities,
+    selectedGov?.id ?? null,
+  );
 
   return (
     <PageShell>
@@ -151,7 +169,7 @@ function SearchPage() {
       <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <select
-            value={params.gov}
+            value={normalized.gov}
             onChange={(e) =>
               navigate({
                 search: (p: SearchParams) => ({ ...p, gov: e.target.value, city: "", page: 1 }),
@@ -167,21 +185,16 @@ function SearchPage() {
             ))}
           </select>
 
-          <select
-            value={params.city}
-            onChange={(e) =>
-              navigate({ search: (p: SearchParams) => ({ ...p, city: e.target.value, page: 1 }) })
-            }
+          <CityPicker
+            className="w-44"
+            cities={selectedGov ? govCities : []}
+            value={normalized.city}
             disabled={!selectedGov}
-            className="h-9 rounded-full border border-border bg-card px-3 text-xs disabled:opacity-60"
-          >
-            <option value="">{selectedGov ? "كل المدن" : "اختر المحافظة أولاً"}</option>
-            {govCities.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            allLabel={selectedGov ? "كل المدن" : "اختر المحافظة أولاً"}
+            onChange={(v) =>
+              navigate({ search: (p: SearchParams) => ({ ...p, city: v, page: 1 }) })
+            }
+          />
 
           <select
             value={params.cat}
