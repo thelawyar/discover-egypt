@@ -182,6 +182,10 @@ function BusinessForm() {
       instagram: existing.instagram ?? "",
       products: existing.products ?? [],
       cover_image_url: existing.cover_image_url ?? null,
+      logo_url: existing.logo_url ?? null,
+      theme_primary: existing.theme_primary ?? null,
+      theme_bg: existing.theme_bg ?? null,
+      theme_style: existing.theme_style ?? "classic",
     });
   }, [existing]);
 
