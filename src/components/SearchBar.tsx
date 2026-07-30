@@ -107,19 +107,25 @@ export function SearchBar({
     setGovId(null);
   }
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
+  function go(term: string, cityOverride?: string) {
+    setSuggestOpen(false);
     navigate({
       to: "/search",
       search: {
-        q: q.trim(),
-        city: cityId,
-        gov: cityId ? "" : (selectedGov?.slug ?? ""),
+        q: term.trim(),
+        city: cityOverride ?? cityId,
+        gov: (cityOverride ?? cityId) ? "" : (selectedGov?.slug ?? ""),
         cat: "",
         page: 1,
       },
     });
   }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    go(q);
+  }
+
 
 
   return (
