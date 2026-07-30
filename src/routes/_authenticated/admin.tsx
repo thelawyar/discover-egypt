@@ -129,9 +129,14 @@ function AdminPage() {
               {label}
             </button>
           ))}
-          <Button asChild variant="outline" size="sm" className="ms-auto rounded-full">
-            <Link to="/admin-categories">صفحة إدارة التصنيفات</Link>
-          </Button>
+          <div className="ms-auto flex gap-2">
+            <Button asChild variant="outline" size="sm" className="rounded-full">
+              <Link to="/admin-cities">المحافظات والمدن</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="rounded-full">
+              <Link to="/admin-categories">صفحة إدارة التصنيفات</Link>
+            </Button>
+          </div>
         </div>
 
 
