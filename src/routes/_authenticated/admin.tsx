@@ -102,10 +102,13 @@ function AdminPage() {
       const { error } = await supabase.from("businesses").update(fields).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, vars) => {
       toast.success("تم التحديث");
       queryClient.invalidateQueries({ queryKey: ["admin-businesses"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-business-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["moderation-log", vars.id] });
     },
+
     onError: () => toast.error("تعذّر التحديث"),
   });
   // Reassign a business to another registered user by email.
