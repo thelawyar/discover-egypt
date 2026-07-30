@@ -150,6 +150,35 @@ export const Route = createFileRoute("/search")({
       if (ld && page < ld.pages) links.push({ rel: "next", href: build(page + 1) });
     }
 
+    // Breadcrumb trail: home › governorate › city › category, as selected.
+    const crumbs: { name: string; item: string }[] = [
+      { name: "الرئيسية", item: `${origin}/` },
+    ];
+    if (ld?.labels.gov)
+      crumbs.push({
+        name: ld.labels.gov,
+        item: `${origin}/search?gov=${encodeURIComponent(sp.gov)}`,
+      });
+    if (ld?.labels.city)
+      crumbs.push({ name: ld.labels.city, item: `${origin}/city/${encodeURIComponent(sp.city)}` });
+    if (cat)
+      crumbs.push({
+        name: cat,
+        item: `${origin}/search?cat=${encodeURIComponent(sp.cat)}`,
+      });
+    if (term) crumbs.push({ name: `نتائج «${term}»`, item: canonical });
+
+    const breadcrumb = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: crumbs.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: c.name,
+        item: c.item,
+      })),
+    };
+
     return {
       meta: [
         { title },
@@ -159,11 +188,30 @@ export const Route = createFileRoute("/search")({
         { property: "og:url", content: canonical },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc.slice(0, 300) },
-        { name: "robots", content: indexable ? "index, follow" : "noindex, follow" },
+        {
+          name: "robots",
+          content: indexable
+            ? "index, follow, max-image-preview:large, max-snippet:-1"
+            : "noindex, follow",
+        },
       ],
       links,
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+      ],
     };
   },
+  /** Same directive at the HTTP layer so crawlers that skip the HTML still obey it. */
+  headers: ({ match }) => {
+    const sp = match.search as SearchParams | undefined;
+    const indexable = !sp?.q?.trim();
+    return {
+      "X-Robots-Tag": indexable
+        ? "index, follow, max-image-preview:large, max-snippet:-1"
+        : "noindex, follow",
+    };
+  },
+
   loader: async ({ context, deps }) => {
     const [taxonomy, results, origin] = await Promise.all([
       context.queryClient.ensureQueryData(taxonomyQuery),
@@ -191,7 +239,36 @@ export const Route = createFileRoute("/search")({
 
 });
 
+/** Dynamic, filter-aware H1 text for the results page. */
+function resultsHeading(s: {
+  q: string;
+  prod: string;
+  page: number;
+  gov: string | null;
+  city: string | null;
+  cat: string | null;
+}): string {
+  const term = s.q.trim();
+  const prod = s.prod.trim();
+  const place = s.city ?? s.gov;
+  const parts = [
+    term
+      ? `نتائج البحث عن «${term}»`
+      : s.cat
+        ? `${s.cat}`
+        : prod
+          ? `أنشطة توفر «${prod}»`
+          : "كل الأنشطة التجارية",
+    term && s.cat ? `في ${s.cat}` : null,
+    term && prod ? `تشمل «${prod}»` : null,
+    place ? `في ${place}` : null,
+    s.page > 1 ? `- صفحة ${s.page}` : null,
+  ].filter(Boolean);
+  return parts.join(" ");
+}
+
 function SearchPage() {
+
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
   
@@ -293,7 +370,20 @@ function SearchPage() {
 
 
       <div className="mx-auto max-w-6xl px-4 py-6">
+        {/* Single dynamic H1 describing exactly what this filtered page lists. */}
+        <h1 className="mb-4 text-xl font-extrabold sm:text-2xl">
+          {resultsHeading({
+            q: params.q,
+            prod: params.prod,
+            page: params.page,
+            gov: taxonomy.governorates.find((g) => g.slug === normalized.gov)?.name ?? null,
+            city: taxonomy.cities.find((c) => c.slug === normalized.city)?.name ?? null,
+            cat: taxonomy.categories.find((c) => c.slug === params.cat)?.name ?? null,
+          })}
+        </h1>
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
+
           <select
             value={normalized.gov}
             onChange={(e) =>

@@ -32,6 +32,7 @@ function toCard(row: Row): BusinessCardData {
     category_name: rel(row.categories, "name"),
     city_name: rel(row.cities, "name"),
     governorate_name: rel(row.governorates, "name"),
+    governorate_slug: rel(row.governorates, "slug"),
   };
 }
 
@@ -41,7 +42,7 @@ const NO_MATCH = "00000000-0000-0000-0000-000000000000";
 
 const CARD_SELECT =
   "id,username,name,description,address,phone,whatsapp,cover_image_url,cover_thumb_url,products,is_featured," +
-  "categories(name),cities(name),governorates(name)";
+  "categories(name),cities(name),governorates(name,slug)";
 
 export const getTaxonomy = createServerFn({ method: "GET" }).handler(
   async (): Promise<Taxonomy> => {

@@ -43,6 +43,7 @@ export type BusinessCardData = {
   category_name: string | null;
   city_name: string | null;
   governorate_name: string | null;
+  governorate_slug: string | null;
 };
 
 export type BusinessDetail = BusinessCardData & {
