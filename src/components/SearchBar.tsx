@@ -190,7 +190,11 @@ export function SearchBar({
           }}
           onFocus={() => setSuggestOpen(true)}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setSuggestOpen(false);
+            if (e.key !== "Escape") return;
+            e.preventDefault();
+            // First ESC closes the suggestions, the next one clears like ✕.
+            if (suggestOpen && debounced.length >= 2) setSuggestOpen(false);
+            else clearQuery();
           }}
           autoComplete="off"
           maxLength={100}
