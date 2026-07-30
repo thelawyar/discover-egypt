@@ -493,18 +493,35 @@ function NearMeButton({
 }
 
 
-/** Copies the current results URL (query + filters + page) for sharing. */
-function ShareResults() {
+/** Human label for the remembered search. */
+function lastSearchLabel(
+  state: SearchState,
+  taxonomy: { cities: City[]; governorates: Governorate[]; categories: Category[] },
+): string {
+  const bits = [
+    state.q.trim(),
+    taxonomy.categories.find((c) => c.slug === state.cat)?.name,
+    taxonomy.cities.find((c) => c.slug === state.city)?.name ??
+      taxonomy.governorates.find((g) => g.slug === state.gov)?.name,
+    state.prod.trim(),
+  ].filter(Boolean);
+  return bits.length ? bits.join(" · ") : "كل الأنشطة";
+}
+
+/** Copies a short share link (/s/<code>) carrying every filter and the sort order. */
+function ShareResults({ params, origin }: { params: SearchParams; origin: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
     if (typeof window === "undefined") return;
+    const base = origin || window.location.origin;
+    const url = shortShareUrl(base, params as SearchState);
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard unavailable */
+      window.prompt("انسخ رابط المشاركة", url);
     }
   }
 
@@ -515,13 +532,14 @@ function ShareResults() {
       size="sm"
       className="rounded-full"
       onClick={copy}
-      title="نسخ رابط هذه النتائج بنفس الفلاتر"
+      title="نسخ رابط قصير يحمل كل الفلاتر والفرز"
     >
       {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-      {copied ? "تم نسخ الرابط" : "مشاركة النتائج"}
+      {copied ? "تم نسخ الرابط" : "نسخ رابط المشاركة"}
     </Button>
   );
 }
+
 
 /** Chips reflecting exactly what the shareable URL contains. */
 function ActiveFilters({
