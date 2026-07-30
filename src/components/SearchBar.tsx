@@ -121,22 +121,36 @@ export function SearchBar({
 
   function go(term: string, cityOverride?: string) {
     setSuggestOpen(false);
+    setCityOpen(false);
+    const trimmed = term.trim();
+    setQ(trimmed);
+    setDebounced(trimmed);
     navigate({
       to: "/search",
-      search: {
-        q: term.trim(),
+      search: (prev: Record<string, unknown>) => ({
+        ...prev,
+        q: trimmed,
         city: cityOverride ?? cityId,
         gov: (cityOverride ?? cityId) ? "" : (selectedGov?.slug ?? ""),
-        cat: "",
         page: 1,
-      },
+      }),
     });
+  }
+
+  /** Clearing must apply instantly, not wait for a submit. */
+  function clearQuery() {
+    setQ("");
+    setDebounced("");
+    setSuggestOpen(false);
+    if (onLiveChange) onLiveChange("");
+    else go("");
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     go(q);
   }
+
 
 
 
@@ -187,13 +201,14 @@ export function SearchBar({
         {q ? (
           <button
             type="button"
-            onClick={() => setQ("")}
+            onClick={clearQuery}
             aria-label="مسح البحث"
             className="rounded-full p-1 text-muted-foreground hover:bg-muted"
           >
             <X className="size-4" />
           </button>
         ) : null}
+
 
         <span className="mx-1 h-6 w-px bg-border" />
 

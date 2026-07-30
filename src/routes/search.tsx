@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   Check,
   Copy,
+  History,
   Link2,
   Loader2,
   LocateFixed,
@@ -24,6 +25,15 @@ import { citiesForGovernorate, normalizeLocationParams } from "@/lib/location-fi
 import { PageShell } from "@/components/SiteHeader";
 import { searchTokens } from "@/lib/highlight";
 import { Button } from "@/components/ui/button";
+import {
+  clearLastSearch,
+  readLastSearch,
+  saveLastSearch,
+  sameSearchState,
+  shortShareUrl,
+  type SearchState,
+} from "@/lib/search-share";
+
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -80,29 +90,56 @@ export const Route = createFileRoute("/search")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => search,
   head: ({ match, loaderData }) => {
-    const ld = loaderData as unknown as { origin: string; pages: number } | undefined;
-    const sp = match.search ?? { q: "", city: "", gov: "", cat: "", page: 1 };
+    const ld = loaderData as unknown as
+      | { origin: string; pages: number; total: number; labels: { gov: string | null; city: string | null; cat: string | null } }
+      | undefined;
+    const sp = match.search ?? { q: "", city: "", gov: "", cat: "", prod: "", sort: "best", page: 1 };
     const term = sp.q?.trim();
-    const title = term
-      ? `نتائج البحث عن "${term}" | اكتشف مدينتك`
-      : (sp.page ?? 1) > 1
-        ? `تصفح الأنشطة التجارية - صفحة ${sp.page} | اكتشف مدينتك`
-        : "تصفح الأنشطة التجارية | اكتشف مدينتك";
-    const desc = term
-      ? `نتائج البحث عن "${term}" في الدليل التجاري لكل المدن المصرية.`
-      : "ابحث عن الأنشطة التجارية في المدن المصرية وتصفح النتائج بالتفصيل.";
+    const place = ld?.labels.city ?? ld?.labels.gov ?? null;
+    const cat = ld?.labels.cat ?? null;
+    const prod = sp.prod?.trim();
+    const page = sp.page ?? 1;
+
+    // Build a title/description from whatever the visitor actually selected.
+    const subject = term
+      ? `«${term}»`
+      : cat
+        ? cat
+        : prod
+          ? `${prod}`
+          : "الأنشطة التجارية";
+    const parts = [
+      term ? `نتائج البحث عن ${subject}` : `${subject}`,
+      cat && term ? `في ${cat}` : null,
+      place ? `في ${place}` : null,
+      page > 1 ? `- صفحة ${page}` : null,
+    ].filter(Boolean);
+    const title = `${parts.join(" ")} | اكتشف مدينتك`;
+
+    const count = ld?.total ?? 0;
+    const desc = [
+      count
+        ? `${count.toLocaleString("ar-EG")} نتيجة`
+        : "تصفح نتائج الدليل التجاري",
+      term ? `لـ ${subject}` : cat ? `ضمن تصنيف ${cat}` : null,
+      prod ? `تشمل ${prod}` : null,
+      place ? `في ${place}` : "في المدن المصرية",
+      "— دليل اكتشف مدينتك للأنشطة التجارية.",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     const origin = ld?.origin ?? "";
-    const build = (page: number) => {
+    const build = (p: number) => {
       const usp = new URLSearchParams();
       if (sp.city) usp.set("city", sp.city);
       if (sp.gov) usp.set("gov", sp.gov);
       if (sp.cat) usp.set("cat", sp.cat);
-      if (page > 1) usp.set("page", String(page));
+      if (p > 1) usp.set("page", String(p));
       const qs = usp.toString();
       return `${origin}/search${qs ? `?${qs}` : ""}`;
     };
 
-    const page = sp.page ?? 1;
     const canonical = build(page);
     // Free-text queries stay out of the index; filtered/browsable pages are indexable.
     const indexable = !term;
@@ -116,19 +153,19 @@ export const Route = createFileRoute("/search")({
     return {
       meta: [
         { title },
-        { name: "description", content: desc },
+        { name: "description", content: desc.slice(0, 300) },
         { property: "og:title", content: title },
-        { property: "og:description", content: desc },
+        { property: "og:description", content: desc.slice(0, 300) },
         { property: "og:url", content: canonical },
         { name: "twitter:title", content: title },
-        { name: "twitter:description", content: desc },
+        { name: "twitter:description", content: desc.slice(0, 300) },
         { name: "robots", content: indexable ? "index, follow" : "noindex, follow" },
       ],
       links,
     };
   },
   loader: async ({ context, deps }) => {
-    const [, results, origin] = await Promise.all([
+    const [taxonomy, results, origin] = await Promise.all([
       context.queryClient.ensureQueryData(taxonomyQuery),
       context.queryClient.ensureQueryData(resultsQuery(deps)),
       context.queryClient.ensureQueryData({
@@ -137,8 +174,18 @@ export const Route = createFileRoute("/search")({
         staleTime: Infinity,
       }),
     ]);
-    return { origin, pages: Math.max(1, Math.ceil(results.total / 12)) };
+    return {
+      origin,
+      pages: Math.max(1, Math.ceil(results.total / 12)),
+      total: results.total,
+      labels: {
+        gov: taxonomy.governorates.find((g) => g.slug === deps.gov)?.name ?? null,
+        city: taxonomy.cities.find((c) => c.slug === deps.city)?.name ?? null,
+        cat: taxonomy.categories.find((c) => c.slug === deps.cat)?.name ?? null,
+      },
+    };
   },
+
   component: SearchPage,
   errorComponent: ({ error }) => <ResultsError message={error.message} />,
 
@@ -147,8 +194,11 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
+  
   const { data: taxonomy } = useSuspenseQuery(taxonomyQuery);
   const { data: results } = useSuspenseQuery(resultsQuery(params));
+
+
 
   const perPage = 12;
   const pages = Math.max(1, Math.ceil(results.total / perPage));
@@ -172,6 +222,19 @@ function SearchPage() {
     selectedGov?.id ?? null,
   );
 
+  // Remember the last search so returning visitors get a one-click shortcut.
+  const [lastSearch, setLastSearch] = useState<SearchState | null>(null);
+  useEffect(() => {
+    setLastSearch(readLastSearch());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    saveLastSearch(params as SearchState);
+  }, [params]);
+
+  const showLast =
+    lastSearch && !sameSearchState(lastSearch, params as SearchState);
+
   return (
     <PageShell>
       <div className="border-b border-border">
@@ -190,8 +253,34 @@ function SearchPage() {
             }
           />
 
+          {showLast ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+              <History className="size-3.5" />
+              <span>آخر بحث لك:</span>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate({ search: () => ({ ...lastSearch, page: 1 }) })
+                }
+                className="rounded-full bg-primary-soft px-3 py-1 font-medium text-accent-foreground hover:opacity-80"
+              >
+                {lastSearchLabel(lastSearch, taxonomy)}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearLastSearch();
+                  setLastSearch(null);
+                }}
+                className="underline"
+              >
+                إخفاء
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
+
 
       <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -284,7 +373,7 @@ function SearchPage() {
             {results.total.toLocaleString("ar-EG")} نتيجة
           </span>
 
-          <ShareResults />
+          <ShareResults params={params} />
         </div>
 
 
@@ -407,18 +496,36 @@ function NearMeButton({
 }
 
 
-/** Copies the current results URL (query + filters + page) for sharing. */
-function ShareResults() {
+/** Human label for the remembered search. */
+function lastSearchLabel(
+  state: SearchState,
+  taxonomy: { cities: City[]; governorates: Governorate[]; categories: Category[] },
+): string {
+  const bits = [
+    state.q.trim(),
+    taxonomy.categories.find((c) => c.slug === state.cat)?.name,
+    taxonomy.cities.find((c) => c.slug === state.city)?.name ??
+      taxonomy.governorates.find((g) => g.slug === state.gov)?.name,
+    state.prod.trim(),
+  ].filter(Boolean);
+  return bits.length ? bits.join(" · ") : "كل الأنشطة";
+}
+
+/** Copies a short share link (/s/<code>) carrying every filter and the sort order. */
+function ShareResults({ params }: { params: SearchParams }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
     if (typeof window === "undefined") return;
+    const base = window.location.origin;
+
+    const url = shortShareUrl(base, params as SearchState);
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard unavailable */
+      window.prompt("انسخ رابط المشاركة", url);
     }
   }
 
@@ -429,13 +536,14 @@ function ShareResults() {
       size="sm"
       className="rounded-full"
       onClick={copy}
-      title="نسخ رابط هذه النتائج بنفس الفلاتر"
+      title="نسخ رابط قصير يحمل كل الفلاتر والفرز"
     >
       {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-      {copied ? "تم نسخ الرابط" : "مشاركة النتائج"}
+      {copied ? "تم نسخ الرابط" : "نسخ رابط المشاركة"}
     </Button>
   );
 }
+
 
 /** Chips reflecting exactly what the shareable URL contains. */
 function ActiveFilters({

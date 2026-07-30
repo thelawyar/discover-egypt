@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as UsernameRouteImport } from './routes/$username'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SCodeRouteImport } from './routes/s.$code'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
 import { Route as AuthenticatedAdminSetupRouteImport } from './routes/_authenticated/admin-setup'
@@ -51,6 +52,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SCodeRoute = SCodeRouteImport.update({
+  id: '/s/$code',
+  path: '/s/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitySlugRoute = CitySlugRouteImport.update({
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
+  '/s/$code': typeof SCodeRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
+  '/s/$code': typeof SCodeRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/_authenticated/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
+  '/s/$code': typeof SCodeRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
 }
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/business/$id'
     | '/city/$slug'
+    | '/s/$code'
     | '/dashboard/'
     | '/dashboard/business/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/business/$id'
     | '/city/$slug'
+    | '/s/$code'
     | '/dashboard'
     | '/dashboard/business/$id'
   id:
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-setup'
     | '/business/$id'
     | '/city/$slug'
+    | '/s/$code'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/business/$id'
   fileRoutesById: FileRoutesById
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BusinessIdRoute: typeof BusinessIdRoute
   CitySlugRoute: typeof CitySlugRoute
+  SCodeRoute: typeof SCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$code': {
+      id: '/s/$code'
+      path: '/s/$code'
+      fullPath: '/s/$code'
+      preLoaderRoute: typeof SCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/city/$slug': {
@@ -338,6 +358,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BusinessIdRoute: BusinessIdRoute,
   CitySlugRoute: CitySlugRoute,
+  SCodeRoute: SCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
