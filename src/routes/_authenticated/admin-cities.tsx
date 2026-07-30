@@ -152,7 +152,13 @@ function AdminCitiesPage() {
         data.cities.map((c) => [`${c.governorate_id}|${c.name.trim()}`, c]),
       );
 
-      const inserts: Record<string, unknown>[] = [];
+      const inserts: {
+        governorate_id: string;
+        name: string;
+        slug: string;
+        is_new_city: boolean;
+        is_active: boolean;
+      }[] = [];
       let updated = 0;
       let skipped = 0;
 
