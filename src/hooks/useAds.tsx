@@ -39,10 +39,3 @@ export function useAds(placement: AdPlacement) {
   return data ?? [];
 }
 
-/** Registers a click on a paid ad without blocking navigation. */
-export function trackAdClick(id: string) {
-  void supabase.rpc("increment_ad_click" as never, { _id: id } as never).then(
-    () => undefined,
-    () => undefined,
-  );
-}
