@@ -56,6 +56,16 @@ function AdminPage() {
     },
   });
 
+  // Simple client-side filter so long lists stay usable on mobile.
+  const term = q.trim().toLowerCase();
+  const filtered = (data ?? []).filter((b) => {
+    if (!term) return true;
+    const city = (b.cities as { name: string } | null)?.name ?? "";
+    const cat = (b.categories as { name: string } | null)?.name ?? "";
+    return `${b.name} ${city} ${cat}`.toLowerCase().includes(term);
+  });
+
+
   const update = useMutation({
     mutationFn: async (payload: {
       id: string;
