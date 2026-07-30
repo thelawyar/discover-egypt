@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { SearchX } from "lucide-react";
+import { Check, Copy, Link2, SearchX, X } from "lucide-react";
 import { getTaxonomy, searchBusinesses } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { SearchBar } from "@/components/SearchBar";
@@ -11,6 +11,7 @@ import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { CityPicker } from "@/components/CityPicker";
 import { citiesForGovernorate, normalizeLocationParams } from "@/lib/location-filter";
 import { PageShell } from "@/components/SiteHeader";
+import { searchTokens } from "@/lib/highlight";
 import { Button } from "@/components/ui/button";
 
 const searchSchema = z.object({
