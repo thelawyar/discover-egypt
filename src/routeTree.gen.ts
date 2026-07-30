@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapSearchDotxmlRouteImport } from './routes/sitemap-search[.]xml'
+import { Route as SitemapIndexDotxmlRouteImport } from './routes/sitemap-index[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
@@ -42,6 +43,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SitemapSearchDotxmlRoute = SitemapSearchDotxmlRouteImport.update({
   id: '/sitemap-search.xml',
   path: '/sitemap-search.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapIndexDotxmlRoute = SitemapIndexDotxmlRouteImport.update({
+  id: '/sitemap-index.xml',
+  path: '/sitemap-index.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
+  '/sitemap-index.xml': typeof SitemapIndexDotxmlRoute
   '/sitemap-search.xml': typeof SitemapSearchDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
+  '/sitemap-index.xml': typeof SitemapIndexDotxmlRoute
   '/sitemap-search.xml': typeof SitemapSearchDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
+  '/sitemap-index.xml': typeof SitemapIndexDotxmlRoute
   '/sitemap-search.xml': typeof SitemapSearchDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/search'
+    | '/sitemap-index.xml'
     | '/sitemap-search.xml'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/search'
+    | '/sitemap-index.xml'
     | '/sitemap-search.xml'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/search'
+    | '/sitemap-index.xml'
     | '/sitemap-search.xml'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   McpRoute: typeof McpRoute
   SearchRoute: typeof SearchRoute
+  SitemapIndexDotxmlRoute: typeof SitemapIndexDotxmlRoute
   SitemapSearchDotxmlRoute: typeof SitemapSearchDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap-search.xml'
       fullPath: '/sitemap-search.xml'
       preLoaderRoute: typeof SitemapSearchDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-index.xml': {
+      id: '/sitemap-index.xml'
+      path: '/sitemap-index.xml'
+      fullPath: '/sitemap-index.xml'
+      preLoaderRoute: typeof SitemapIndexDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -540,6 +560,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   McpRoute: McpRoute,
   SearchRoute: SearchRoute,
+  SitemapIndexDotxmlRoute: SitemapIndexDotxmlRoute,
   SitemapSearchDotxmlRoute: SitemapSearchDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
