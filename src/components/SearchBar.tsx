@@ -145,7 +145,8 @@ export function SearchBar({
     setQ("");
     setDebounced("");
     setSuggestOpen(false);
-    if (onLiveChange) onLiveChange("");
+    if (onClear) onClear();
+    else if (onLiveChange) onLiveChange("");
     else go("");
   }
 
