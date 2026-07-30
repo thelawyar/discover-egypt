@@ -886,6 +886,7 @@ export type Database = {
         Args: { _business_id: string; _user_id: string }
         Returns: boolean
       }
+      business_withdraw: { Args: { _business_id: string }; Returns: boolean }
       can_manage_business: {
         Args: { _business_id: string; _user_id: string }
         Returns: boolean

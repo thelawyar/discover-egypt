@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
+import { ImageCropDialog, validateImageFile } from "@/components/ImageCropDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard/profile")({
   head: () => ({
@@ -39,6 +40,7 @@ function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -83,8 +85,19 @@ function ProfilePage() {
     queryClient.invalidateQueries({ queryKey: ["my-profile"] });
   }
 
-  async function onPickAvatar(file: File | undefined) {
-    if (!file || !user) return;
+  function onSelectFile(file: File | undefined) {
+    if (fileRef.current) fileRef.current.value = "";
+    if (!file) return;
+    const invalid = validateImageFile(file);
+    if (invalid) {
+      toast.error(invalid);
+      return;
+    }
+    setPendingFile(file);
+  }
+
+  async function onCroppedAvatar(file: File) {
+    if (!user) return;
     setUploading(true);
     try {
       const { url } = await uploadBusinessImage(file, user.id, {
@@ -100,13 +113,14 @@ function ProfilePage() {
       if (error) throw error;
       toast.success("تم تحديث الصورة الشخصية");
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      setPendingFile(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذّر رفع الصورة");
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
+
 
   async function changePassword() {
     if (password.length < 8) {
@@ -162,7 +176,7 @@ function ProfilePage() {
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
                     className="hidden"
-                    onChange={(e) => onPickAvatar(e.target.files?.[0])}
+                    onChange={(e) => onSelectFile(e.target.files?.[0])}
                   />
                   <Button
                     type="button"
@@ -178,6 +192,15 @@ function ProfilePage() {
                     )}
                     تغيير الصورة
                   </Button>
+                  <ImageCropDialog
+                    file={pendingFile}
+                    ratio={1}
+                    outputWidth={512}
+                    title="قصّ الصورة الشخصية"
+                    busy={uploading}
+                    onCancel={() => setPendingFile(null)}
+                    onConfirm={onCroppedAvatar}
+                  />
                   <p className="text-[11px] text-muted-foreground">
                     PNG أو JPG أو WEBP — حتى 10 ميجابايت.
                   </p>

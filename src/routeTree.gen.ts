@@ -32,6 +32,7 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as ApiPublicOgRouteImport } from './routes/api/public/og'
 import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
+import { Route as AuthenticatedDashboardBusinessesRouteImport } from './routes/_authenticated/dashboard.businesses'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_authenticated/dashboard.business.$id'
@@ -156,6 +157,12 @@ const AuthenticatedDashboardProfileRoute =
     path: '/dashboard/profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardBusinessesRoute =
+  AuthenticatedDashboardBusinessesRouteImport.update({
+    id: '/dashboard/businesses',
+    path: '/dashboard/businesses',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/s/$code': typeof SCodeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/api/public/og': typeof ApiPublicOgRoute
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/s/$code': typeof SCodeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/api/public/og': typeof ApiPublicOgRoute
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/s/$code': typeof SCodeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
   '/api/public/og': typeof ApiPublicOgRoute
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/s/$code'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/dashboard/businesses'
     | '/dashboard/profile'
     | '/api/public/md'
     | '/api/public/og'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/s/$code'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/dashboard/businesses'
     | '/dashboard/profile'
     | '/api/public/md'
     | '/api/public/og'
@@ -335,6 +347,7 @@ export interface FileRouteTypes {
     | '/s/$code'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/dashboard/businesses'
     | '/_authenticated/dashboard/profile'
     | '/api/public/md'
     | '/api/public/og'
@@ -527,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/businesses': {
+      id: '/_authenticated/dashboard/businesses'
+      path: '/dashboard/businesses'
+      fullPath: '/dashboard/businesses'
+      preLoaderRoute: typeof AuthenticatedDashboardBusinessesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -556,6 +576,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute
   AuthenticatedAdminCitiesRoute: typeof AuthenticatedAdminCitiesRoute
   AuthenticatedAdminSetupRoute: typeof AuthenticatedAdminSetupRoute
+  AuthenticatedDashboardBusinessesRoute: typeof AuthenticatedDashboardBusinessesRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardBusinessIdRoute: typeof AuthenticatedDashboardBusinessIdRoute
@@ -566,6 +587,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminCitiesRoute: AuthenticatedAdminCitiesRoute,
   AuthenticatedAdminSetupRoute: AuthenticatedAdminSetupRoute,
+  AuthenticatedDashboardBusinessesRoute: AuthenticatedDashboardBusinessesRoute,
   AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedDashboardBusinessIdRoute: AuthenticatedDashboardBusinessIdRoute,

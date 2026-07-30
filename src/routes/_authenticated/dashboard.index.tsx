@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Store } from "lucide-react";
+import { Plus, Pencil, Trash2, Store, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -87,11 +87,18 @@ function Dashboard() {
               كل نشاط جديد أو معدَّل يمر بمراجعة الإدارة قبل الظهور في الدليل.
             </p>
           </div>
-          <Button asChild className="rounded-full">
-            <Link to="/dashboard/business/$id" params={{ id: "new" }}>
-              <Plus className="size-4" /> أضف نشاطاً
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/dashboard/businesses">
+                <ListChecks className="size-4" /> أنشطتي حسب الحالة
+              </Link>
+            </Button>
+            <Button asChild className="rounded-full">
+              <Link to="/dashboard/business/$id" params={{ id: "new" }}>
+                <Plus className="size-4" /> أضف نشاطاً
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
