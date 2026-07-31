@@ -65,6 +65,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Load branding on the server so the correct logo/name/colors are in the
+  // first paint instead of flashing the defaults.
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(siteSettingsQuery);
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
