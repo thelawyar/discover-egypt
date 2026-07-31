@@ -770,19 +770,26 @@ function BusinessForm() {
             coverUrl={form.cover_image_url}
           />
 
+          <GalleryEditor
+            businessId={isNew ? null : id}
+            userId={user?.id ?? ""}
+            draftImages={draftImages}
+            onDraftImagesChange={setDraftImages}
+            draftCover={form.cover_image_url}
+            onDraftCoverChange={(url) => set("cover_image_url", url)}
+          />
+          <HoursEditor
+            businessId={isNew ? null : id}
+            value={draftHours}
+            onChange={setDraftHours}
+          />
           {!isNew ? (
             <>
-              <GalleryEditor businessId={id} userId={user?.id ?? ""} />
-              <HoursEditor businessId={id} />
               <BusinessStats businessId={id} />
               <ManagersEditor businessId={id} />
             </>
-          ) : (
-            <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-              بعد حفظ النشاط ستتمكن من إضافة معرض الصور ومواعيد العمل ومتابعة
-              إحصائيات الزيارات.
-            </p>
-          )}
+          ) : null}
+
 
 
           <div className="flex justify-end gap-2">
