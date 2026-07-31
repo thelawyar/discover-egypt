@@ -129,10 +129,14 @@ function BusinessForm() {
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState<FormState>(EMPTY);
+  // Gallery + hours collected locally while creating a brand-new business.
+  const [draftImages, setDraftImages] = useState<string[]>([]);
+  const [draftHours, setDraftHours] = useState<DayRow[]>(DEFAULT_HOURS);
   const [productInput, setProductInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [showCategoryInput, setShowCategoryInput] = useState(false);
+
 
   const { data: taxonomy } = useQuery({
     queryKey: ["taxonomy"],
