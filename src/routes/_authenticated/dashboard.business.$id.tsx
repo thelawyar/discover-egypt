@@ -361,13 +361,39 @@ function BusinessForm() {
       };
 
       if (isNew) {
-        const { error } = await supabase.from("businesses").insert(payload);
+        const { data: created, error } = await supabase
+          .from("businesses")
+          .insert(payload)
+          .select("id")
+          .single();
         if (error) {
           if (error.code === "23505")
             throw new Error("هذا الرابط مستخدم بالفعل، جرّب رابطًا آخر.");
           throw error;
         }
+        // Persist the gallery + hours collected before the business existed.
+        if (created?.id) {
+          if (draftImages.length) {
+            await supabase.from("business_images").insert(
+              draftImages.map((url, i) => ({
+                business_id: created.id,
+                url,
+                sort_order: i,
+              })),
+            );
+          }
+          await supabase.from("business_hours").insert(
+            draftHours.map((r) => ({
+              business_id: created.id,
+              day_of_week: r.day_of_week,
+              opens_at: r.is_closed ? null : r.opens_at,
+              closes_at: r.is_closed ? null : r.closes_at,
+              is_closed: r.is_closed,
+            })),
+          );
+        }
       } else {
+
         const { error } = await supabase
           .from("businesses")
           .update(payload)
