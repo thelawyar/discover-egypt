@@ -5,32 +5,48 @@ import { supabase } from "@/integrations/supabase/client";
 import { WEEK_DAYS } from "@/lib/directory-types";
 import { Button } from "@/components/ui/button";
 
-type DayRow = {
+export type DayRow = {
   day_of_week: number;
   opens_at: string;
   closes_at: string;
   is_closed: boolean;
 };
 
-const DEFAULT_ROWS: DayRow[] = WEEK_DAYS.map((_, i) => ({
+export const DEFAULT_HOURS: DayRow[] = WEEK_DAYS.map((_, i) => ({
   day_of_week: i,
   opens_at: "09:00",
   closes_at: "22:00",
   is_closed: false,
 }));
 
+const DEFAULT_ROWS = DEFAULT_HOURS;
+
 /** Weekly opening hours shown on the public mini-site. */
-export function HoursEditor({ businessId }: { businessId: string }) {
-  const [rows, setRows] = useState<DayRow[]>(DEFAULT_ROWS);
+export function HoursEditor({
+  businessId,
+  value,
+  onChange,
+}: {
+  /** Existing business: hours are saved immediately. Null while creating. */
+  businessId?: string | null;
+  /** Draft mode (new business): rows held in the parent form state. */
+  value?: DayRow[];
+  onChange?: (rows: DayRow[]) => void;
+}) {
+  const isDraft = !businessId;
+  const [localRows, setLocalRows] = useState<DayRow[]>(DEFAULT_ROWS);
   const [saving, setSaving] = useState(false);
+
+  const rows = isDraft ? (value ?? DEFAULT_ROWS) : localRows;
 
   const { data } = useQuery({
     queryKey: ["business-hours", businessId],
+    enabled: !isDraft,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("business_hours")
         .select("day_of_week,opens_at,closes_at,is_closed")
-        .eq("business_id", businessId)
+        .eq("business_id", businessId!)
         .order("day_of_week");
       if (error) throw error;
       return data;
@@ -39,7 +55,7 @@ export function HoursEditor({ businessId }: { businessId: string }) {
 
   useEffect(() => {
     if (!data?.length) return;
-    setRows(
+    setLocalRows(
       DEFAULT_ROWS.map((d) => {
         const found = data.find((h) => h.day_of_week === d.day_of_week);
         if (!found) return d;
@@ -54,23 +70,26 @@ export function HoursEditor({ businessId }: { businessId: string }) {
   }, [data]);
 
   function update(day: number, patch: Partial<DayRow>) {
-    setRows((prev) =>
-      prev.map((r) => (r.day_of_week === day ? { ...r, ...patch } : r)),
+    const next = rows.map((r) =>
+      r.day_of_week === day ? { ...r, ...patch } : r,
     );
+    if (isDraft) onChange?.(next);
+    else setLocalRows(next);
   }
 
   async function save() {
+    if (isDraft) return;
     setSaving(true);
     try {
       const { error: delError } = await supabase
         .from("business_hours")
         .delete()
-        .eq("business_id", businessId);
+        .eq("business_id", businessId!);
       if (delError) throw delError;
 
       const { error } = await supabase.from("business_hours").insert(
         rows.map((r) => ({
-          business_id: businessId,
+          business_id: businessId!,
           day_of_week: r.day_of_week,
           opens_at: r.is_closed ? null : r.opens_at,
           closes_at: r.is_closed ? null : r.closes_at,
@@ -89,6 +108,11 @@ export function HoursEditor({ businessId }: { businessId: string }) {
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-card">
       <h2 className="text-sm font-bold">مواعيد العمل</h2>
+      {isDraft ? (
+        <p className="text-[11px] text-muted-foreground">
+          حدّد المواعيد الآن وسيتم حفظها مع النشاط عند الضغط على حفظ.
+        </p>
+      ) : null}
       <ul className="space-y-2">
         {rows.map((r) => (
           <li key={r.day_of_week} className="flex flex-wrap items-center gap-2 text-sm">
@@ -121,16 +145,18 @@ export function HoursEditor({ businessId }: { businessId: string }) {
           </li>
         ))}
       </ul>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="rounded-full"
-        disabled={saving}
-        onClick={save}
-      >
-        {saving ? "جارٍ الحفظ..." : "حفظ المواعيد"}
-      </Button>
+      {!isDraft ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="rounded-full"
+          disabled={saving}
+          onClick={save}
+        >
+          {saving ? "جارٍ الحفظ..." : "حفظ المواعيد"}
+        </Button>
+      ) : null}
     </section>
   );
 }

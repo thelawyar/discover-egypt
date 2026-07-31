@@ -23,16 +23,29 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+type GalleryEditorProps = {
+  /** Existing business: images are persisted immediately. Null while creating. */
+  businessId?: string | null;
+  userId: string;
+  /** Draft mode (new business): image urls held in the parent form state. */
+  draftImages?: string[];
+  onDraftImagesChange?: (urls: string[]) => void;
+  /** Draft mode cover selection. */
+  draftCover?: string | null;
+  onDraftCoverChange?: (url: string) => void;
+};
 
 /** Manage the photo gallery shown on the public mini-site. */
 export function GalleryEditor({
   businessId,
   userId,
-}: {
-  businessId: string;
-  userId: string;
-}) {
+  draftImages,
+  onDraftImagesChange,
+  draftCover,
+  onDraftCoverChange,
+}: GalleryEditorProps) {
   const queryClient = useQueryClient();
+  const isDraft = !businessId;
   const [uploading, setUploading] = useState(false);
   // Files waiting to be cropped one-by-one before upload.
   const [queue, setQueue] = useState<File[]>([]);
@@ -40,36 +53,44 @@ export function GalleryEditor({
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [savingCover, setSavingCover] = useState(false);
 
-  const { data: cover, refetch: refetchCover } = useQuery({
+  const { data: savedCover, refetch: refetchCover } = useQuery({
     queryKey: ["business-cover", businessId],
+    enabled: !isDraft,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("businesses")
         .select("cover_image_url")
-        .eq("id", businessId)
+        .eq("id", businessId!)
         .maybeSingle();
       if (error) throw error;
       return data?.cover_image_url ?? null;
     },
   });
-  const refreshCover = () => refetchCover();
+  const cover = isDraft ? (draftCover ?? null) : (savedCover ?? null);
+  const refreshCover = () => (isDraft ? Promise.resolve() : refetchCover());
 
-
-  const { data: images } = useQuery({
+  const { data: savedImages } = useQuery({
     queryKey: ["business-images", businessId],
+    enabled: !isDraft,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("business_images")
         .select("id,url,sort_order")
-        .eq("business_id", businessId)
+        .eq("business_id", businessId!)
         .order("sort_order");
       if (error) throw error;
       return data;
     },
   });
 
+  const images = isDraft
+    ? (draftImages ?? []).map((url, i) => ({ id: url, url, sort_order: i }))
+    : savedImages;
+
   const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["business-images", businessId] });
+    isDraft
+      ? Promise.resolve()
+      : queryClient.invalidateQueries({ queryKey: ["business-images", businessId] });
 
   /** Validate the picked files and queue the valid ones for cropping. */
   function pick(files: FileList) {
@@ -104,11 +125,15 @@ export function GalleryEditor({
         thumbWidth: 480,
         quality: 0.82,
       });
-      const { error } = await supabase
-        .from("business_images")
-        .insert({ business_id: businessId, url, sort_order: images?.length ?? 0 });
-      if (error) throw error;
-      await refresh();
+      if (isDraft) {
+        onDraftImagesChange?.([...(draftImages ?? []), url]);
+      } else {
+        const { error } = await supabase
+          .from("business_images")
+          .insert({ business_id: businessId!, url, sort_order: images?.length ?? 0 });
+        if (error) throw error;
+        await refresh();
+      }
       toast.success("تمت إضافة الصورة");
       setQueue((q) => q.slice(1));
     } catch (err) {
@@ -124,6 +149,10 @@ export function GalleryEditor({
     const target = index + dir;
     if (target < 0 || target >= list.length) return;
     [list[index], list[target]] = [list[target], list[index]];
+    if (isDraft) {
+      onDraftImagesChange?.(list.map((img) => img.url));
+      return;
+    }
     const updates = list.map((img, i) =>
       supabase.from("business_images").update({ sort_order: i }).eq("id", img.id),
     );
@@ -136,6 +165,10 @@ export function GalleryEditor({
   }
 
   async function remove(id: string) {
+    if (isDraft) {
+      onDraftImagesChange?.((draftImages ?? []).filter((url) => url !== id));
+      return;
+    }
     const { error } = await supabase.from("business_images").delete().eq("id", id);
     if (error) {
       toast.error("تعذّر حذف الصورة");
@@ -147,11 +180,17 @@ export function GalleryEditor({
   /** Pin the previewed gallery image as the business cover photo. */
   async function confirmCover() {
     if (!coverPreview) return;
+    if (isDraft) {
+      onDraftCoverChange?.(coverPreview);
+      setCoverPreview(null);
+      toast.success("تم اختيار صورة الغلاف — ستُحفظ مع النشاط");
+      return;
+    }
     setSavingCover(true);
     const { error } = await supabase
       .from("businesses")
       .update({ cover_image_url: coverPreview, cover_thumb_url: null })
-      .eq("id", businessId);
+      .eq("id", businessId!);
     setSavingCover(false);
     if (error) {
       toast.error("تعذّر تعيين صورة الغلاف");
@@ -170,6 +209,7 @@ export function GalleryEditor({
         <p className="mt-1 text-[11px] text-muted-foreground">
           حتى 12 صورة تظهر داخل صفحة النشاط، يتم قصّها مربعة وضغطها تلقائياً، ويمكنك
           إعادة ترتيبها بالأسهم، واختيار أي صورة لتكون غلاف النشاط.
+          {isDraft ? " سيتم حفظ الصور مع النشاط عند الضغط على حفظ." : ""}
         </p>
       </div>
 

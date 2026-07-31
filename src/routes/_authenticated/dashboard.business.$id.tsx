@@ -23,7 +23,7 @@ import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/userna
 import { isHexColor } from "@/lib/business-theme";
 import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
 import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
-import { HoursEditor } from "@/components/dashboard/HoursEditor";
+import { HoursEditor, DEFAULT_HOURS, type DayRow } from "@/components/dashboard/HoursEditor";
 import { BusinessStats } from "@/components/dashboard/BusinessStats";
 import { ManagersEditor } from "@/components/dashboard/ManagersEditor";
 import { QrCodeButton } from "@/components/QrCodeButton";
@@ -129,10 +129,14 @@ function BusinessForm() {
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState<FormState>(EMPTY);
+  // Gallery + hours collected locally while creating a brand-new business.
+  const [draftImages, setDraftImages] = useState<string[]>([]);
+  const [draftHours, setDraftHours] = useState<DayRow[]>(DEFAULT_HOURS);
   const [productInput, setProductInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [showCategoryInput, setShowCategoryInput] = useState(false);
+
 
   const { data: taxonomy } = useQuery({
     queryKey: ["taxonomy"],
@@ -357,13 +361,39 @@ function BusinessForm() {
       };
 
       if (isNew) {
-        const { error } = await supabase.from("businesses").insert(payload);
+        const { data: created, error } = await supabase
+          .from("businesses")
+          .insert(payload)
+          .select("id")
+          .single();
         if (error) {
           if (error.code === "23505")
             throw new Error("هذا الرابط مستخدم بالفعل، جرّب رابطًا آخر.");
           throw error;
         }
+        // Persist the gallery + hours collected before the business existed.
+        if (created?.id) {
+          if (draftImages.length) {
+            await supabase.from("business_images").insert(
+              draftImages.map((url, i) => ({
+                business_id: created.id,
+                url,
+                sort_order: i,
+              })),
+            );
+          }
+          await supabase.from("business_hours").insert(
+            draftHours.map((r) => ({
+              business_id: created.id,
+              day_of_week: r.day_of_week,
+              opens_at: r.is_closed ? null : r.opens_at,
+              closes_at: r.is_closed ? null : r.closes_at,
+              is_closed: r.is_closed,
+            })),
+          );
+        }
       } else {
+
         const { error } = await supabase
           .from("businesses")
           .update(payload)
@@ -770,19 +800,26 @@ function BusinessForm() {
             coverUrl={form.cover_image_url}
           />
 
+          <GalleryEditor
+            businessId={isNew ? null : id}
+            userId={user?.id ?? ""}
+            draftImages={draftImages}
+            onDraftImagesChange={setDraftImages}
+            draftCover={form.cover_image_url}
+            onDraftCoverChange={(url) => set("cover_image_url", url)}
+          />
+          <HoursEditor
+            businessId={isNew ? null : id}
+            value={draftHours}
+            onChange={setDraftHours}
+          />
           {!isNew ? (
             <>
-              <GalleryEditor businessId={id} userId={user?.id ?? ""} />
-              <HoursEditor businessId={id} />
               <BusinessStats businessId={id} />
               <ManagersEditor businessId={id} />
             </>
-          ) : (
-            <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-              بعد حفظ النشاط ستتمكن من إضافة معرض الصور ومواعيد العمل ومتابعة
-              إحصائيات الزيارات.
-            </p>
-          )}
+          ) : null}
+
 
 
           <div className="flex justify-end gap-2">
