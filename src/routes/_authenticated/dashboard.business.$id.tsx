@@ -23,7 +23,7 @@ import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/userna
 import { isHexColor } from "@/lib/business-theme";
 import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
 import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
-import { HoursEditor } from "@/components/dashboard/HoursEditor";
+import { HoursEditor, DEFAULT_HOURS, type DayRow } from "@/components/dashboard/HoursEditor";
 import { BusinessStats } from "@/components/dashboard/BusinessStats";
 import { ManagersEditor } from "@/components/dashboard/ManagersEditor";
 import { QrCodeButton } from "@/components/QrCodeButton";
