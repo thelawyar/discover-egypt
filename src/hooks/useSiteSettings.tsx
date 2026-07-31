@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -53,26 +52,13 @@ export function useSiteSettings() {
   return data ?? DEFAULT_SETTINGS;
 }
 
-/** Applies the admin-managed brand colors as CSS variables on <html>. */
+/**
+ * Applies the admin-managed brand colors as CSS variables.
+ * Rendered as a <style> tag so the colors are already correct on the very first
+ * paint (SSR) instead of flashing the defaults first.
+ */
 export function BrandingStyles() {
-  const settings = useSiteSettings();
-  const { primary_color: primary, accent_color: accent } = settings;
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const vars: Record<string, string> = {
-      "--primary": primary,
-      "--ring": primary,
-      "--sidebar-primary": primary,
-      "--primary-soft": accent,
-      "--accent": accent,
-      "--sidebar-accent": accent,
-    };
-    for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
-    return () => {
-      for (const k of Object.keys(vars)) root.style.removeProperty(k);
-    };
-  }, [primary, accent]);
-
-  return null;
+  const { primary_color: primary, accent_color: accent } = useSiteSettings();
+  const css = `:root{--primary:${primary};--ring:${primary};--sidebar-primary:${primary};--primary-soft:${accent};--accent:${accent};--sidebar-accent:${accent};}`;
+  return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }

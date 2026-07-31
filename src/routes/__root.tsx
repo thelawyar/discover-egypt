@@ -14,7 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
-import { BrandingStyles } from "@/hooks/useSiteSettings";
+import { BrandingStyles, siteSettingsQuery } from "@/hooks/useSiteSettings";
 import { NotFoundPage } from "@/components/NotFoundPage";
 import { ThemeProvider, themeBootstrapScript } from "@/hooks/useTheme";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -65,6 +65,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Load branding on the server so the correct logo/name/colors are in the
+  // first paint instead of flashing the defaults.
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(siteSettingsQuery);
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
