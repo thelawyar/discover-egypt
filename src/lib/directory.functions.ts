@@ -521,6 +521,7 @@ export const getBusiness = createServerFn({ method: "GET" })
         .from("reviews")
         .select("id,rating,comment,author_name,created_at")
         .eq("business_id", businessId)
+        .eq("status", "approved")
         .order("created_at", { ascending: false })
         .limit(30),
     ]);
