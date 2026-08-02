@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Copy, KeyRound, ShieldCheck, ShieldOff } from "lucide-react";
+import { Copy, KeyRound, Lock, ShieldCheck, ShieldOff, Trash2, Unlock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { adminManageUser } from "@/lib/admin-users.functions";
 
 type AdminUser = {
   id: string;
@@ -13,7 +15,9 @@ type AdminUser = {
   created_at: string;
   last_sign_in_at: string | null;
   is_admin: boolean;
+  is_banned: boolean;
 };
+
 
 function fmt(date: string | null) {
   if (!date) return "—";
@@ -73,6 +77,34 @@ export function AdminUsers() {
       toast.success("تم إنشاء رمز دعوة جديد — انسخه الآن");
     },
     onError: () => toast.error("تعذّر إنشاء رمز الدعوة"),
+  });
+
+  const manageFn = useServerFn(adminManageUser);
+  const manage = useMutation({
+    mutationFn: async (vars: { userId: string; action: "ban" | "unban" | "delete" }) =>
+      manageFn({ data: vars }),
+    onSuccess: (_r, vars) => {
+      toast.success(
+        vars.action === "delete"
+          ? "تم حذف المستخدم"
+          : vars.action === "ban"
+            ? "تم تعطيل الحساب"
+            : "تم تفعيل الحساب",
+      );
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (error: { message?: string }) => {
+      const m = error?.message ?? "";
+      toast.error(
+        m.includes("target_is_admin")
+          ? "اسحب صلاحية المسؤول أولاً قبل التعطيل أو الحذف"
+          : m.includes("self_action")
+            ? "لا يمكنك تنفيذ هذا الإجراء على حسابك"
+            : m.includes("forbidden")
+              ? "لا تملك صلاحية تنفيذ هذا الإجراء"
+              : "تعذّر تنفيذ الإجراء",
+      );
+    },
   });
 
   const term = search.trim().toLowerCase();
@@ -157,24 +189,72 @@ export function AdminUsers() {
                   مسؤول
                 </span>
               ) : null}
+              {u.is_banned ? (
+                <span className="rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-bold text-destructive">
+                  معطّل
+                </span>
+              ) : null}
 
-              <Button
-                size="sm"
-                variant={u.is_admin ? "outline" : "default"}
-                className={`rounded-full ${u.is_admin ? "text-destructive" : ""}`}
-                disabled={setRole.isPending || (u.is_admin && u.id === user?.id)}
-                onClick={() => setRole.mutate({ userId: u.id, grant: !u.is_admin })}
-              >
-                {u.is_admin ? (
-                  <>
-                    <ShieldOff className="size-3.5" /> سحب الصلاحية
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="size-3.5" /> تعيين مسؤول
-                  </>
-                )}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant={u.is_admin ? "outline" : "default"}
+                  className={`rounded-full ${u.is_admin ? "text-destructive" : ""}`}
+                  disabled={setRole.isPending || (u.is_admin && u.id === user?.id)}
+                  onClick={() => setRole.mutate({ userId: u.id, grant: !u.is_admin })}
+                >
+                  {u.is_admin ? (
+                    <>
+                      <ShieldOff className="size-3.5" /> سحب الصلاحية
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="size-3.5" /> تعيين مسؤول
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full"
+                  disabled={manage.isPending || u.id === user?.id || u.is_admin}
+                  onClick={() =>
+                    manage.mutate({
+                      userId: u.id,
+                      action: u.is_banned ? "unban" : "ban",
+                    })
+                  }
+                >
+                  {u.is_banned ? (
+                    <>
+                      <Unlock className="size-3.5" /> تفعيل
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="size-3.5" /> تعطيل
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full text-destructive"
+                  disabled={manage.isPending || u.id === user?.id || u.is_admin}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `سيتم حذف المستخدم ${u.email ?? ""} نهائياً. هل أنت متأكد؟`,
+                      )
+                    )
+                      manage.mutate({ userId: u.id, action: "delete" });
+                  }}
+                >
+                  <Trash2 className="size-3.5" /> حذف
+                </Button>
+              </div>
+
             </div>
           ))}
         </div>
