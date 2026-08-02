@@ -17,6 +17,7 @@ import { AdminAds } from "@/components/AdminAds";
 import { AdminSearchTerms } from "@/components/AdminSearchTerms";
 import { AdminInsights } from "@/components/AdminInsights";
 import { ModerationLog } from "@/components/AdminModerationLog";
+import { AdminReviews } from "@/components/AdminReviews";
 
 
 
@@ -41,7 +42,15 @@ function AdminPage() {
   const [q, setQ] = useState("");
   const [openLog, setOpenLog] = useState<string | null>(null);
   const [view, setView] = useState<
-    "moderation" | "insights" | "categories" | "users" | "ads" | "branding" | "seo" | "searches"
+    | "moderation"
+    | "reviews"
+    | "insights"
+    | "categories"
+    | "users"
+    | "ads"
+    | "branding"
+    | "seo"
+    | "searches"
   >("moderation");
   const queryClient = useQueryClient();
 
