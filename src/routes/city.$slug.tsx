@@ -358,7 +358,9 @@ function CityPage() {
           </Button>
         </div>
 
-        {page === 1 ? <CityPortalSections slug={slug} /> : null}
+        {page === 1 ? (
+          <CityPortalSections slug={slug} cityName={data.city.name} />
+        ) : null}
 
         {page === 1 && data.items.length ? (
           <h2 className="mt-10 text-lg font-bold">كل الأنشطة في {data.city.name}</h2>
