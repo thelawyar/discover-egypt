@@ -27,6 +27,7 @@ import { QrCodeButton } from "@/components/QrCodeButton";
 import { Button } from "@/components/ui/button";
 import { MessageForm } from "@/components/MessageForm";
 import { whatsAppDigits } from "@/lib/phone";
+import { ReviewForm } from "@/components/ReviewForm";
 
 /** Where the visit came from, derived from the referrer. */
 function visitSource(): string {
@@ -376,9 +377,13 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
               </div>
             ) : null}
 
+            <div className="mt-8">
+              <h2 className="mb-3 text-sm font-bold">آراء العملاء</h2>
+              <ReviewForm businessId={data.id} />
+            </div>
+
             {data.reviews.length ? (
-              <div className="mt-8">
-                <h2 className="mb-3 text-sm font-bold">آراء العملاء</h2>
+              <div className="mt-4">
                 <div className="space-y-3">
                   {data.reviews.map((r) => (
                     <div key={r.id} className="rounded-2xl border p-4" style={cardStyle}>
