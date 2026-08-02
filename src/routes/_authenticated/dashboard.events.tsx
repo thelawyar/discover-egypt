@@ -131,7 +131,7 @@ function DashboardEvents() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("تم حفظ المناسبة");
+      toast.success("تم الحفظ وأُرسلت المناسبة لمراجعة الإدارة");
       setForm(null);
       queryClient.invalidateQueries({ queryKey: ["my-events"] });
     },
