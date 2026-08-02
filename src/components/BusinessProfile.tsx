@@ -29,6 +29,8 @@ import { MessageForm } from "@/components/MessageForm";
 import { whatsAppDigits } from "@/lib/phone";
 import { ReviewForm } from "@/components/ReviewForm";
 import { AddToListButton } from "@/components/AddToListButton";
+import { ReportBusinessButton } from "@/components/ReportBusinessButton";
+
 
 /** Where the visit came from, derived from the referrer. */
 function visitSource(): string {
