@@ -216,7 +216,19 @@ function Section({
 
 function CityPortalSections({ slug }: { slug: string }) {
   const { data: portal } = useSuspenseQuery(portalQuery(slug));
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   if (!portal) return null;
+
+  const mapPoints = (portal.nearby ?? [])
+    .filter((b) => b.latitude !== null && b.longitude !== null)
+    .map((b) => ({
+      id: b.id,
+      name: b.name,
+      username: b.username,
+      latitude: b.latitude as number,
+      longitude: b.longitude as number,
+    }));
 
   const grid = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
