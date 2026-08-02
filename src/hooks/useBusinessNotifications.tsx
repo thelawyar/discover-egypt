@@ -104,6 +104,9 @@ export function showSystemNotification(title: string, body: string, url?: string
 export function useEventReminders(hours = 48) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { data: prefs } = useNotificationPrefs();
+  const prefsRef = useRef<NotificationPrefs>(DEFAULT_PREFS);
+  prefsRef.current = prefs ?? DEFAULT_PREFS;
   const done = useRef(false);
 
   useEffect(() => {
@@ -113,12 +116,17 @@ export function useEventReminders(hours = 48) {
       const { data, error } = await supabase.rpc("run_event_reminders", { _hours: hours });
       if (error || !data) return;
       queryClient.invalidateQueries({ queryKey: ["status-notifications"] });
-      toast.info("لديك مناسبات قريبة", {
-        description: `تم تنبيهك بـ ${data} مناسبة تبدأ قريباً.`,
-      });
+      const title = "لديك مناسبات قريبة";
+      const body = `تم تنبيهك بـ ${data} مناسبة تبدأ قريباً.`;
+      toast.info(title, { description: body });
+      if (prefsRef.current.sound_enabled) beep();
+      if (prefsRef.current.push_enabled) {
+        showSystemNotification(title, body, "/events");
+      }
     })();
   }, [user, hours, queryClient]);
 }
+
 
 export function useBusinessNotifications() {
   const { user } = useAuth();

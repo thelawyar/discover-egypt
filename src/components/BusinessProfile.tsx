@@ -29,6 +29,8 @@ import { MessageForm } from "@/components/MessageForm";
 import { whatsAppDigits } from "@/lib/phone";
 import { ReviewForm } from "@/components/ReviewForm";
 import { AddToListButton } from "@/components/AddToListButton";
+import { ReportBusinessButton } from "@/components/ReportBusinessButton";
+
 
 /** Where the visit came from, derived from the referrer. */
 function visitSource(): string {
@@ -307,9 +309,11 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
             <div className="mt-4">
               <div className="flex flex-col gap-2">
                 <HandleBar username={data.username} name={data.name} />
-                <div>
+                <div className="flex flex-wrap gap-2">
                   <AddToListButton businessId={data.id} businessName={data.name} />
+                  <ReportBusinessButton businessId={data.id} />
                 </div>
+
               </div>
             </div>
 

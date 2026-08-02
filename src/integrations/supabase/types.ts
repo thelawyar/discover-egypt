@@ -445,6 +445,50 @@ export type Database = {
           },
         ]
       }
+      business_reports: {
+        Row: {
+          admin_note: string | null
+          business_id: string
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          business_id: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          business_id?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_reports_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_username_history: {
         Row: {
           business_id: string
