@@ -2,11 +2,14 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { Sparkles, Clock3, Baby, Tag, CalendarDays, Dices } from "lucide-react";
 import { getCityPage } from "@/lib/directory.functions";
+import { getCityPortal } from "@/lib/portal.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { ogCardMeta } from "@/lib/og";
 import { PageShell } from "@/components/SiteHeader";
 import { BusinessCard } from "@/components/BusinessCard";
+import { EventCard } from "@/components/EventCard";
 import { Button } from "@/components/ui/button";
 
 function cityQuery(slug: string, page: number) {
@@ -16,9 +19,18 @@ function cityQuery(slug: string, page: number) {
   });
 }
 
+function portalQuery(slug: string) {
+  return queryOptions({
+    queryKey: ["city-portal", slug],
+    queryFn: () => getCityPortal({ data: { slug } }),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
 const citySearchSchema = z.object({
   page: fallback(z.number().int().min(1), 1).default(1),
 });
+
 
 export const Route = createFileRoute("/city/$slug")({
   validateSearch: zodValidator(citySearchSchema),

@@ -15,11 +15,16 @@ import { Route as SitemapIndexDotxmlRouteImport } from './routes/sitemap-index[.
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as UsernameRouteImport } from './routes/$username'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ListsIndexRouteImport } from './routes/lists.index'
+import { Route as EventsIndexRouteImport } from './routes/events.index'
 import { Route as SCodeRouteImport } from './routes/s.$code'
+import { Route as ListsSlugRouteImport } from './routes/lists.$slug'
+import { Route as EventsIdRouteImport } from './routes/events.$id'
 import { Route as CitySlugRouteImport } from './routes/city.$slug'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
 import { Route as AuthenticatedAdminSetupRouteImport } from './routes/_authenticated/admin-setup'
@@ -33,6 +38,8 @@ import { Route as ApiPublicOgRouteImport } from './routes/api/public/og'
 import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
 import { Route as AuthenticatedDashboardNotificationsRouteImport } from './routes/_authenticated/dashboard.notifications'
+import { Route as AuthenticatedDashboardListsRouteImport } from './routes/_authenticated/dashboard.lists'
+import { Route as AuthenticatedDashboardEventsRouteImport } from './routes/_authenticated/dashboard.events'
 import { Route as AuthenticatedDashboardBusinessesRouteImport } from './routes/_authenticated/dashboard.businesses'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -68,6 +75,11 @@ const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -87,9 +99,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListsIndexRoute = ListsIndexRouteImport.update({
+  id: '/lists/',
+  path: '/lists/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SCodeRoute = SCodeRouteImport.update({
   id: '/s/$code',
   path: '/s/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListsSlugRoute = ListsSlugRouteImport.update({
+  id: '/lists/$slug',
+  path: '/lists/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIdRoute = EventsIdRouteImport.update({
+  id: '/events/$id',
+  path: '/events/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitySlugRoute = CitySlugRouteImport.update({
@@ -164,6 +196,18 @@ const AuthenticatedDashboardNotificationsRoute =
     path: '/dashboard/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardListsRoute =
+  AuthenticatedDashboardListsRouteImport.update({
+    id: '/dashboard/lists',
+    path: '/dashboard/lists',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardEventsRoute =
+  AuthenticatedDashboardEventsRouteImport.update({
+    id: '/dashboard/events',
+    path: '/dashboard/events',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardBusinessesRoute =
   AuthenticatedDashboardBusinessesRouteImport.update({
     id: '/dashboard/businesses',
@@ -192,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
   '/auth': typeof AuthRoute
+  '/discover': typeof DiscoverRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
@@ -206,10 +251,16 @@ export interface FileRoutesByFullPath {
   '/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
+  '/events/$id': typeof EventsIdRoute
+  '/lists/$slug': typeof ListsSlugRoute
   '/s/$code': typeof SCodeRoute
+  '/events/': typeof EventsIndexRoute
+  '/lists/': typeof ListsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
+  '/dashboard/events': typeof AuthenticatedDashboardEventsRoute
+  '/dashboard/lists': typeof AuthenticatedDashboardListsRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
@@ -221,6 +272,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
   '/auth': typeof AuthRoute
+  '/discover': typeof DiscoverRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
@@ -235,10 +287,16 @@ export interface FileRoutesByTo {
   '/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
+  '/events/$id': typeof EventsIdRoute
+  '/lists/$slug': typeof ListsSlugRoute
   '/s/$code': typeof SCodeRoute
+  '/events': typeof EventsIndexRoute
+  '/lists': typeof ListsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
+  '/dashboard/events': typeof AuthenticatedDashboardEventsRoute
+  '/dashboard/lists': typeof AuthenticatedDashboardListsRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
@@ -252,6 +310,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/$username': typeof UsernameRoute
   '/auth': typeof AuthRoute
+  '/discover': typeof DiscoverRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/search': typeof SearchRoute
@@ -266,10 +325,16 @@ export interface FileRoutesById {
   '/_authenticated/admin-setup': typeof AuthenticatedAdminSetupRoute
   '/business/$id': typeof BusinessIdRoute
   '/city/$slug': typeof CitySlugRoute
+  '/events/$id': typeof EventsIdRoute
+  '/lists/$slug': typeof ListsSlugRoute
   '/s/$code': typeof SCodeRoute
+  '/events/': typeof EventsIndexRoute
+  '/lists/': typeof ListsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
+  '/_authenticated/dashboard/events': typeof AuthenticatedDashboardEventsRoute
+  '/_authenticated/dashboard/lists': typeof AuthenticatedDashboardListsRoute
   '/_authenticated/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
@@ -283,6 +348,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$username'
     | '/auth'
+    | '/discover'
     | '/llms.txt'
     | '/mcp'
     | '/search'
@@ -297,10 +363,16 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/business/$id'
     | '/city/$slug'
+    | '/events/$id'
+    | '/lists/$slug'
     | '/s/$code'
+    | '/events/'
+    | '/lists/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/dashboard/businesses'
+    | '/dashboard/events'
+    | '/dashboard/lists'
     | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/api/public/md'
@@ -312,6 +384,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$username'
     | '/auth'
+    | '/discover'
     | '/llms.txt'
     | '/mcp'
     | '/search'
@@ -326,10 +399,16 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/business/$id'
     | '/city/$slug'
+    | '/events/$id'
+    | '/lists/$slug'
     | '/s/$code'
+    | '/events'
+    | '/lists'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/dashboard/businesses'
+    | '/dashboard/events'
+    | '/dashboard/lists'
     | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/api/public/md'
@@ -342,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/$username'
     | '/auth'
+    | '/discover'
     | '/llms.txt'
     | '/mcp'
     | '/search'
@@ -356,10 +436,16 @@ export interface FileRouteTypes {
     | '/_authenticated/admin-setup'
     | '/business/$id'
     | '/city/$slug'
+    | '/events/$id'
+    | '/lists/$slug'
     | '/s/$code'
+    | '/events/'
+    | '/lists/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/dashboard/businesses'
+    | '/_authenticated/dashboard/events'
+    | '/_authenticated/dashboard/lists'
     | '/_authenticated/dashboard/notifications'
     | '/_authenticated/dashboard/profile'
     | '/api/public/md'
@@ -373,6 +459,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   UsernameRoute: typeof UsernameRoute
   AuthRoute: typeof AuthRoute
+  DiscoverRoute: typeof DiscoverRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   McpRoute: typeof McpRoute
   SearchRoute: typeof SearchRoute
@@ -383,7 +470,11 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BusinessIdRoute: typeof BusinessIdRoute
   CitySlugRoute: typeof CitySlugRoute
+  EventsIdRoute: typeof EventsIdRoute
+  ListsSlugRoute: typeof ListsSlugRoute
   SCodeRoute: typeof SCodeRoute
+  EventsIndexRoute: typeof EventsIndexRoute
+  ListsIndexRoute: typeof ListsIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicMdRoute: typeof ApiPublicMdRoute
@@ -434,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -462,11 +560,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lists/': {
+      id: '/lists/'
+      path: '/lists'
+      fullPath: '/lists/'
+      preLoaderRoute: typeof ListsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/s/$code': {
       id: '/s/$code'
       path: '/s/$code'
       fullPath: '/s/$code'
       preLoaderRoute: typeof SCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lists/$slug': {
+      id: '/lists/$slug'
+      path: '/lists/$slug'
+      fullPath: '/lists/$slug'
+      preLoaderRoute: typeof ListsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$id': {
+      id: '/events/$id'
+      path: '/events/$id'
+      fullPath: '/events/$id'
+      preLoaderRoute: typeof EventsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/city/$slug': {
@@ -560,6 +686,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/lists': {
+      id: '/_authenticated/dashboard/lists'
+      path: '/dashboard/lists'
+      fullPath: '/dashboard/lists'
+      preLoaderRoute: typeof AuthenticatedDashboardListsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/events': {
+      id: '/_authenticated/dashboard/events'
+      path: '/dashboard/events'
+      fullPath: '/dashboard/events'
+      preLoaderRoute: typeof AuthenticatedDashboardEventsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/businesses': {
       id: '/_authenticated/dashboard/businesses'
       path: '/dashboard/businesses'
@@ -597,6 +737,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCitiesRoute: typeof AuthenticatedAdminCitiesRoute
   AuthenticatedAdminSetupRoute: typeof AuthenticatedAdminSetupRoute
   AuthenticatedDashboardBusinessesRoute: typeof AuthenticatedDashboardBusinessesRoute
+  AuthenticatedDashboardEventsRoute: typeof AuthenticatedDashboardEventsRoute
+  AuthenticatedDashboardListsRoute: typeof AuthenticatedDashboardListsRoute
   AuthenticatedDashboardNotificationsRoute: typeof AuthenticatedDashboardNotificationsRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
@@ -609,6 +751,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCitiesRoute: AuthenticatedAdminCitiesRoute,
   AuthenticatedAdminSetupRoute: AuthenticatedAdminSetupRoute,
   AuthenticatedDashboardBusinessesRoute: AuthenticatedDashboardBusinessesRoute,
+  AuthenticatedDashboardEventsRoute: AuthenticatedDashboardEventsRoute,
+  AuthenticatedDashboardListsRoute: AuthenticatedDashboardListsRoute,
   AuthenticatedDashboardNotificationsRoute:
     AuthenticatedDashboardNotificationsRoute,
   AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
@@ -624,6 +768,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   UsernameRoute: UsernameRoute,
   AuthRoute: AuthRoute,
+  DiscoverRoute: DiscoverRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   McpRoute: McpRoute,
   SearchRoute: SearchRoute,
@@ -635,7 +780,11 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   BusinessIdRoute: BusinessIdRoute,
   CitySlugRoute: CitySlugRoute,
+  EventsIdRoute: EventsIdRoute,
+  ListsSlugRoute: ListsSlugRoute,
   SCodeRoute: SCodeRoute,
+  EventsIndexRoute: EventsIndexRoute,
+  ListsIndexRoute: ListsIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicMdRoute: ApiPublicMdRoute,
@@ -644,13 +793,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
