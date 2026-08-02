@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Copy, KeyRound, ShieldCheck, ShieldOff } from "lucide-react";
+import { Copy, KeyRound, Lock, ShieldCheck, ShieldOff, Trash2, Unlock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { adminManageUser } from "@/lib/admin-users.functions";
 
 type AdminUser = {
   id: string;
@@ -13,7 +15,9 @@ type AdminUser = {
   created_at: string;
   last_sign_in_at: string | null;
   is_admin: boolean;
+  is_banned: boolean;
 };
+
 
 function fmt(date: string | null) {
   if (!date) return "—";
