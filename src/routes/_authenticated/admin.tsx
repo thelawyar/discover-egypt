@@ -219,6 +219,7 @@ function AdminPage() {
 
         {view === "branding" ? <BrandingSettings /> : null}
         {view === "reviews" ? <AdminReviews /> : null}
+        {view === "events" ? <AdminEvents /> : null}
         {view === "insights" ? <AdminInsights /> : null}
         {view === "users" ? <AdminUsers /> : null}
         {view === "categories" ? <AdminCategories /> : null}
