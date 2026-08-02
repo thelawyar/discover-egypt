@@ -304,7 +304,12 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
             ) : null}
 
             <div className="mt-4">
-              <HandleBar username={data.username} name={data.name} />
+              <div className="flex flex-col gap-2">
+                <HandleBar username={data.username} name={data.name} />
+                <div>
+                  <AddToListButton businessId={data.id} businessName={data.name} />
+                </div>
+              </div>
             </div>
 
             {data.description ? (
