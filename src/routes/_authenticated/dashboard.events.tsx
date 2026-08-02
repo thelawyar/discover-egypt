@@ -360,15 +360,35 @@ function DashboardEvents() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {EVENT_KIND_LABELS[e.kind] ?? "حدث"} · {formatEventDate(e.starts_at)}
                   </p>
+                  {e.status === "rejected" && e.rejection_reason ? (
+                    <p className="mt-1 text-xs text-destructive">
+                      سبب الرفض: {e.rejection_reason}
+                    </p>
+                  ) : null}
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                    e.is_published
+                    e.status === "approved"
                       ? "bg-success/15 text-success"
+                      : e.status === "rejected"
+                        ? "bg-destructive/10 text-destructive"
+                        : "bg-warning/15 text-warning-foreground"
+                  }`}
+                >
+                  {e.status === "approved"
+                    ? "معتمد"
+                    : e.status === "rejected"
+                      ? "مرفوض"
+                      : "قيد المراجعة"}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                    e.is_published
+                      ? "bg-muted text-muted-foreground"
                       : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  {e.is_published ? "منشور" : "مخفي"}
+                  {e.is_published ? "ظاهر" : "مخفي"}
                 </span>
                 <div className="flex gap-1">
                   <Button
