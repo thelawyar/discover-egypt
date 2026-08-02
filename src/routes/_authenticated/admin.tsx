@@ -46,6 +46,8 @@ function AdminPage() {
   const [view, setView] = useState<
     | "moderation"
     | "reviews"
+    | "reports"
+
     | "events"
     | "insights"
     | "categories"
