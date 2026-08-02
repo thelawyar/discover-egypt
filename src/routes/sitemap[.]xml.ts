@@ -29,6 +29,10 @@ export const Route = createFileRoute("/sitemap.xml")({
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "daily", priority: "1.0" },
           { path: "/search", changefreq: "daily", priority: "0.9" },
+          { path: "/events", changefreq: "daily", priority: "0.8" },
+          { path: "/lists", changefreq: "weekly", priority: "0.7" },
+          { path: "/discover", changefreq: "weekly", priority: "0.6" },
+
           ...data.categories.map((slug) => ({
             path: `/search?cat=${encodeURIComponent(slug)}`,
             changefreq: "weekly" as const,
