@@ -79,6 +79,34 @@ export function AdminUsers() {
     onError: () => toast.error("تعذّر إنشاء رمز الدعوة"),
   });
 
+  const manageFn = useServerFn(adminManageUser);
+  const manage = useMutation({
+    mutationFn: async (vars: { userId: string; action: "ban" | "unban" | "delete" }) =>
+      manageFn({ data: vars }),
+    onSuccess: (_r, vars) => {
+      toast.success(
+        vars.action === "delete"
+          ? "تم حذف المستخدم"
+          : vars.action === "ban"
+            ? "تم تعطيل الحساب"
+            : "تم تفعيل الحساب",
+      );
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (error: { message?: string }) => {
+      const m = error?.message ?? "";
+      toast.error(
+        m.includes("target_is_admin")
+          ? "اسحب صلاحية المسؤول أولاً قبل التعطيل أو الحذف"
+          : m.includes("self_action")
+            ? "لا يمكنك تنفيذ هذا الإجراء على حسابك"
+            : m.includes("forbidden")
+              ? "لا تملك صلاحية تنفيذ هذا الإجراء"
+              : "تعذّر تنفيذ الإجراء",
+      );
+    },
+  });
+
   const term = search.trim().toLowerCase();
   const rows = (users.data ?? []).filter(
     (u) =>
