@@ -151,7 +151,9 @@ export type Database = {
           is_published: boolean
           kind: Database["public"]["Enums"]["event_kind"]
           price_info: string | null
+          rejection_reason: string | null
           starts_at: string
+          status: Database["public"]["Enums"]["business_status"]
           title: string
           updated_at: string
           venue: string | null
@@ -171,7 +173,9 @@ export type Database = {
           is_published?: boolean
           kind?: Database["public"]["Enums"]["event_kind"]
           price_info?: string | null
+          rejection_reason?: string | null
           starts_at?: string
+          status?: Database["public"]["Enums"]["business_status"]
           title: string
           updated_at?: string
           venue?: string | null
@@ -191,7 +195,9 @@ export type Database = {
           is_published?: boolean
           kind?: Database["public"]["Enums"]["event_kind"]
           price_info?: string | null
+          rejection_reason?: string | null
           starts_at?: string
+          status?: Database["public"]["Enums"]["business_status"]
           title?: string
           updated_at?: string
           venue?: string | null
@@ -713,6 +719,35 @@ export type Database = {
           },
         ]
       }
+      event_reminders: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_reminders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "business_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governorates: {
         Row: {
           created_at: string
@@ -1202,6 +1237,7 @@ export type Database = {
         Returns: boolean
       }
       random_username: { Args: never; Returns: string }
+      run_event_reminders: { Args: { _hours?: number }; Returns: number }
       search_term_stats: {
         Args: { _days?: number; _limit?: number }
         Returns: {
