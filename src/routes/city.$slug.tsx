@@ -219,7 +219,7 @@ function Section({
   );
 }
 
-function CityPortalSections({ slug }: { slug: string }) {
+function CityPortalSections({ slug, cityName }: { slug: string; cityName: string }) {
   const { data: portal } = useSuspenseQuery(portalQuery(slug));
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
