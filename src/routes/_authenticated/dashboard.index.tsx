@@ -94,12 +94,19 @@ function Dashboard() {
                 <ListChecks className="size-4" /> أنشطتي حسب الحالة
               </Link>
             </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/dashboard/events">🎉 عروضي وأحداثي</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/dashboard/lists">🔖 قوائمي</Link>
+            </Button>
             <Button asChild className="rounded-full">
               <Link to="/dashboard/business/$id" params={{ id: "new" }}>
                 <Plus className="size-4" /> أضف نشاطاً
               </Link>
             </Button>
           </div>
+
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">

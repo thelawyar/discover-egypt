@@ -135,6 +135,91 @@ export type Database = {
           },
         ]
       }
+      business_events: {
+        Row: {
+          business_id: string
+          city_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          external_url: string | null
+          governorate_id: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_published: boolean
+          kind: Database["public"]["Enums"]["event_kind"]
+          price_info: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          business_id: string
+          city_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          external_url?: string | null
+          governorate_id?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          kind?: Database["public"]["Enums"]["event_kind"]
+          price_info?: string | null
+          starts_at?: string
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          business_id?: string
+          city_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          external_url?: string | null
+          governorate_id?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_published?: boolean
+          kind?: Database["public"]["Enums"]["event_kind"]
+          price_info?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_events_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_events_governorate_id_fkey"
+            columns: ["governorate_id"]
+            isOneToOne: false
+            referencedRelation: "governorates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_hours: {
         Row: {
           business_id: string
@@ -655,6 +740,95 @@ export type Database = {
         }
         Relationships: []
       }
+      list_items: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          list_id: string
+          note: string | null
+          sort_order: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          list_id: string
+          note?: string | null
+          sort_order?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          list_id?: string
+          note?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lists: {
+        Row: {
+          city_id: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          slug: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lists_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           created_at: string
@@ -1023,6 +1197,10 @@ export type Database = {
       }
       make_slug: { Args: { v: string }; Returns: string }
       normalize_username: { Args: { v: string }; Returns: string }
+      owns_list: {
+        Args: { _list_id: string; _user_id: string }
+        Returns: boolean
+      }
       random_username: { Args: never; Returns: string }
       search_term_stats: {
         Args: { _days?: number; _limit?: number }
@@ -1051,6 +1229,7 @@ export type Database = {
       ad_placement: "home" | "search" | "business"
       app_role: "admin" | "moderator" | "user"
       business_status: "pending" | "approved" | "rejected"
+      event_kind: "offer" | "party" | "opening" | "match" | "event"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1181,6 +1360,7 @@ export const Constants = {
       ad_placement: ["home", "search", "business"],
       app_role: ["admin", "moderator", "user"],
       business_status: ["pending", "approved", "rejected"],
+      event_kind: ["offer", "party", "opening", "match", "event"],
     },
   },
 } as const
