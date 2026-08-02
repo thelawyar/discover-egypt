@@ -9,6 +9,8 @@ const LazyCityMap = lazy(() =>
   import("@/components/CityMap").then((m) => ({ default: m.CityMap })),
 );
 import { getCityPage } from "@/lib/directory.functions";
+import { AMENITIES } from "@/lib/business-attributes";
+
 import { getCityPortal } from "@/lib/portal.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { ogCardMeta } from "@/lib/og";
