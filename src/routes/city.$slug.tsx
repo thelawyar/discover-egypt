@@ -36,6 +36,9 @@ export const Route = createFileRoute("/city/$slug")({
   validateSearch: zodValidator(citySearchSchema),
   loaderDeps: ({ search }) => ({ page: search.page }),
   loader: async ({ context, params, deps }) => {
+    if (deps.page === 1) {
+      void context.queryClient.ensureQueryData(portalQuery(params.slug));
+    }
     const [data, origin] = await Promise.all([
       context.queryClient.ensureQueryData(cityQuery(params.slug, deps.page)),
       context.queryClient.ensureQueryData({
@@ -44,6 +47,7 @@ export const Route = createFileRoute("/city/$slug")({
         staleTime: Infinity,
       }),
     ]);
+
     if (!data) throw notFound();
     return {
       origin,
