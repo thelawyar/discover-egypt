@@ -11,7 +11,10 @@ import { ContactNotifications } from "@/components/dashboard/ContactNotification
 import { MessagesInbox } from "@/components/dashboard/MessagesInbox";
 import { NotificationSettings } from "@/components/dashboard/NotificationSettings";
 import { StatusNotifications } from "@/components/dashboard/StatusNotifications";
-import { useBusinessNotifications } from "@/hooks/useBusinessNotifications";
+import {
+  useBusinessNotifications,
+  useEventReminders,
+} from "@/hooks/useBusinessNotifications";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   head: () => ({
