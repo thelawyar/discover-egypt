@@ -37,6 +37,8 @@ function Dashboard() {
   const queryClient = useQueryClient();
   // Live toast + system notification for new messages/orders.
   useBusinessNotifications();
+  // Reminders for events/offers starting soon (owned or saved in my lists).
+  useEventReminders();
 
 
   const { data, isLoading } = useQuery({
