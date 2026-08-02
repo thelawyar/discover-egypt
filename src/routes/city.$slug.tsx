@@ -219,13 +219,67 @@ function Section({
   );
 }
 
+const TIME_FILTERS = [
+  { value: "all", label: "الكل" },
+  { value: "offers", label: "لديه عرض حالي" },
+  { value: "events", label: "لديه حدث قادم" },
+] as const;
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium ${
+        active
+          ? "bg-primary text-primary-foreground"
+          : "border border-border bg-card text-muted-foreground hover:bg-muted"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function CityPortalSections({ slug, cityName }: { slug: string; cityName: string }) {
   const { data: portal } = useSuspenseQuery(portalQuery(slug));
   const [mounted, setMounted] = useState(false);
+  const [cat, setCat] = useState("");
+  const [price, setPrice] = useState(0);
+  const [amenity, setAmenity] = useState("");
+  const [when, setWhen] = useState<(typeof TIME_FILTERS)[number]["value"]>("all");
   useEffect(() => setMounted(true), []);
   if (!portal) return null;
 
-  const mapPoints = (portal.nearby ?? [])
+  const nearby = portal.nearby ?? [];
+  const offerIds = new Set((portal.offers ?? []).map((e) => e.business_id));
+  const eventIds = new Set((portal.events ?? []).map((e) => e.business_id));
+
+  const catOptions = Array.from(
+    new Set(nearby.map((b) => b.category_name).filter(Boolean) as string[]),
+  ).slice(0, 12);
+  const amenityOptions = AMENITIES.filter((a) =>
+    nearby.some((b) => (b.amenities ?? []).includes(a.value)),
+  ).slice(0, 10);
+
+  const filtered = nearby.filter((b) => {
+    if (cat && b.category_name !== cat) return false;
+    if (price && (b.price_level ?? 0) !== price) return false;
+    if (amenity && !(b.amenities ?? []).includes(amenity)) return false;
+    if (when === "offers" && !offerIds.has(b.id)) return false;
+    if (when === "events" && !eventIds.has(b.id)) return false;
+    return true;
+  });
+
+  const mapPoints = filtered
     .filter((b) => b.latitude !== null && b.longitude !== null)
     .map((b) => ({
       id: b.id,
@@ -235,6 +289,7 @@ function CityPortalSections({ slug, cityName }: { slug: string; cityName: string
       longitude: b.longitude as number,
     }));
 
+  const hasMapData = nearby.some((b) => b.latitude !== null && b.longitude !== null);
   const grid = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
@@ -257,21 +312,72 @@ function CityPortalSections({ slug, cityName }: { slug: string; cityName: string
         </div>
       ) : null}
 
-      {mapPoints.length ? (
+      {hasMapData ? (
         <Section title="خريطة الأماكن القريبة" icon={<MapIcon className="size-5 text-primary" />}>
-          {mounted ? (
+          <div className="mb-3 space-y-2">
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              <FilterChip active={!cat} onClick={() => setCat("")}>
+                كل التصنيفات
+              </FilterChip>
+              {catOptions.map((c) => (
+                <FilterChip key={c} active={cat === c} onClick={() => setCat(cat === c ? "" : c)}>
+                  {c}
+                </FilterChip>
+              ))}
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              <FilterChip active={!price} onClick={() => setPrice(0)}>
+                كل الأسعار
+              </FilterChip>
+              {[1, 2, 3, 4].map((p) => (
+                <FilterChip key={p} active={price === p} onClick={() => setPrice(price === p ? 0 : p)}>
+                  {"$".repeat(p)}
+                </FilterChip>
+              ))}
+              {TIME_FILTERS.map((t) => (
+                <FilterChip key={t.value} active={when === t.value} onClick={() => setWhen(t.value)}>
+                  {t.label}
+                </FilterChip>
+              ))}
+            </div>
+            {amenityOptions.length ? (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                <FilterChip active={!amenity} onClick={() => setAmenity("")}>
+                  كل الخدمات
+                </FilterChip>
+                {amenityOptions.map((a) => (
+                  <FilterChip
+                    key={a.value}
+                    active={amenity === a.value}
+                    onClick={() => setAmenity(amenity === a.value ? "" : a.value)}
+                  >
+                    {a.label}
+                  </FilterChip>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          {mapPoints.length === 0 ? (
+            <p className="rounded-2xl border border-border bg-muted/40 p-6 text-center text-sm text-muted-foreground">
+              لا توجد أماكن مطابقة للفلاتر المختارة على الخريطة.
+            </p>
+          ) : mounted ? (
             <Suspense
-              fallback={
-                <div className="h-[340px] w-full animate-pulse rounded-2xl bg-muted" />
-              }
+              fallback={<div className="h-[340px] w-full animate-pulse rounded-2xl bg-muted" />}
             >
-              <LazyCityMap points={mapPoints} cityName={cityName} />
+              <LazyCityMap
+                key={mapPoints.map((p) => p.id).join(",")}
+                points={mapPoints}
+                cityName={cityName}
+              />
             </Suspense>
           ) : (
             <div className="h-[340px] w-full rounded-2xl bg-muted" />
           )}
         </Section>
       ) : null}
+
 
       {portal.offers.length ? (
         <Section title="عروض اليوم" icon={<Tag className="size-5 text-primary" />}>
