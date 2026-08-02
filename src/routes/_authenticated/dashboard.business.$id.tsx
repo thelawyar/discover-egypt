@@ -21,6 +21,8 @@ import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
 import { isHexColor } from "@/lib/business-theme";
+import { ATTR_GROUPS, PRICE_LEVELS } from "@/lib/business-attributes";
+
 import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
 import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { HoursEditor, DEFAULT_HOURS, type DayRow } from "@/components/dashboard/HoursEditor";
