@@ -18,6 +18,7 @@ import { AdminSearchTerms } from "@/components/AdminSearchTerms";
 import { AdminInsights } from "@/components/AdminInsights";
 import { ModerationLog } from "@/components/AdminModerationLog";
 import { AdminReviews } from "@/components/AdminReviews";
+import { AdminEvents } from "@/components/AdminEvents";
 
 
 
