@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import type { BusinessDetail } from "@/lib/directory-types";
 import { WEEK_DAYS } from "@/lib/directory-types";
+import { ATTR_GROUPS, attrLabel, priceLabel } from "@/lib/business-attributes";
+
 import { resolveTheme, themeVars } from "@/lib/business-theme";
 import { supabase } from "@/integrations/supabase/client";
 import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
@@ -324,6 +326,37 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
                 </div>
               </div>
             ) : null}
+
+            {ATTR_GROUPS.some((g) => data[g.key].length) || data.price_level ? (
+              <div className="mt-6 space-y-3">
+                <h2 className="text-sm font-bold">مميزات المكان</h2>
+                {data.price_level ? (
+                  <p className="text-xs">
+                    <span className="font-bold">مستوى السعر: </span>
+                    <span dir="ltr">{priceLabel(data.price_level)}</span>
+                  </p>
+                ) : null}
+                {ATTR_GROUPS.filter((g) => data[g.key].length).map((g) => (
+                  <div key={g.key}>
+                    <p className="mb-1.5 text-[11px] font-bold" style={{ color: "var(--biz-muted)" }}>
+                      {g.title}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {data[g.key].map((v) => (
+                        <span
+                          key={v}
+                          className="rounded-lg px-3 py-1.5 text-xs"
+                          style={softStyle}
+                        >
+                          {attrLabel(v)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
 
             {data.images.length ? (
               <div className="mt-8">

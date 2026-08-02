@@ -389,6 +389,7 @@ export type Database = {
       businesses: {
         Row: {
           address: string | null
+          amenities: string[]
           category_id: string | null
           city_id: string | null
           cover_image_url: string | null
@@ -397,6 +398,7 @@ export type Database = {
           description: string | null
           email: string | null
           facebook: string | null
+          good_for: string[]
           governorate_id: string | null
           id: string
           instagram: string | null
@@ -405,8 +407,11 @@ export type Database = {
           logo_url: string | null
           longitude: number | null
           name: string
+          occasions: string[]
           owner_id: string | null
+          payment_methods: string[]
           phone: string | null
+          price_level: number | null
           products: string[]
           rejection_reason: string | null
           search_norm: string
@@ -420,12 +425,14 @@ export type Database = {
           theme_style: string
           updated_at: string
           username: string
+          vibes: string[]
           view_count: number
           website: string | null
           whatsapp: string | null
         }
         Insert: {
           address?: string | null
+          amenities?: string[]
           category_id?: string | null
           city_id?: string | null
           cover_image_url?: string | null
@@ -434,6 +441,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           facebook?: string | null
+          good_for?: string[]
           governorate_id?: string | null
           id?: string
           instagram?: string | null
@@ -442,8 +450,11 @@ export type Database = {
           logo_url?: string | null
           longitude?: number | null
           name: string
+          occasions?: string[]
           owner_id?: string | null
+          payment_methods?: string[]
           phone?: string | null
+          price_level?: number | null
           products?: string[]
           rejection_reason?: string | null
           search_norm?: string
@@ -457,12 +468,14 @@ export type Database = {
           theme_style?: string
           updated_at?: string
           username?: string
+          vibes?: string[]
           view_count?: number
           website?: string | null
           whatsapp?: string | null
         }
         Update: {
           address?: string | null
+          amenities?: string[]
           category_id?: string | null
           city_id?: string | null
           cover_image_url?: string | null
@@ -471,6 +484,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           facebook?: string | null
+          good_for?: string[]
           governorate_id?: string | null
           id?: string
           instagram?: string | null
@@ -479,8 +493,11 @@ export type Database = {
           logo_url?: string | null
           longitude?: number | null
           name?: string
+          occasions?: string[]
           owner_id?: string | null
+          payment_methods?: string[]
           phone?: string | null
+          price_level?: number | null
           products?: string[]
           rejection_reason?: string | null
           search_norm?: string
@@ -494,6 +511,7 @@ export type Database = {
           theme_style?: string
           updated_at?: string
           username?: string
+          vibes?: string[]
           view_count?: number
           website?: string | null
           whatsapp?: string | null

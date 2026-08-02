@@ -21,6 +21,8 @@ import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
 import { isHexColor } from "@/lib/business-theme";
+import { ATTR_GROUPS, PRICE_LEVELS } from "@/lib/business-attributes";
+
 import { ThemeEditor } from "@/components/dashboard/ThemeEditor";
 import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { HoursEditor, DEFAULT_HOURS, type DayRow } from "@/components/dashboard/HoursEditor";
@@ -93,6 +95,12 @@ type FormState = {
   theme_font: string;
   theme_button: string;
   theme_contrast: boolean;
+  price_level: number | null;
+  amenities: string[];
+  payment_methods: string[];
+  good_for: string[];
+  vibes: string[];
+  occasions: string[];
 };
 
 const EMPTY: FormState = {
@@ -119,7 +127,14 @@ const EMPTY: FormState = {
   theme_font: "cairo",
   theme_button: "rounded",
   theme_contrast: false,
+  price_level: null,
+  amenities: [],
+  payment_methods: [],
+  good_for: [],
+  vibes: [],
+  occasions: [],
 };
+
 
 function BusinessForm() {
   const { id } = Route.useParams();
@@ -233,7 +248,14 @@ function BusinessForm() {
       theme_font: existing.theme_font ?? "cairo",
       theme_button: existing.theme_button ?? "rounded",
       theme_contrast: Boolean(existing.theme_contrast),
+      price_level: existing.price_level ?? null,
+      amenities: existing.amenities ?? [],
+      payment_methods: existing.payment_methods ?? [],
+      good_for: existing.good_for ?? [],
+      vibes: existing.vibes ?? [],
+      occasions: existing.occasions ?? [],
     });
+
   }, [existing]);
 
   const cities = citiesForGovernorate(
@@ -356,6 +378,13 @@ function BusinessForm() {
         theme_font: form.theme_font,
         theme_button: form.theme_button,
         theme_contrast: form.theme_contrast,
+        price_level: form.price_level,
+        amenities: form.amenities,
+        payment_methods: form.payment_methods,
+        good_for: form.good_for,
+        vibes: form.vibes,
+        occasions: form.occasions,
+
         // Ownership is set only when creating; editors/managers must not steal it.
         ...(isNew ? { owner_id: user!.id } : {}),
       };
@@ -698,6 +727,78 @@ function BusinessForm() {
               </div>
             ) : null}
           </section>
+
+          <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
+            <div>
+              <h2 className="text-sm font-bold">مميزات النشاط</h2>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                تساعد هذه الخيارات الزوار على الوصول لنشاطك عند البحث بالاحتياج أو
+                المزاج أو المناسبة.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>مستوى السعر</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRICE_LEVELS.map((p) => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() =>
+                      set("price_level", form.price_level === p.value ? null : p.value)
+                    }
+                    className={`rounded-full border px-3 py-1 text-xs ${
+                      form.price_level === p.value
+                        ? "border-primary bg-primary-soft text-accent-foreground"
+                        : "border-border hover:bg-muted"
+                    }`}
+                  >
+                    <span dir="ltr">{p.label}</span> {p.hint}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {ATTR_GROUPS.map((group) => {
+              const key = group.key as
+                | "amenities"
+                | "payment_methods"
+                | "good_for"
+                | "vibes"
+                | "occasions";
+              const selected = form[key];
+              return (
+                <div key={group.key} className="space-y-1.5">
+                  <Label>{group.title}</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {group.options.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        onClick={() =>
+                          set(
+                            key,
+                            selected.includes(o.value)
+                              ? selected.filter((v) => v !== o.value)
+                              : [...selected, o.value],
+                          )
+                        }
+                        className={`rounded-full border px-3 py-1 text-xs ${
+                          selected.includes(o.value)
+                            ? "border-primary bg-primary-soft text-accent-foreground"
+                            : "border-border hover:bg-muted"
+                        }`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+
+
 
           <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
             <h2 className="text-sm font-bold">بيانات التواصل</h2>

@@ -25,7 +25,13 @@ import { CityPicker } from "@/components/CityPicker";
 import { citiesForGovernorate, normalizeLocationParams } from "@/lib/location-filter";
 import { PageShell } from "@/components/SiteHeader";
 import { searchTokens } from "@/lib/highlight";
+import {
+  AttributeFilters,
+  SmartBanner,
+  type AttrParams,
+} from "@/components/search/AttributeFilters";
 import { Button } from "@/components/ui/button";
+
 import {
   clearLastSearch,
   readLastSearch,
@@ -44,6 +50,14 @@ const searchSchema = z.object({
   prod: fallback(z.string(), "").default(""),
   sort: fallback(z.enum(["best", "newest", "popular"]), "best").default("best"),
   page: fallback(z.number().int(), 1).default(1),
+  // Enrichment filters (comma separated slugs).
+  amen: fallback(z.string(), "").default(""),
+  pay: fallback(z.string(), "").default(""),
+  good: fallback(z.string(), "").default(""),
+  vibe: fallback(z.string(), "").default(""),
+  occ: fallback(z.string(), "").default(""),
+  price: fallback(z.number().int(), 0).default(0),
+  open: fallback(z.boolean(), false).default(false),
 });
 
 type SearchParams = z.infer<typeof searchSchema>;
@@ -60,15 +74,7 @@ const taxonomyQuery = queryOptions({
   staleTime: 1000 * 60 * 30,
 });
 
-function resultsQuery(deps: {
-  q: string;
-  city: string;
-  gov: string;
-  cat: string;
-  prod: string;
-  sort: "best" | "newest" | "popular";
-  page: number;
-}) {
+function resultsQuery(deps: SearchParams) {
   return queryOptions({
     queryKey: ["search", deps],
     queryFn: () =>
@@ -81,10 +87,18 @@ function resultsQuery(deps: {
           prod: deps.prod || undefined,
           sort: deps.sort,
           page: deps.page,
+          amen: deps.amen || undefined,
+          pay: deps.pay || undefined,
+          good: deps.good || undefined,
+          vibe: deps.vibe || undefined,
+          occ: deps.occ || undefined,
+          price: deps.price || undefined,
+          open: deps.open || undefined,
         },
       }),
   });
 }
+
 
 
 export const Route = createFileRoute("/search")({
@@ -506,6 +520,17 @@ function SearchPage() {
             }
           />
 
+          <AttributeFilters
+            params={params as AttrParams}
+            onChange={(patch) =>
+              navigate({
+                search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }),
+              })
+            }
+          />
+
+
+
           <span className="ms-auto text-xs text-muted-foreground">
             {results.total.toLocaleString("ar-EG")} نتيجة
           </span>
@@ -533,7 +558,20 @@ function SearchPage() {
           }}
         />
 
+        {results.smart ? (
+          <SmartBanner
+            summary={results.smart.summary}
+            chips={[
+              ...results.smart.filters.good_for,
+              ...results.smart.filters.vibes,
+              ...results.smart.filters.occasions,
+              ...results.smart.filters.amenities,
+            ]}
+          />
+        ) : null}
+
         {results.items.length === 0 ? (
+
           <NoResults
             params={params}
             taxonomy={taxonomy}
