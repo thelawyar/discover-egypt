@@ -240,6 +240,22 @@ function CityPortalSections({ slug }: { slug: string }) {
         </div>
       ) : null}
 
+      {mapPoints.length ? (
+        <Section title="خريطة الأماكن القريبة" icon={<MapIcon className="size-5 text-primary" />}>
+          {mounted ? (
+            <Suspense
+              fallback={
+                <div className="h-[340px] w-full animate-pulse rounded-2xl bg-muted" />
+              }
+            >
+              <LazyCityMap points={mapPoints} cityName={slug} />
+            </Suspense>
+          ) : (
+            <div className="h-[340px] w-full rounded-2xl bg-muted" />
+          )}
+        </Section>
+      ) : null}
+
       {portal.offers.length ? (
         <Section title="عروض اليوم" icon={<Tag className="size-5 text-primary" />}>
           <div className={grid}>
