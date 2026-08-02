@@ -17,6 +17,12 @@ function rel(value: unknown, key: string): string | null {
   return typeof v === "string" ? v : null;
 }
 
+function strArr(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((v): v is string => typeof v === "string")
+    : [];
+}
+
 function toCard(row: Row): BusinessCardData {
   return {
     id: row.id as string,
@@ -30,6 +36,12 @@ function toCard(row: Row): BusinessCardData {
     cover_thumb_url: (row.cover_thumb_url as string) ?? null,
     products: (row.products as string[]) ?? [],
     is_featured: Boolean(row.is_featured),
+    price_level: typeof row.price_level === "number" ? row.price_level : null,
+    amenities: strArr(row.amenities),
+    payment_methods: strArr(row.payment_methods),
+    good_for: strArr(row.good_for),
+    vibes: strArr(row.vibes),
+    occasions: strArr(row.occasions),
     category_name: rel(row.categories, "name"),
     city_name: rel(row.cities, "name"),
     governorate_name: rel(row.governorates, "name"),
@@ -43,7 +55,9 @@ const NO_MATCH = "00000000-0000-0000-0000-000000000000";
 
 const CARD_SELECT =
   "id,username,name,description,address,phone,whatsapp,cover_image_url,cover_thumb_url,products,is_featured," +
+  "price_level,amenities,payment_methods,good_for,vibes,occasions," +
   "categories(name),cities(name),governorates(name,slug)";
+
 
 export const getTaxonomy = createServerFn({ method: "GET" }).handler(
   async (): Promise<Taxonomy> => {
@@ -68,6 +82,9 @@ export const getTaxonomy = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/** Comma separated attribute slugs, e.g. "wifi,parking". */
+const csv = z.string().optional();
+
 const searchSchema = z.object({
   q: z.string().optional(),
   city: z.string().optional(),
@@ -76,52 +93,108 @@ const searchSchema = z.object({
   prod: z.string().optional(),
   sort: z.enum(["best", "newest", "popular"]).optional(),
   page: z.number().optional(),
+  amen: csv,
+  pay: csv,
+  good: csv,
+  vibe: csv,
+  occ: csv,
+  price: z.number().optional(),
+  open: z.boolean().optional(),
+  /** Allow the AI interpreter to widen a descriptive query. */
+  smart: z.boolean().optional(),
 });
 
+function splitCsv(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => /^[a-z0-9_]{2,24}$/.test(v))
+    .slice(0, 8);
+}
+
+
+
+export type SearchFilters = {
+  amenities: string[];
+  payment_methods: string[];
+  good_for: string[];
+  vibes: string[];
+  occasions: string[];
+  price_max: number | null;
+  open_now: boolean;
+};
+
+export type SearchResponse = {
+  items: BusinessCardData[];
+  total: number;
+  page: number;
+  /** Present when the AI interpreter widened a descriptive query. */
+  smart: {
+    summary: string;
+    keywords: string;
+    category: string | null;
+    city: string | null;
+    filters: SearchFilters;
+  } | null;
+};
 
 export const searchBusinesses = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => searchSchema.parse(data))
-  .handler(
-    async ({
-      data,
-    }): Promise<{ items: BusinessCardData[]; total: number; page: number }> => {
-      const { getPublicClient } = await import("./supabase-public.server");
-      const supabase = getPublicClient();
+  .handler(async ({ data }): Promise<SearchResponse> => {
+    const { getPublicClient } = await import("./supabase-public.server");
+    const supabase = getPublicClient();
 
-      const perPage = 12;
-      const page = Math.max(1, Math.min(200, data.page ?? 1));
-      const term = (data.q ?? "").trim().slice(0, 100);
+    const perPage = 12;
+    const page = Math.max(1, Math.min(200, data.page ?? 1));
+    const term = (data.q ?? "").trim().slice(0, 100);
 
-      // Filters accept either a UUID or a SEO-friendly slug.
-      const resolve = async (
-        table: "cities" | "governorates" | "categories",
-        value: string | undefined,
-      ): Promise<string | null> => {
-        if (!value) return null;
-        if (UUID_RE.test(value)) return value;
-        const { data: row } = await supabase
-          .from(table)
-          .select("id")
-          .eq("slug", value)
-          .maybeSingle();
-        return row?.id ?? NO_MATCH;
-      };
+    // Filters accept either a UUID or a SEO-friendly slug.
+    const resolve = async (
+      table: "cities" | "governorates" | "categories",
+      value: string | undefined,
+    ): Promise<string | null> => {
+      if (!value) return null;
+      if (UUID_RE.test(value)) return value;
+      const { data: row } = await supabase
+        .from(table)
+        .select("id")
+        .eq("slug", value)
+        .maybeSingle();
+      return row?.id ?? NO_MATCH;
+    };
 
-      const [cityId, govId, catId] = await Promise.all([
-        resolve("cities", data.city),
-        resolve("governorates", data.gov),
-        resolve("categories", data.cat),
-      ]);
+    /** Resolve a plain Arabic name coming from the AI interpreter. */
+    const resolveByName = async (
+      table: "cities" | "categories",
+      value: string | null,
+    ): Promise<string | null> => {
+      if (!value) return null;
+      const { data: row } = await supabase
+        .from(table)
+        .select("id")
+        .ilike("name_norm", `%${arNorm(value)}%`)
+        .limit(1)
+        .maybeSingle();
+      return row?.id ?? null;
+    };
 
-      // Split the query into words so "عيادة اسنان المنصورة" matches a business
-      // whose words are spread across name / description / products / city.
-      const tokens = arNorm(term)
+    const [cityId, govId, catId] = await Promise.all([
+      resolve("cities", data.city),
+      resolve("governorates", data.gov),
+      resolve("categories", data.cat),
+    ]);
+
+    // Split the query into words so "عيادة اسنان المنصورة" matches a business
+    // whose words are spread across name / description / products / city.
+    const tokenize = (value: string) =>
+      arNorm(value)
         .replace(/[%,()]/g, " ")
         .split(/\s+/)
         .filter((t) => t.length >= 2)
         .slice(0, 5);
 
-      const clausesPerToken = await Promise.all(
+    const tokenClauses = async (tokens: string[]) =>
+      Promise.all(
         tokens.map(async (token) => {
           const [cats, cities, govs] = await Promise.all([
             supabase.from("categories").select("id").ilike("name_norm", `%${token}%`),
@@ -137,85 +210,226 @@ export const searchBusinesses = createServerFn({ method: "GET" })
           const govList = (govs.data ?? []).map((g) => g.id);
           if (catList.length) parts.push(`category_id.in.(${catList.join(",")})`);
           if (cityList.length) parts.push(`city_id.in.(${cityList.join(",")})`);
-          if (govList.length)
-            parts.push(`governorate_id.in.(${govList.join(",")})`);
+          if (govList.length) parts.push(`governorate_id.in.(${govList.join(",")})`);
           return parts.join(",");
         }),
       );
 
-      const from = (page - 1) * perPage;
-      // Product keyword: matches the products array or any indexed text.
-      const product = (data.prod ?? "")
-        .replace(/[%,(){}"']/g, " ")
-        .trim()
-        .slice(0, 40);
-      const sort = data.sort ?? "best";
+    const from = (page - 1) * perPage;
+    // Product keyword: matches the products array or any indexed text.
+    const product = (data.prod ?? "")
+      .replace(/[%,(){}"']/g, " ")
+      .trim()
+      .slice(0, 40);
+    const sort = data.sort ?? "best";
 
-      const build = (mode: "all" | "any") => {
-        let query = supabase
-          .from("businesses")
-          .select(CARD_SELECT, { count: "exact" })
-          .eq("status", "approved");
+    const baseFilters: SearchFilters = {
+      amenities: splitCsv(data.amen),
+      payment_methods: splitCsv(data.pay),
+      good_for: splitCsv(data.good),
+      vibes: splitCsv(data.vibe),
+      occasions: splitCsv(data.occ),
+      price_max:
+        typeof data.price === "number" && data.price >= 1 && data.price <= 4
+          ? Math.round(data.price)
+          : null,
+      open_now: data.open === true,
+    };
 
-        if (cityId) query = query.eq("city_id", cityId);
-        if (govId) query = query.eq("governorate_id", govId);
-        if (catId) query = query.eq("category_id", catId);
-        if (product.length >= 2)
-          query = query.or(
-            `products.cs.{"${product}"},search_norm.ilike.%${arNorm(product)}%`,
-          );
+    /** Businesses currently open, based on their weekly hours (Cairo time). */
+    const openNowIds = async (): Promise<string[]> => {
+      const now = new Date();
+      const fmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Africa/Cairo",
+        hour: "2-digit",
+        minute: "2-digit",
+        weekday: "short",
+        hour12: false,
+      });
+      const parts = fmt.formatToParts(now);
+      const weekday = parts.find((p) => p.type === "weekday")?.value ?? "Sun";
+      const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+      const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
+      const dayIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(weekday);
+      const nowMin = Number(hh) * 60 + Number(mm);
 
-        if (clausesPerToken.length) {
-          if (mode === "all") {
-            // Chained .or() calls are AND-ed together: every word must match something.
-            for (const clause of clausesPerToken) query = query.or(clause);
-          } else {
-            query = query.or(clausesPerToken.join(","));
-          }
-        }
+      const { data: rows } = await supabase
+        .from("business_hours")
+        .select("business_id,opens_at,closes_at,is_closed")
+        .eq("day_of_week", dayIndex < 0 ? 0 : dayIndex)
+        .eq("is_closed", false)
+        .limit(5000);
 
-        if (sort === "newest") {
-          query = query.order("created_at", { ascending: false });
-        } else if (sort === "popular") {
-          query = query
-            .order("view_count", { ascending: false })
-            .order("created_at", { ascending: false });
+      const toMin = (v: string | null) => {
+        if (!v) return null;
+        const [h, m] = v.split(":");
+        return Number(h) * 60 + Number(m ?? 0);
+      };
+
+      const ids = new Set<string>();
+      for (const r of rows ?? []) {
+        const o = toMin(r.opens_at);
+        const c = toMin(r.closes_at);
+        if (o === null || c === null) continue;
+        const open = c > o ? nowMin >= o && nowMin <= c : nowMin >= o || nowMin <= c;
+        if (open) ids.add(r.business_id);
+      }
+      return Array.from(ids);
+    };
+
+    const openIds = baseFilters.open_now ? await openNowIds() : null;
+
+    const build = (
+      mode: "all" | "any",
+      clauses: string[],
+      filters: SearchFilters,
+      ids: { cityId: string | null; govId: string | null; catId: string | null },
+    ) => {
+      let query = supabase
+        .from("businesses")
+        .select(CARD_SELECT, { count: "exact" })
+        .eq("status", "approved");
+
+      if (ids.cityId) query = query.eq("city_id", ids.cityId);
+      if (ids.govId) query = query.eq("governorate_id", ids.govId);
+      if (ids.catId) query = query.eq("category_id", ids.catId);
+      if (product.length >= 2)
+        query = query.or(
+          `products.cs.{"${product}"},search_norm.ilike.%${arNorm(product)}%`,
+        );
+
+      if (filters.amenities.length)
+        query = query.contains("amenities", filters.amenities);
+      if (filters.payment_methods.length)
+        query = query.contains("payment_methods", filters.payment_methods);
+      if (filters.good_for.length) query = query.contains("good_for", filters.good_for);
+      if (filters.vibes.length) query = query.contains("vibes", filters.vibes);
+      if (filters.occasions.length)
+        query = query.contains("occasions", filters.occasions);
+      if (filters.price_max) query = query.lte("price_level", filters.price_max);
+      if (filters.open_now && openIds) {
+        // Open right now, or explicitly marked as a 24h business.
+        const list = openIds.slice(0, 800);
+        query = list.length
+          ? query.or(`id.in.(${list.join(",")}),amenities.cs.{open_24h}`)
+          : query.contains("amenities", ["open_24h"]);
+      }
+
+      if (clauses.length) {
+        if (mode === "all") {
+          // Chained .or() calls are AND-ed together: every word must match something.
+          for (const clause of clauses) query = query.or(clause);
         } else {
-          query = query
-            .order("is_featured", { ascending: false })
-            .order("created_at", { ascending: false });
+          query = query.or(clauses.join(","));
         }
-
-        return query.range(from, from + perPage - 1);
-      };
-
-
-      let { data: rows, count } = await build("all");
-
-      // Nothing matched every word — fall back to "any word" so the user still gets results.
-      if (!rows?.length && clausesPerToken.length > 1) {
-        const loose = await build("any");
-        rows = loose.data;
-        count = loose.count;
       }
 
-      // Log the search so the admin dashboard can surface popular / empty terms.
-      if (term.length >= 2 && page === 1) {
-        await supabase.rpc("log_search_query", {
-          _term: term,
-          _results: count ?? 0,
-          _city: data.city ?? undefined,
-          _category: data.cat ?? undefined,
+      if (sort === "newest") {
+        query = query.order("created_at", { ascending: false });
+      } else if (sort === "popular") {
+        query = query
+          .order("view_count", { ascending: false })
+          .order("created_at", { ascending: false });
+      } else {
+        query = query
+          .order("is_featured", { ascending: false })
+          .order("created_at", { ascending: false });
+      }
+
+      return query.range(from, from + perPage - 1);
+    };
+
+    const plainIds = { cityId, govId, catId };
+    const clausesPerToken = await tokenClauses(tokenize(term));
+
+    let { data: rows, count } = await build(
+      "all",
+      clausesPerToken,
+      baseFilters,
+      plainIds,
+    );
+
+    // Nothing matched every word — fall back to "any word" so the user still gets results.
+    if (!rows?.length && clausesPerToken.length > 1) {
+      const loose = await build("any", clausesPerToken, baseFilters, plainIds);
+      rows = loose.data;
+      count = loose.count;
+    }
+
+    // Descriptive question with weak results → let the AI translate it to filters.
+    let smart: SearchResponse["smart"] = null;
+    const descriptive = term.split(/\s+/).filter(Boolean).length >= 3;
+    if (
+      data.smart !== false &&
+      term.length >= 6 &&
+      (descriptive || !rows?.length) &&
+      (count ?? 0) < 3
+    ) {
+      const { interpretQuery } = await import("./smart-search.server");
+      const [cats, cities] = await Promise.all([
+        supabase.from("categories").select("name").eq("status", "approved").limit(150),
+        supabase.from("cities").select("name").eq("is_active", true).limit(250),
+      ]);
+      const parsed = await interpretQuery(
+        term,
+        (cats.data ?? []).map((c) => c.name),
+        (cities.data ?? []).map((c) => c.name),
+      );
+
+      if (parsed) {
+        const aiFilters: SearchFilters = {
+          amenities: parsed.amenities,
+          payment_methods: parsed.payment_methods,
+          good_for: parsed.good_for,
+          vibes: parsed.vibes,
+          occasions: parsed.occasions,
+          price_max: parsed.price_max,
+          open_now: baseFilters.open_now,
+        };
+        const [aiCat, aiCity] = await Promise.all([
+          catId ? Promise.resolve(catId) : resolveByName("categories", parsed.category),
+          cityId ? Promise.resolve(cityId) : resolveByName("cities", parsed.city),
+        ]);
+
+        const aiClauses = await tokenClauses(tokenize(parsed.keywords || term));
+        const aiRes = await build("any", aiClauses, aiFilters, {
+          cityId: aiCity,
+          govId,
+          catId: aiCat,
         });
-      }
 
-      return {
-        items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
-        total: count ?? 0,
-        page,
-      };
-    },
-  );
+        if (aiRes.data?.length) {
+          rows = aiRes.data;
+          count = aiRes.count;
+          smart = {
+            summary: parsed.summary,
+            keywords: parsed.keywords,
+            category: parsed.category,
+            city: parsed.city,
+            filters: aiFilters,
+          };
+        }
+      }
+    }
+
+    // Log the search so the admin dashboard can surface popular / empty terms.
+    if (term.length >= 2 && page === 1) {
+      await supabase.rpc("log_search_query", {
+        _term: term,
+        _results: count ?? 0,
+        _city: data.city ?? undefined,
+        _category: data.cat ?? undefined,
+      });
+    }
+
+    return {
+      items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
+      total: count ?? 0,
+      page,
+      smart,
+    };
+  });
+
 
 /** Fast autocomplete: business names plus matching categories and cities. */
 export const suggestSearch = createServerFn({ method: "GET" })

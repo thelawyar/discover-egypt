@@ -26,7 +26,16 @@ export type Taxonomy = {
   categories: Category[];
 };
 
-export type BusinessCardData = {
+export type BusinessAttributes = {
+  price_level: number | null;
+  amenities: string[];
+  payment_methods: string[];
+  good_for: string[];
+  vibes: string[];
+  occasions: string[];
+};
+
+export type BusinessCardData = BusinessAttributes & {
   id: string;
   /** Public handle used for the one-page mini-site URL: /<username>. */
   username: string;
@@ -45,6 +54,7 @@ export type BusinessCardData = {
   governorate_name: string | null;
   governorate_slug: string | null;
 };
+
 
 export type BusinessDetail = BusinessCardData & {
   logo_url: string | null;
