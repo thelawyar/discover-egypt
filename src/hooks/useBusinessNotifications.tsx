@@ -97,6 +97,29 @@ export function showSystemNotification(title: string, body: string, url?: string
  * Live listener for new messages/orders arriving on the user's business pages.
  * Fires a toast plus a system notification when the user enabled them.
  */
+/**
+ * Creates in-app reminders for approved events starting soon that belong to the
+ * user's businesses or to businesses saved in their lists. Runs once per session.
+ */
+export function useEventReminders(hours = 48) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const done = useRef(false);
+
+  useEffect(() => {
+    if (!user || done.current) return;
+    done.current = true;
+    void (async () => {
+      const { data, error } = await supabase.rpc("run_event_reminders", { _hours: hours });
+      if (error || !data) return;
+      queryClient.invalidateQueries({ queryKey: ["status-notifications"] });
+      toast.info("لديك مناسبات قريبة", {
+        description: `تم تنبيهك بـ ${data} مناسبة تبدأ قريباً.`,
+      });
+    })();
+  }, [user, hours, queryClient]);
+}
+
 export function useBusinessNotifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();

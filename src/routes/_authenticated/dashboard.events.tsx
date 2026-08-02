@@ -131,7 +131,7 @@ function DashboardEvents() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("تم حفظ المناسبة");
+      toast.success("تم الحفظ وأُرسلت المناسبة لمراجعة الإدارة");
       setForm(null);
       queryClient.invalidateQueries({ queryKey: ["my-events"] });
     },
@@ -172,7 +172,8 @@ function DashboardEvents() {
           <div>
             <h1 className="text-xl font-extrabold">عروضي وأحداثي</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              أضف عروض اليوم، الحفلات، الافتتاحات والمباريات لتظهر في صفحة الأحداث وبوابة مدينتك.
+              أضف عروض اليوم، الحفلات، الافتتاحات والمباريات. تُراجع الإدارة كل عرض أو حدث جديد
+              قبل ظهوره للزوار.
             </p>
           </div>
           <div className="flex gap-2">
@@ -360,15 +361,35 @@ function DashboardEvents() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {EVENT_KIND_LABELS[e.kind] ?? "حدث"} · {formatEventDate(e.starts_at)}
                   </p>
+                  {e.status === "rejected" && e.rejection_reason ? (
+                    <p className="mt-1 text-xs text-destructive">
+                      سبب الرفض: {e.rejection_reason}
+                    </p>
+                  ) : null}
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                    e.is_published
+                    e.status === "approved"
                       ? "bg-success/15 text-success"
+                      : e.status === "rejected"
+                        ? "bg-destructive/10 text-destructive"
+                        : "bg-warning/15 text-warning-foreground"
+                  }`}
+                >
+                  {e.status === "approved"
+                    ? "معتمد"
+                    : e.status === "rejected"
+                      ? "مرفوض"
+                      : "قيد المراجعة"}
+                </span>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                    e.is_published
+                      ? "bg-muted text-muted-foreground"
                       : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  {e.is_published ? "منشور" : "مخفي"}
+                  {e.is_published ? "ظاهر" : "مخفي"}
                 </span>
                 <div className="flex gap-1">
                   <Button

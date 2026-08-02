@@ -1,8 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { Sparkles, Clock3, Baby, Tag, CalendarDays, Dices } from "lucide-react";
+import { Sparkles, Clock3, Baby, Tag, CalendarDays, Dices, Map as MapIcon } from "lucide-react";
+
+const LazyCityMap = lazy(() =>
+  import("@/components/CityMap").then((m) => ({ default: m.CityMap })),
+);
 import { getCityPage } from "@/lib/directory.functions";
 import { getCityPortal } from "@/lib/portal.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
@@ -214,9 +219,21 @@ function Section({
   );
 }
 
-function CityPortalSections({ slug }: { slug: string }) {
+function CityPortalSections({ slug, cityName }: { slug: string; cityName: string }) {
   const { data: portal } = useSuspenseQuery(portalQuery(slug));
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   if (!portal) return null;
+
+  const mapPoints = (portal.nearby ?? [])
+    .filter((b) => b.latitude !== null && b.longitude !== null)
+    .map((b) => ({
+      id: b.id,
+      name: b.name,
+      username: b.username,
+      latitude: b.latitude as number,
+      longitude: b.longitude as number,
+    }));
 
   const grid = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
@@ -238,6 +255,22 @@ function CityPortalSections({ slug }: { slug: string }) {
             </Link>
           ))}
         </div>
+      ) : null}
+
+      {mapPoints.length ? (
+        <Section title="خريطة الأماكن القريبة" icon={<MapIcon className="size-5 text-primary" />}>
+          {mounted ? (
+            <Suspense
+              fallback={
+                <div className="h-[340px] w-full animate-pulse rounded-2xl bg-muted" />
+              }
+            >
+              <LazyCityMap points={mapPoints} cityName={cityName} />
+            </Suspense>
+          ) : (
+            <div className="h-[340px] w-full rounded-2xl bg-muted" />
+          )}
+        </Section>
       ) : null}
 
       {portal.offers.length ? (
@@ -325,7 +358,9 @@ function CityPage() {
           </Button>
         </div>
 
-        {page === 1 ? <CityPortalSections slug={slug} /> : null}
+        {page === 1 ? (
+          <CityPortalSections slug={slug} cityName={data.city.name} />
+        ) : null}
 
         {page === 1 && data.items.length ? (
           <h2 className="mt-10 text-lg font-bold">كل الأنشطة في {data.city.name}</h2>
