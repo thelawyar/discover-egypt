@@ -172,7 +172,8 @@ function DashboardEvents() {
           <div>
             <h1 className="text-xl font-extrabold">عروضي وأحداثي</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              أضف عروض اليوم، الحفلات، الافتتاحات والمباريات لتظهر في صفحة الأحداث وبوابة مدينتك.
+              أضف عروض اليوم، الحفلات، الافتتاحات والمباريات. تُراجع الإدارة كل عرض أو حدث جديد
+              قبل ظهوره للزوار.
             </p>
           </div>
           <div className="flex gap-2">
