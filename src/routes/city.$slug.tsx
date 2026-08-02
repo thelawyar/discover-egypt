@@ -265,7 +265,7 @@ function CityPortalSections({ slug, cityName }: { slug: string; cityName: string
                 <div className="h-[340px] w-full animate-pulse rounded-2xl bg-muted" />
               }
             >
-              <LazyCityMap points={mapPoints} cityName={slug} />
+              <LazyCityMap points={mapPoints} cityName={cityName} />
             </Suspense>
           ) : (
             <div className="h-[340px] w-full rounded-2xl bg-muted" />
