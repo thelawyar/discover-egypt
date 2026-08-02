@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import type { BusinessDetail } from "@/lib/directory-types";
 import { WEEK_DAYS } from "@/lib/directory-types";
+import { ATTR_GROUPS, attrLabel, priceLabel } from "@/lib/business-attributes";
+
 import { resolveTheme, themeVars } from "@/lib/business-theme";
 import { supabase } from "@/integrations/supabase/client";
 import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
