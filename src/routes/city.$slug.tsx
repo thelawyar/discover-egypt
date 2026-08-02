@@ -1,8 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { Sparkles, Clock3, Baby, Tag, CalendarDays, Dices } from "lucide-react";
+import { Sparkles, Clock3, Baby, Tag, CalendarDays, Dices, Map as MapIcon } from "lucide-react";
+
+const LazyCityMap = lazy(() =>
+  import("@/components/CityMap").then((m) => ({ default: m.CityMap })),
+);
 import { getCityPage } from "@/lib/directory.functions";
 import { getCityPortal } from "@/lib/portal.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
