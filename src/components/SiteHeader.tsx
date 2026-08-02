@@ -121,9 +121,35 @@ export function PageShell({ children }: { children: React.ReactNode }) {
           <Link to="/" className="min-w-0 shrink">
             <Brand />
           </Link>
+          <nav className="hidden items-center gap-1 text-sm md:flex">
+            <Link
+              to="/events"
+              search={{ city: "", gov: "", kind: "", when: "upcoming", page: 1 }}
+              className="rounded-full px-3 py-1.5 hover:bg-muted"
+              activeProps={{ className: "rounded-full px-3 py-1.5 bg-muted font-semibold" }}
+            >
+              العروض والأحداث
+            </Link>
+            <Link
+              to="/lists"
+              className="rounded-full px-3 py-1.5 hover:bg-muted"
+              activeProps={{ className: "rounded-full px-3 py-1.5 bg-muted font-semibold" }}
+            >
+              القوائم
+            </Link>
+            <Link
+              to="/discover"
+              search={{ city: "", gov: "", good: "", vibe: "", price: 0, seed: 1 }}
+              className="rounded-full px-3 py-1.5 hover:bg-muted"
+              activeProps={{ className: "rounded-full px-3 py-1.5 bg-muted font-semibold" }}
+            >
+              🎲 اكتشف
+            </Link>
+          </nav>
           <SiteHeader />
         </div>
       </header>
+
       {children}
       <footer className="mt-16 border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 text-center text-xs text-muted-foreground">
