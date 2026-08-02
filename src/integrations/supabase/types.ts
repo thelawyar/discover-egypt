@@ -899,11 +899,13 @@ export type Database = {
       admin_list_users: {
         Args: never
         Returns: {
+          banned_until: string
           created_at: string
           email: string
           full_name: string
           id: string
           is_admin: boolean
+          is_banned: boolean
           last_sign_in_at: string
         }[]
       }
