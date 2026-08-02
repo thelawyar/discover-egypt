@@ -194,6 +194,108 @@ export const Route = createFileRoute("/city/$slug")({
   ),
 });
 
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mt-8">
+      <h2 className="flex items-center gap-2 text-lg font-bold">
+        {icon}
+        {title}
+      </h2>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
+function CityPortalSections({ slug }: { slug: string }) {
+  const { data: portal } = useSuspenseQuery(portalQuery(slug));
+  if (!portal) return null;
+
+  const grid = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
+
+  return (
+    <>
+      {portal.categories.length ? (
+        <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
+          {portal.categories.map((c) => (
+            <Link
+              key={c.slug}
+              to="/search"
+              search={{ q: "", city: slug, gov: "", cat: c.slug, page: 1 }}
+              className="shrink-0 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
+            >
+              {c.name}
+              <span className="mr-1 text-muted-foreground">
+                {c.count.toLocaleString("ar-EG")}
+              </span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+
+      {portal.offers.length ? (
+        <Section title="عروض اليوم" icon={<Tag className="size-5 text-primary" />}>
+          <div className={grid}>
+            {portal.offers.map((e) => (
+              <EventCard key={e.id} item={e} />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      {portal.top.length ? (
+        <Section title="أفضل الأماكن" icon={<Sparkles className="size-5 text-primary" />}>
+          <div className={grid}>
+            {portal.top.map((b) => (
+              <BusinessCard key={b.id} item={b} />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      {portal.events.length ? (
+        <Section
+          title="أحداث ومناسبات قادمة"
+          icon={<CalendarDays className="size-5 text-primary" />}
+        >
+          <div className={grid}>
+            {portal.events.map((e) => (
+              <EventCard key={e.id} item={e} />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      {portal.kids.length ? (
+        <Section title="أماكن مناسبة للأطفال" icon={<Baby className="size-5 text-primary" />}>
+          <div className={grid}>
+            {portal.kids.map((b) => (
+              <BusinessCard key={b.id} item={b} />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      {portal.latest.length ? (
+        <Section title="أحدث الأنشطة" icon={<Clock3 className="size-5 text-primary" />}>
+          <div className={grid}>
+            {portal.latest.map((b) => (
+              <BusinessCard key={b.id} item={b} />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+    </>
+  );
+}
+
 function CityPage() {
   const { slug } = Route.useParams();
   const { page } = Route.useSearch();
@@ -205,11 +307,30 @@ function CityPage() {
   return (
     <PageShell>
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-2xl font-extrabold">دليل {data.city.name} التجاري</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {data.city.governorate_name ? `${data.city.governorate_name} · ` : ""}
-          {data.total.toLocaleString("ar-EG")} نشاط معتمد
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-extrabold">دليل {data.city.name} التجاري</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {data.city.governorate_name ? `${data.city.governorate_name} · ` : ""}
+              {data.total.toLocaleString("ar-EG")} نشاط معتمد
+            </p>
+          </div>
+          <Button asChild variant="outline" className="rounded-full">
+            <Link
+              to="/discover"
+              search={{ city: slug, gov: "", good: "", vibe: "", price: 0, seed: 1 }}
+            >
+              <Dices className="size-4" /> اكتشف عشوائياً
+            </Link>
+          </Button>
+        </div>
+
+        {page === 1 ? <CityPortalSections slug={slug} /> : null}
+
+        {page === 1 && data.items.length ? (
+          <h2 className="mt-10 text-lg font-bold">كل الأنشطة في {data.city.name}</h2>
+        ) : null}
+
 
         {data.items.length === 0 ? (
           <p className="py-24 text-center text-muted-foreground">
