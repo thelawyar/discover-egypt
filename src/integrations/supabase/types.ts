@@ -1293,6 +1293,7 @@ export type Database = {
         Returns: boolean
       }
       random_username: { Args: never; Returns: string }
+      resolve_legacy_handle: { Args: { _username: string }; Returns: string }
       run_event_reminders: { Args: { _hours?: number }; Returns: number }
       search_term_stats: {
         Args: { _days?: number; _limit?: number }
