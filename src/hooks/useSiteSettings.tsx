@@ -17,10 +17,10 @@ export type SiteSettings = {
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  site_name: "اكتشف مدينتك",
-  tagline: "دليل تجاري شامل لكل المدن المصرية",
+  site_name: "durtown",
+  tagline: "DISCOVER YOUR TOWN — الدليل التجاري الشامل لكل المدن المصرية",
   logo_url: null,
-  primary_color: "#2f6df6",
+  primary_color: "#2F6DF6",
   accent_color: "#eaf1ff",
   adsense_enabled: false,
   adsense_client: null,

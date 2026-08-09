@@ -1,7 +1,7 @@
 {
-  "name": "اكتشف مدينتك - دليل تجاري شامل",
-  "short_name": "اكتشف مدينتك",
-  "description": "ابحث عن أي نشاط تجاري في مدينتك: عيادات، محلات، مصانع، مدارس وأكثر.",
+  "name": "durtown — اكتشف مدينتك",
+  "short_name": "durtown",
+  "description": "DISCOVER YOUR TOWN — ابحث عن أي نشاط تجاري في مدينتك: عيادات، محلات، مصانع، مدارس وأكثر.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/",
@@ -9,7 +9,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#1a73e8",
+  "theme_color": "#2F6DF6",
   "icons": [
     {
       "src": "/app-icon-192.png",
