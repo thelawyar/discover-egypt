@@ -783,20 +783,14 @@ export const resolveLegacyHandle = createServerFn({ method: "GET" })
     const { getPublicClient } = await import("./supabase-public.server");
     const supabase = getPublicClient();
 
-    const { data: row } = await supabase
-      .from("business_username_history")
-      .select("business_id")
-      .eq("username", data.username.toLowerCase())
-      .maybeSingle();
+    // History rows are not publicly readable; a guarded routine returns only
+    // the current approved handle.
+    const { data: current } = await (
+      supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: string | null }>
+    )("resolve_legacy_handle", { _username: data.username.toLowerCase() });
 
-    if (!row) return null;
-
-    const { data: biz } = await supabase
-      .from("businesses")
-      .select("username")
-      .eq("id", row.business_id)
-      .eq("status", "approved")
-      .maybeSingle();
-
-    return biz?.username ?? null;
+    return current ?? null;
   });
