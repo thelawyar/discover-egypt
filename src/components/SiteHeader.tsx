@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import townLogo from "@/assets/town-logo.jpg.asset.json";
+import durtownLogo from "@/assets/durtown-logo.png.asset.json";
+import durtownLogoDark from "@/assets/durtown-logo-dark.png.asset.json";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -21,14 +22,29 @@ export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
     size === "lg"
       ? "text-2xl sm:text-4xl md:text-5xl"
       : "truncate text-base sm:text-xl";
-  const imgCls = size === "lg" ? "h-14 sm:h-20 md:h-24" : "h-8 sm:h-9";
+  const imgCls = size === "lg" ? "h-16 sm:h-24 md:h-28" : "h-9 sm:h-10";
+
+  // Admin-uploaded logo wins; otherwise the durtown wordmark (light/dark variants).
+  if (!logo) {
+    return (
+      <span className="inline-flex min-w-0 items-center justify-center">
+        <img
+          src={durtownLogo.url}
+          alt={name}
+          className={`${imgCls} w-auto shrink-0 dark:hidden`}
+        />
+        <img
+          src={durtownLogoDark.url}
+          alt={name}
+          className={`${imgCls} hidden w-auto shrink-0 dark:block`}
+        />
+      </span>
+    );
+  }
+
   return (
     <span className="inline-flex min-w-0 flex-wrap items-center justify-center gap-2">
-      <img
-        src={logo || townLogo.url}
-        alt={name}
-        className={`${imgCls} w-auto shrink-0`}
-      />
+      <img src={logo} alt={name} className={`${imgCls} w-auto shrink-0`} />
       <span
         className={`font-extrabold tracking-tight text-foreground ${cls}`}
       >
