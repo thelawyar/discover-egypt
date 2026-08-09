@@ -1,0 +1,1 @@
+UPDATE public.site_settings SET logo_url = NULL, primary_color = '#3272f6', accent_color = '#eaf1ff' WHERE id = 'default';
