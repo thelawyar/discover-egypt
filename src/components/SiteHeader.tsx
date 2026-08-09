@@ -17,7 +17,11 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
-  const { site_name: name, logo_url: logo } = useSiteSettings();
+  const {
+    site_name: name,
+    logo_url: logo,
+    logo_dark_url: logoDark,
+  } = useSiteSettings();
   const cls =
     size === "lg"
       ? "text-2xl sm:text-4xl md:text-5xl"
@@ -35,6 +39,20 @@ export function Brand({ size = "sm" }: { size?: "sm" | "lg" }) {
         />
         <img
           src={durtownLogoDark.url}
+          alt={name}
+          className={`${imgCls} hidden w-auto shrink-0 dark:block`}
+        />
+      </span>
+    );
+  }
+
+  // Admin logo, with an optional dedicated dark-mode variant.
+  if (logoDark) {
+    return (
+      <span className="inline-flex min-w-0 items-center justify-center">
+        <img src={logo} alt={name} className={`${imgCls} w-auto shrink-0 dark:hidden`} />
+        <img
+          src={logoDark}
           alt={name}
           className={`${imgCls} hidden w-auto shrink-0 dark:block`}
         />
