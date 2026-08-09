@@ -1108,7 +1108,11 @@ export type Database = {
           adsense_slot: string | null
           adsense_slot_business: string | null
           adsense_slot_search: string | null
+          hero_subtitle: string
+          hero_title: string
+          icon_url: string | null
           id: string
+          logo_dark_url: string | null
           logo_url: string | null
           primary_color: string
           site_name: string
@@ -1124,7 +1128,11 @@ export type Database = {
           adsense_slot?: string | null
           adsense_slot_business?: string | null
           adsense_slot_search?: string | null
+          hero_subtitle?: string
+          hero_title?: string
+          icon_url?: string | null
           id?: string
+          logo_dark_url?: string | null
           logo_url?: string | null
           primary_color?: string
           site_name?: string
@@ -1140,7 +1148,11 @@ export type Database = {
           adsense_slot?: string | null
           adsense_slot_business?: string | null
           adsense_slot_search?: string | null
+          hero_subtitle?: string
+          hero_title?: string
+          icon_url?: string | null
           id?: string
+          logo_dark_url?: string | null
           logo_url?: string | null
           primary_color?: string
           site_name?: string
