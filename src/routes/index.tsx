@@ -102,7 +102,10 @@ function Home() {
         <h1 className="text-center">
           <Brand size="lg" />
         </h1>
-        <p className="mt-2 text-center text-xs text-muted-foreground sm:text-sm">
+        <p className="mt-2 text-center text-lg font-extrabold tracking-tight text-primary sm:text-2xl">
+          استكشف مدينتك
+        </p>
+        <p className="mt-1 text-center text-xs text-muted-foreground sm:text-sm">
           الدليل التجاري الشامل لكل المدن المصرية
         </p>
 
