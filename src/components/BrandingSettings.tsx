@@ -12,7 +12,9 @@ export function BrandingSettings() {
   const current = useSiteSettings();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<SiteSettings>(current);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<
+    "logo_url" | "logo_dark_url" | "icon_url" | null
+  >(null);
 
   useEffect(() => {
     setForm(current);
