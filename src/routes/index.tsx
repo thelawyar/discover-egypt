@@ -5,6 +5,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Brand, SiteHeader } from "@/components/SiteHeader";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { ogCardMeta } from "@/lib/og";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const taxonomyQuery = queryOptions({
   queryKey: ["taxonomy"],
