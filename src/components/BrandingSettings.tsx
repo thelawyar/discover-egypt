@@ -193,46 +193,49 @@ export function BrandingSettings() {
         />
       </div>
 
-      <div>
-        <label className="text-xs font-medium text-muted-foreground">شعار الموقع (Logo)</label>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          PNG / JPG / WEBP / SVG — حتى 2 ميجابايت، وأبعاد بين 80×40 و2000×2000 بكسل.
-        </p>
-        <div className="mt-2 flex items-center gap-3">
-          {form.logo_url ? (
-            <img
-              src={form.logo_url}
-              alt="الشعار"
-              className="h-14 w-auto rounded-lg border border-border bg-background p-1"
-            />
-          ) : (
-            <span className="text-xs text-muted-foreground">الشعار الافتراضي</span>
-          )}
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-primary-soft">
-            <Upload className="size-3.5" />
-            {uploading ? "جارٍ الرفع..." : "رفع شعار"}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/svg+xml"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadLogo(f);
-                e.target.value = "";
-              }}
-            />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            العبارة الرئيسية (تحت الشعار)
           </label>
-          {form.logo_url ? (
-            <button
-              type="button"
-              className="text-xs text-destructive"
-              onClick={() => setForm({ ...form, logo_url: null })}
-            >
-              إزالة
-            </button>
-          ) : null}
+          <input
+            className={field}
+            value={form.hero_title}
+            onChange={(e) => setForm({ ...form, hero_title: e.target.value })}
+            placeholder="استكشف مدينتك"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            العبارة الفرعية (الصفحة الرئيسية)
+          </label>
+          <input
+            className={field}
+            value={form.hero_subtitle}
+            onChange={(e) => setForm({ ...form, hero_subtitle: e.target.value })}
+            placeholder="الدليل التجاري الشامل لكل المدن المصرية"
+          />
         </div>
       </div>
+
+      <ImageField
+        label="شعار الموقع (الوضع الفاتح)"
+        hint="PNG / JPG / WEBP / SVG — حتى 2 ميجابايت، وأبعاد بين 80×40 و2000×2000 بكسل."
+        fieldKey="logo_url"
+      />
+
+      <ImageField
+        label="شعار الوضع الداكن (اختياري)"
+        hint="نسخة فاتحة من الشعار تظهر في الوضع الداكن. يُستخدم الشعار الأساسي إن لم تُرفع."
+        fieldKey="logo_dark_url"
+      />
+
+      <ImageField
+        label="أيقونة التطبيق (Brand Mark)"
+        hint="صورة مربعة 512×512 بكسل على الأقل (الحد الأدنى 192×192) — تُستخدم كأيقونة التطبيق والفافيكون."
+        fieldKey="icon_url"
+        square
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
