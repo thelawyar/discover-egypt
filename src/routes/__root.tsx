@@ -68,9 +68,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // Load branding on the server so the correct logo/name/colors are in the
   // first paint instead of flashing the defaults.
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(siteSettingsQuery);
+    const settings = await context.queryClient.ensureQueryData(siteSettingsQuery);
+    return { iconUrl: settings.icon_url };
   },
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { charSet: "utf-8" },
       {
