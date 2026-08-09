@@ -5,6 +5,10 @@ export type SiteSettings = {
   site_name: string;
   tagline: string;
   logo_url: string | null;
+  logo_dark_url: string | null;
+  icon_url: string | null;
+  hero_title: string;
+  hero_subtitle: string;
   primary_color: string;
   accent_color: string;
   adsense_enabled: boolean;
@@ -20,6 +24,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   site_name: "durtown",
   tagline: "DISCOVER YOUR TOWN — الدليل التجاري الشامل لكل المدن المصرية",
   logo_url: null,
+  logo_dark_url: null,
+  icon_url: null,
+  hero_title: "استكشف مدينتك",
+  hero_subtitle: "الدليل التجاري الشامل لكل المدن المصرية",
   primary_color: "#2F6DF6",
   accent_color: "#eaf1ff",
   adsense_enabled: false,
@@ -38,7 +46,7 @@ export const siteSettingsQuery = {
     const { data, error } = await supabase
       .from("site_settings")
       .select(
-        "site_name,tagline,logo_url,primary_color,accent_color,adsense_enabled,adsense_client,adsense_slot,adsense_slot_search,adsense_slot_business,adsense_every,ad_positions",
+        "site_name,tagline,logo_url,logo_dark_url,icon_url,hero_title,hero_subtitle,primary_color,accent_color,adsense_enabled,adsense_client,adsense_slot,adsense_slot_search,adsense_slot_business,adsense_every,ad_positions",
       )
       .eq("id", "default")
       .maybeSingle();

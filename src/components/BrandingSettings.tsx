@@ -12,7 +12,9 @@ export function BrandingSettings() {
   const current = useSiteSettings();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<SiteSettings>(current);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<
+    "logo_url" | "logo_dark_url" | "icon_url" | null
+  >(null);
 
   useEffect(() => {
     setForm(current);
@@ -23,9 +25,13 @@ export function BrandingSettings() {
       const { error } = await supabase
         .from("site_settings")
         .update({
-          site_name: values.site_name.trim() || "اكتشف مدينتك",
+          site_name: values.site_name.trim() || "durtown",
           tagline: values.tagline.trim(),
           logo_url: values.logo_url,
+          logo_dark_url: values.logo_dark_url,
+          icon_url: values.icon_url,
+          hero_title: values.hero_title.trim(),
+          hero_subtitle: values.hero_subtitle.trim(),
           primary_color: values.primary_color,
           accent_color: values.accent_color,
         })
@@ -40,7 +46,7 @@ export function BrandingSettings() {
   });
 
   /** Validates format, size and dimensions before uploading. */
-  async function validateLogo(file: File): Promise<string | null> {
+  async function validateImage(file: File, kind: "logo" | "icon"): Promise<string | null> {
     const allowed = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
     if (!allowed.includes(file.type))
       return "صيغة غير مدعومة — استخدم PNG أو JPG أو WEBP أو SVG.";
@@ -63,25 +69,38 @@ export function BrandingSettings() {
     });
 
     if (!dims) return "تعذّر قراءة الصورة، تأكد أن الملف سليم.";
-    if (dims.w < 80 || dims.h < 40)
-      return `أبعاد الصورة ${dims.w}×${dims.h} صغيرة جداً — الحد الأدنى 80×40 بكسل.`;
     if (dims.w > 2000 || dims.h > 2000)
       return `أبعاد الصورة ${dims.w}×${dims.h} كبيرة جداً — الحد الأقصى 2000×2000 بكسل.`;
+
+    if (kind === "icon") {
+      if (dims.w < 192 || dims.h < 192)
+        return `أيقونة التطبيق ${dims.w}×${dims.h} صغيرة — الحد الأدنى 192×192 بكسل.`;
+      if (Math.abs(dims.w - dims.h) / Math.max(dims.w, dims.h) > 0.05)
+        return "أيقونة التطبيق يجب أن تكون مربعة (نسبة 1:1).";
+      return null;
+    }
+
+    if (dims.w < 80 || dims.h < 40)
+      return `أبعاد الصورة ${dims.w}×${dims.h} صغيرة جداً — الحد الأدنى 80×40 بكسل.`;
     if (dims.w / dims.h > 8 || dims.h / dims.w > 4)
       return "نسبة أبعاد الشعار غير مناسبة، يفضّل شعاراً أفقياً متوازناً.";
     return null;
   }
 
-  async function uploadLogo(file: File) {
-    const problem = await validateLogo(file);
+  async function uploadImage(
+    file: File,
+    key: "logo_url" | "logo_dark_url" | "icon_url",
+  ) {
+    const kind = key === "icon_url" ? "icon" : "logo";
+    const problem = await validateImage(file, kind);
     if (problem) {
       toast.error(problem);
       return;
     }
-    setUploading(true);
+    setUploading(key);
     try {
       const ext = file.name.split(".").pop() ?? "png";
-      const path = `logo-${Date.now()}.${ext}`;
+      const path = `${kind === "icon" ? "icon" : key.replace("_url", "")}-${Date.now()}.${ext}`;
       const up = await supabase.storage.from("branding").upload(path, file, {
         upsert: true,
         contentType: file.type,
@@ -91,13 +110,67 @@ export function BrandingSettings() {
         .from("branding")
         .createSignedUrl(path, 60 * 60 * 24 * 3650);
       if (signed.error) throw signed.error;
-      setForm((f) => ({ ...f, logo_url: signed.data.signedUrl }));
-      toast.success("تم رفع الشعار، اضغط حفظ للتطبيق");
+      setForm((f) => ({ ...f, [key]: signed.data.signedUrl }));
+      toast.success("تم الرفع، اضغط حفظ للتطبيق");
     } catch {
-      toast.error("تعذّر رفع الشعار");
+      toast.error("تعذّر رفع الصورة");
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
+  }
+
+  function ImageField({
+    label,
+    hint,
+    fieldKey,
+    square,
+  }: {
+    label: string;
+    hint: string;
+    fieldKey: "logo_url" | "logo_dark_url" | "icon_url";
+    square?: boolean;
+  }) {
+    const value = form[fieldKey];
+    return (
+      <div>
+        <label className="text-xs font-medium text-muted-foreground">{label}</label>
+        <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          {value ? (
+            <img
+              src={value}
+              alt={label}
+              className={`${square ? "size-14 object-contain" : "h-14 w-auto"} rounded-lg border border-border bg-background p-1`}
+            />
+          ) : (
+            <span className="text-xs text-muted-foreground">الافتراضي</span>
+          )}
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-primary-soft">
+            <Upload className="size-3.5" />
+            {uploading === fieldKey ? "جارٍ الرفع..." : "رفع صورة"}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadImage(f, fieldKey);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {value ? (
+            <button
+              type="button"
+              className="text-xs text-destructive"
+              onClick={() => setForm({ ...form, [fieldKey]: null })}
+            >
+              إزالة
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
   }
 
   const field = "mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm";
@@ -122,46 +195,49 @@ export function BrandingSettings() {
         />
       </div>
 
-      <div>
-        <label className="text-xs font-medium text-muted-foreground">شعار الموقع (Logo)</label>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          PNG / JPG / WEBP / SVG — حتى 2 ميجابايت، وأبعاد بين 80×40 و2000×2000 بكسل.
-        </p>
-        <div className="mt-2 flex items-center gap-3">
-          {form.logo_url ? (
-            <img
-              src={form.logo_url}
-              alt="الشعار"
-              className="h-14 w-auto rounded-lg border border-border bg-background p-1"
-            />
-          ) : (
-            <span className="text-xs text-muted-foreground">الشعار الافتراضي</span>
-          )}
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-primary-soft">
-            <Upload className="size-3.5" />
-            {uploading ? "جارٍ الرفع..." : "رفع شعار"}
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/svg+xml"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadLogo(f);
-                e.target.value = "";
-              }}
-            />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            العبارة الرئيسية (تحت الشعار)
           </label>
-          {form.logo_url ? (
-            <button
-              type="button"
-              className="text-xs text-destructive"
-              onClick={() => setForm({ ...form, logo_url: null })}
-            >
-              إزالة
-            </button>
-          ) : null}
+          <input
+            className={field}
+            value={form.hero_title}
+            onChange={(e) => setForm({ ...form, hero_title: e.target.value })}
+            placeholder="استكشف مدينتك"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            العبارة الفرعية (الصفحة الرئيسية)
+          </label>
+          <input
+            className={field}
+            value={form.hero_subtitle}
+            onChange={(e) => setForm({ ...form, hero_subtitle: e.target.value })}
+            placeholder="الدليل التجاري الشامل لكل المدن المصرية"
+          />
         </div>
       </div>
+
+      <ImageField
+        label="شعار الموقع (الوضع الفاتح)"
+        hint="PNG / JPG / WEBP / SVG — حتى 2 ميجابايت، وأبعاد بين 80×40 و2000×2000 بكسل."
+        fieldKey="logo_url"
+      />
+
+      <ImageField
+        label="شعار الوضع الداكن (اختياري)"
+        hint="نسخة فاتحة من الشعار تظهر في الوضع الداكن. يُستخدم الشعار الأساسي إن لم تُرفع."
+        fieldKey="logo_dark_url"
+      />
+
+      <ImageField
+        label="أيقونة التطبيق (Brand Mark)"
+        hint="صورة مربعة 512×512 بكسل على الأقل (الحد الأدنى 192×192) — تُستخدم كأيقونة التطبيق والفافيكون."
+        fieldKey="icon_url"
+        square
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

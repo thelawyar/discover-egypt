@@ -5,6 +5,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Brand, SiteHeader } from "@/components/SiteHeader";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { ogCardMeta } from "@/lib/og";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const taxonomyQuery = queryOptions({
   queryKey: ["taxonomy"],
@@ -90,6 +91,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { data: taxonomy } = useSuspenseQuery(taxonomyQuery);
   const { data: stats } = useSuspenseQuery(statsQuery);
+  const { hero_title: heroTitle, hero_subtitle: heroSubtitle } = useSiteSettings();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -102,12 +104,16 @@ function Home() {
         <h1 className="text-center">
           <Brand size="lg" />
         </h1>
-        <p className="mt-2 text-center text-lg font-extrabold tracking-tight text-primary sm:text-2xl">
-          استكشف مدينتك
-        </p>
-        <p className="mt-1 text-center text-xs text-muted-foreground sm:text-sm">
-          الدليل التجاري الشامل لكل المدن المصرية
-        </p>
+        {heroTitle ? (
+          <p className="mt-2 text-center text-lg font-extrabold tracking-tight text-primary sm:text-2xl">
+            {heroTitle}
+          </p>
+        ) : null}
+        {heroSubtitle ? (
+          <p className="mt-1 text-center text-xs text-muted-foreground sm:text-sm">
+            {heroSubtitle}
+          </p>
+        ) : null}
 
         <div className="mt-6 flex w-full justify-center sm:mt-8">
           <SearchBar cities={taxonomy.cities} governorates={taxonomy.governorates} />
