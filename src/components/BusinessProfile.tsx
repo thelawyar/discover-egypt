@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { MessageForm } from "@/components/MessageForm";
 import { whatsAppDigits } from "@/lib/phone";
 import { ReviewForm } from "@/components/ReviewForm";
+import { BusinessJobs } from "@/components/BusinessJobs";
 import { AddToListButton } from "@/components/AddToListButton";
 import { ReportBusinessButton } from "@/components/ReportBusinessButton";
 
