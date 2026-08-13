@@ -121,6 +121,7 @@ export function HoursEditor({
             </span>
             <input
               type="time"
+              dir="ltr"
               value={r.opens_at}
               disabled={r.is_closed}
               onChange={(e) => update(r.day_of_week, { opens_at: e.target.value })}
@@ -129,6 +130,7 @@ export function HoursEditor({
             <span className="text-muted-foreground">-</span>
             <input
               type="time"
+              dir="ltr"
               value={r.closes_at}
               disabled={r.is_closed}
               onChange={(e) => update(r.day_of_week, { closes_at: e.target.value })}
