@@ -19,6 +19,7 @@ import type { Category, City, Governorate } from "@/lib/directory-types";
 import { getTaxonomy, searchBusinesses, suggestSearch } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
 import { ogCardMeta } from "@/lib/og";
+import { seoDescription, seoTitle } from "@/lib/seo-text";
 import { SearchBar } from "@/components/SearchBar";
 import { ResultsWithAds } from "@/components/ads/ResultsWithAds";
 import { CityPicker } from "@/components/CityPicker";
@@ -106,7 +107,7 @@ export const Route = createFileRoute("/search")({
   loaderDeps: ({ search }) => search,
   head: ({ match, loaderData }) => {
     const ld = loaderData as unknown as
-      | { origin: string; pages: number; total: number; image: string | null; labels: { gov: string | null; city: string | null; cat: string | null } }
+      | { origin: string; pages: number; total: number; image: string | null; items: { handle: string; name: string }[]; labels: { gov: string | null; city: string | null; cat: string | null } }
       | undefined;
     const sp = match.search ?? { q: "", city: "", gov: "", cat: "", prod: "", sort: "best", page: 1 };
     const term = sp.q?.trim();
@@ -129,20 +130,18 @@ export const Route = createFileRoute("/search")({
       place ? `في ${place}` : null,
       page > 1 ? `- صفحة ${page}` : null,
     ].filter(Boolean);
-    const title = `${parts.join(" ")} | اكتشف مدينتك`;
+    const title = seoTitle(`${parts.join(" ")} | اكتشف مدينتك`);
 
     const count = ld?.total ?? 0;
-    const desc = [
+    const desc = seoDescription([
       count
         ? `${count.toLocaleString("ar-EG")} نتيجة`
         : "تصفح نتائج الدليل التجاري",
       term ? `لـ ${subject}` : cat ? `ضمن تصنيف ${cat}` : null,
       prod ? `تشمل ${prod}` : null,
       place ? `في ${place}` : "في المدن المصرية",
-      "— دليل اكتشف مدينتك للأنشطة التجارية.",
-    ]
-      .filter(Boolean)
-      .join(" ");
+      "— دليل اكتشف مدينتك للأنشطة التجارية: العناوين وأرقام التواصل والمواعيد.",
+    ]);
 
     const origin = ld?.origin ?? "";
     const build = (p: number) => {
@@ -211,16 +210,16 @@ export const Route = createFileRoute("/search")({
     return {
       meta: [
         { title },
-        { name: "description", content: desc.slice(0, 300) },
+        { name: "description", content: desc },
         { property: "og:title", content: shareTitle },
-        { property: "og:description", content: desc.slice(0, 300) },
+        { property: "og:description", content: desc },
         { property: "og:type", content: "website" },
         { property: "og:site_name", content: "اكتشف مدينتك" },
         { property: "og:locale", content: "ar_EG" },
         { property: "og:url", content: build(page) },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: shareTitle },
-        { name: "twitter:description", content: desc.slice(0, 300) },
+        { name: "twitter:description", content: desc },
         ...ogCardMeta(
           {
             kind: "search",
@@ -248,6 +247,29 @@ export const Route = createFileRoute("/search")({
       links,
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SearchResultsPage",
+            name: shareTitle,
+            description: desc,
+            url: build(page),
+            inLanguage: "ar-EG",
+            isPartOf: { "@type": "WebSite", name: "اكتشف مدينتك", url: `${origin}/` },
+            mainEntity: {
+              "@type": "ItemList",
+              numberOfItems: ld?.items?.length ?? 0,
+              itemListOrder: "https://schema.org/ItemListOrderDescending",
+              itemListElement: (ld?.items ?? []).map((b, i) => ({
+                "@type": "ListItem",
+                position: (page - 1) * 12 + i + 1,
+                url: `${origin}/${b.handle}`,
+                name: b.name,
+              })),
+            },
+          }),
+        },
       ],
     };
   },
@@ -277,6 +299,7 @@ export const Route = createFileRoute("/search")({
       pages: Math.max(1, Math.ceil(results.total / 12)),
       total: results.total,
       image: results.items.find((b) => b.cover_image_url)?.cover_image_url ?? null,
+      items: results.items.map((b) => ({ handle: b.username ?? b.id, name: b.name })),
       labels: {
         gov: taxonomy.governorates.find((g) => g.slug === deps.gov)?.name ?? null,
         city: taxonomy.cities.find((c) => c.slug === deps.city)?.name ?? null,

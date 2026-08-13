@@ -103,6 +103,7 @@ function Home() {
       <main className="flex flex-1 flex-col items-center justify-center px-4 pb-16">
         <h1 className="text-center">
           <Brand size="lg" />
+          <span className="sr-only">اكتشف مدينتك — الدليل التجاري لكل مدن مصر</span>
         </h1>
         {heroTitle ? (
           <p className="mt-2 text-center text-lg font-extrabold tracking-tight text-primary sm:text-2xl">

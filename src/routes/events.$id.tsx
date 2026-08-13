@@ -1,3 +1,4 @@
+import { seoDescription } from "@/lib/seo-text";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { CalendarDays, ExternalLink, MapPin, Store, Ticket } from "lucide-react";
@@ -45,9 +46,10 @@ export const Route = createFileRoute("/events/$id")({
     const e = loaderData.item;
     const origin = loaderData.origin ?? "";
     const title = `${e.title} | ${EVENT_KIND_LABELS[e.kind] ?? "حدث"} في ${e.city_name ?? "مصر"}`;
-    const desc =
-      e.description?.slice(0, 155) ??
-      `${EVENT_KIND_LABELS[e.kind] ?? "حدث"} في ${e.venue || e.business_name || e.city_name || "مدينتك"}.`;
+    const desc = seoDescription([
+      e.description,
+      `${EVENT_KIND_LABELS[e.kind] ?? "حدث"} في ${e.venue || e.business_name || e.city_name || "مدينتك"} — التفاصيل والموعد والمكان على دليل اكتشف مدينتك.`,
+    ]);
     const url = `${origin}/events/${params.id}`;
     const image = e.image_url ?? e.business_cover;
 

@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { CANONICAL_ORIGIN } from "@/lib/seo-text";
 
 /** Index of the two sitemaps: core pages and paginated result pages. */
 export const Route = createFileRoute("/sitemap-index.xml")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const proto = request.headers.get("x-forwarded-proto") ?? "https";
-        const host = request.headers.get("host") ?? "";
-        const base = host ? `${proto}://${host}` : "";
+      GET: async () => {
+        const base = CANONICAL_ORIGIN;
 
         const xml = [
           `<?xml version="1.0" encoding="UTF-8"?>`,

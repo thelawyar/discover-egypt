@@ -1,3 +1,4 @@
+import { seoDescription } from "@/lib/seo-text";
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getBusiness, resolveLegacyHandle } from "@/lib/directory.functions";
@@ -141,9 +142,10 @@ export const Route = createFileRoute("/$username")({
       };
     }
     const title = `${loaderData.name} | اكتشف مدينتك`;
-    const desc =
-      loaderData.description?.slice(0, 150) ??
-      `تفاصيل ${loaderData.name} في الدليل التجاري اكتشف مدينتك.`;
+    const desc = seoDescription([
+      loaderData.description,
+      `${loaderData.name} — العنوان وأرقام التواصل ومواعيد العمل والخدمات والصور على دليل اكتشف مدينتك التجاري.`,
+    ]);
     const origin = loaderData.origin ?? "";
     const url = `/${loaderData.username}`;
     const meta: Record<string, string>[] = [

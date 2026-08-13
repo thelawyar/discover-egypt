@@ -299,8 +299,13 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
 
             {rating !== null ? (
               <p className="mt-2 flex items-center gap-1 text-sm">
-                <Star className="size-4 fill-warning text-warning" />
-                <span className="font-bold">{rating.toFixed(1)}</span>
+                <Star className="size-4 fill-warning text-warning" aria-hidden="true" />
+                <span className="sr-only">
+                  التقييم {rating.toFixed(1)} من 5 بناءً على {data.reviews.length} تقييم
+                </span>
+                <span aria-hidden="true" className="font-bold">
+                  {rating.toFixed(1)}
+                </span>
                 <span style={{ color: "var(--biz-muted)" }}>
                   ({data.reviews.length} تقييم)
                 </span>
