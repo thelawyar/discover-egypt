@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { CANONICAL_ORIGIN } from "@/lib/seo-text";
 import { getSitemapData } from "@/lib/directory.functions";
 
 interface SitemapEntry {
@@ -19,10 +20,8 @@ interface SitemapEntry {
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const proto = request.headers.get("x-forwarded-proto") ?? "https";
-        const host = request.headers.get("host") ?? "";
-        const base = host ? `${proto}://${host}` : "";
+      GET: async () => {
+        const base = CANONICAL_ORIGIN;
 
         const data = await getSitemapData();
 
