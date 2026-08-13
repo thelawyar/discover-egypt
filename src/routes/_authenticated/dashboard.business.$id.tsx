@@ -916,6 +916,7 @@ function BusinessForm() {
           />
           {!isNew ? (
             <>
+              <JobsEditor businessId={id} />
               <BusinessStats businessId={id} />
               <ManagersEditor businessId={id} />
             </>
