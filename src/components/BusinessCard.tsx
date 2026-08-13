@@ -45,12 +45,20 @@ export function BusinessCard({
             <Store className="size-10" />
           </div>
         )}
-        {item.is_featured ? (
-          <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-warning px-2.5 py-1 text-[11px] font-semibold text-warning-foreground">
-            <Star className="size-3 fill-current" />
-            مميز
-          </span>
-        ) : null}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+          {item.is_featured ? (
+            <span className="flex items-center gap-1 rounded-full bg-warning px-2.5 py-1 text-[11px] font-semibold text-warning-foreground">
+              <Star className="size-3 fill-current" />
+              مميز
+            </span>
+          ) : null}
+          {item.is_hiring ? (
+            <span className="flex items-center gap-1 rounded-full bg-success px-2.5 py-1 text-[11px] font-semibold text-success-foreground">
+              <BriefcaseBusiness className="size-3" />
+              يوظّف
+            </span>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
