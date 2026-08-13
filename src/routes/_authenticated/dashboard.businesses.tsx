@@ -200,6 +200,11 @@ function MyBusinessesPage() {
                           <Pencil className="size-4" /> التعديل الكامل
                         </Link>
                       </Button>
+                      <Button asChild variant="ghost" size="sm" className="rounded-full">
+                        <Link to="/dashboard/manage/$id" params={{ id: b.id }}>
+                          <Settings2 className="size-4" /> إدارة النشاط
+                        </Link>
+                      </Button>
                       {b.status === "approved" ? (
                         <Button asChild variant="ghost" size="sm" className="rounded-full">
                           <Link to="/$username" params={{ username: b.username }}>
