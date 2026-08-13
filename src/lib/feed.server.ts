@@ -22,7 +22,7 @@ function strArr(value: unknown): string[] {
 }
 
 export const CARD_SELECT =
-  "id,username,name,description,address,phone,whatsapp,cover_image_url,cover_thumb_url,products,is_featured," +
+  "id,username,name,description,address,phone,whatsapp,cover_image_url,cover_thumb_url,products,is_featured,is_hiring," +
   "price_level,amenities,payment_methods,good_for,vibes,occasions," +
   "categories(name),cities(name),governorates(name,slug)";
 
@@ -39,6 +39,7 @@ export function toCard(row: Row): BusinessCardData {
     cover_thumb_url: (row.cover_thumb_url as string) ?? null,
     products: (row.products as string[]) ?? [],
     is_featured: Boolean(row.is_featured),
+    is_hiring: Boolean(row.is_hiring),
     price_level: typeof row.price_level === "number" ? row.price_level : null,
     amenities: strArr(row.amenities),
     payment_methods: strArr(row.payment_methods),
