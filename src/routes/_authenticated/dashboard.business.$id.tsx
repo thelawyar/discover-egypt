@@ -28,7 +28,7 @@ import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { HoursEditor, DEFAULT_HOURS, type DayRow } from "@/components/dashboard/HoursEditor";
 import { BusinessStats } from "@/components/dashboard/BusinessStats";
 import { ManagersEditor } from "@/components/dashboard/ManagersEditor";
-import { JobsEditor } from "@/components/dashboard/JobsEditor";
+
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -902,26 +902,37 @@ function BusinessForm() {
             coverUrl={form.cover_image_url}
           />
 
-          <GalleryEditor
-            businessId={isNew ? null : id}
-            userId={user?.id ?? ""}
-            draftImages={draftImages}
-            onDraftImagesChange={setDraftImages}
-            draftCover={form.cover_image_url}
-            onDraftCoverChange={(url) => set("cover_image_url", url)}
-          />
-          <HoursEditor
-            businessId={isNew ? null : id}
-            value={draftHours}
-            onChange={setDraftHours}
-          />
-          {!isNew ? (
+          {isNew ? (
             <>
-              <JobsEditor businessId={id} />
+              <GalleryEditor
+                businessId={null}
+                userId={user?.id ?? ""}
+                draftImages={draftImages}
+                onDraftImagesChange={setDraftImages}
+                draftCover={form.cover_image_url}
+                onDraftCoverChange={(url) => set("cover_image_url", url)}
+              />
+              <HoursEditor businessId={null} value={draftHours} onChange={setDraftHours} />
+            </>
+          ) : (
+            <>
+              <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-5 shadow-card">
+                <div>
+                  <h2 className="text-sm font-bold">إدارة النشاط</h2>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    مواعيد العمل، معرض الصور، الوظائف، والعروض والأحداث في قسم منفصل.
+                  </p>
+                </div>
+                <Button asChild type="button" variant="outline" className="rounded-full">
+                  <Link to="/dashboard/manage/$id" params={{ id }}>
+                    فتح قسم الإدارة
+                  </Link>
+                </Button>
+              </section>
               <BusinessStats businessId={id} />
               <ManagersEditor businessId={id} />
             </>
-          ) : null}
+          )}
 
 
 

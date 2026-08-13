@@ -43,6 +43,7 @@ import { Route as AuthenticatedDashboardEventsRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardBusinessesRouteImport } from './routes/_authenticated/dashboard.businesses'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as AuthenticatedDashboardManageIdRouteImport } from './routes/_authenticated/dashboard.manage.$id'
 import { Route as AuthenticatedDashboardBusinessIdRouteImport } from './routes/_authenticated/dashboard.business.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -225,6 +226,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDashboardManageIdRoute =
+  AuthenticatedDashboardManageIdRouteImport.update({
+    id: '/dashboard/manage/$id',
+    path: '/dashboard/manage/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardBusinessIdRoute =
   AuthenticatedDashboardBusinessIdRouteImport.update({
     id: '/dashboard/business/$id',
@@ -267,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/api/public/og': typeof ApiPublicOgRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
+  '/dashboard/manage/$id': typeof AuthenticatedDashboardManageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -303,6 +311,7 @@ export interface FileRoutesByTo {
   '/api/public/og': typeof ApiPublicOgRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
+  '/dashboard/manage/$id': typeof AuthenticatedDashboardManageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -341,6 +350,7 @@ export interface FileRoutesById {
   '/api/public/og': typeof ApiPublicOgRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/business/$id': typeof AuthenticatedDashboardBusinessIdRoute
+  '/_authenticated/dashboard/manage/$id': typeof AuthenticatedDashboardManageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/api/public/og'
     | '/dashboard/'
     | '/dashboard/business/$id'
+    | '/dashboard/manage/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/api/public/og'
     | '/dashboard'
     | '/dashboard/business/$id'
+    | '/dashboard/manage/$id'
   id:
     | '__root__'
     | '/'
@@ -452,6 +464,7 @@ export interface FileRouteTypes {
     | '/api/public/og'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/business/$id'
+    | '/_authenticated/dashboard/manage/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -721,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/dashboard/manage/$id': {
+      id: '/_authenticated/dashboard/manage/$id'
+      path: '/dashboard/manage/$id'
+      fullPath: '/dashboard/manage/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardManageIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/business/$id': {
       id: '/_authenticated/dashboard/business/$id'
       path: '/dashboard/business/$id'
@@ -743,6 +763,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDashboardBusinessIdRoute: typeof AuthenticatedDashboardBusinessIdRoute
+  AuthenticatedDashboardManageIdRoute: typeof AuthenticatedDashboardManageIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -758,6 +779,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedDashboardBusinessIdRoute: AuthenticatedDashboardBusinessIdRoute,
+  AuthenticatedDashboardManageIdRoute: AuthenticatedDashboardManageIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
