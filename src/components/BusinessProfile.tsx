@@ -387,6 +387,8 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
               </div>
             ) : null}
 
+            <BusinessJobs businessId={data.id} />
+
             <div className="mt-8">
               <h2 className="mb-3 text-sm font-bold">آراء العملاء</h2>
               <ReviewForm businessId={data.id} />
