@@ -49,6 +49,8 @@ export type BusinessCardData = BusinessAttributes & {
   cover_thumb_url: string | null;
   products: string[];
   is_featured: boolean;
+  /** True when the business has at least one active job opening. */
+  is_hiring: boolean;
   category_name: string | null;
   city_name: string | null;
   governorate_name: string | null;

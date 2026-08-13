@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { MessageForm } from "@/components/MessageForm";
 import { whatsAppDigits } from "@/lib/phone";
 import { ReviewForm } from "@/components/ReviewForm";
+import { BusinessJobs } from "@/components/BusinessJobs";
 import { AddToListButton } from "@/components/AddToListButton";
 import { ReportBusinessButton } from "@/components/ReportBusinessButton";
 
@@ -386,6 +387,8 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
                 </div>
               </div>
             ) : null}
+
+            <BusinessJobs businessId={data.id} />
 
             <div className="mt-8">
               <h2 className="mb-3 text-sm font-bold">آراء العملاء</h2>

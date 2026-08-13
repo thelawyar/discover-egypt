@@ -293,6 +293,53 @@ export type Database = {
           },
         ]
       }
+      business_jobs: {
+        Row: {
+          business_id: string
+          contact: string | null
+          created_at: string
+          description: string | null
+          employment_type: string | null
+          id: string
+          is_active: boolean
+          salary_range: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          contact?: string | null
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          salary_range?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          contact?: string | null
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          salary_range?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_managers: {
         Row: {
           business_id: string
@@ -538,6 +585,7 @@ export type Database = {
           id: string
           instagram: string | null
           is_featured: boolean
+          is_hiring: boolean
           latitude: number | null
           logo_url: string | null
           longitude: number | null
@@ -581,6 +629,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_featured?: boolean
+          is_hiring?: boolean
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
@@ -624,6 +673,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           is_featured?: boolean
+          is_hiring?: boolean
           latitude?: number | null
           logo_url?: string | null
           longitude?: number | null
