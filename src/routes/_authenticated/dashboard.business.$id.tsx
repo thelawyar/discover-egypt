@@ -28,6 +28,7 @@ import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { HoursEditor, DEFAULT_HOURS, type DayRow } from "@/components/dashboard/HoursEditor";
 import { BusinessStats } from "@/components/dashboard/BusinessStats";
 import { ManagersEditor } from "@/components/dashboard/ManagersEditor";
+import { JobsEditor } from "@/components/dashboard/JobsEditor";
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
