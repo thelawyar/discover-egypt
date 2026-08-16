@@ -242,29 +242,19 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
           style={cardStyle}
         >
           <div className="aspect-[21/9] w-full">
-            {data.cover_image_url ? (
-              <img
-                src={data.cover_image_url}
-                alt={data.name}
-                className="size-full object-cover"
-              />
-            ) : (
-              <div
-                className="flex size-full items-center justify-center"
-                style={{ color: "var(--biz-muted)" }}
-              >
-                <Store className="size-14" />
-              </div>
-            )}
-          </div>
-          {data.logo_url ? (
             <img
-              src={data.logo_url}
-              alt={`شعار ${data.name}`}
-              className="absolute bottom-4 start-6 size-20 rounded-2xl border-2 object-cover shadow-lg sm:size-24"
-              style={{ borderColor: "var(--biz-card)", background: "var(--biz-card)" }}
+              src={businessCover(data.cover_image_url)}
+              alt={data.name}
+              className="size-full object-cover"
             />
-          ) : null}
+          </div>
+          <img
+            src={businessLogo(data.logo_url)}
+            alt={`شعار ${data.name}`}
+            className="absolute bottom-4 start-6 size-20 rounded-2xl border-2 object-cover shadow-lg sm:size-24"
+            style={{ borderColor: "var(--biz-card)", background: "var(--biz-card)" }}
+          />
+
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
