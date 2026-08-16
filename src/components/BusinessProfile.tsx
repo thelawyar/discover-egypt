@@ -28,7 +28,7 @@ import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { Button } from "@/components/ui/button";
 import { MessageForm } from "@/components/MessageForm";
-import { whatsAppDigits } from "@/lib/phone";
+import { whatsAppLink } from "@/lib/phone";
 import { ReviewForm } from "@/components/ReviewForm";
 import { BusinessJobs } from "@/components/BusinessJobs";
 import { AddToListButton } from "@/components/AddToListButton";
@@ -163,7 +163,13 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
       ? [
           {
             key: "whatsapp",
-            href: `https://wa.me/${whatsAppDigits(data.whatsapp)}`,
+            href: whatsAppLink(
+              data.whatsapp,
+              data.name,
+              typeof window !== "undefined"
+                ? `${window.location.origin}/${data.username}`
+                : `https://durtown.com/${data.username}`,
+            ),
             label: "واتساب",
             external: true,
             icon: MessageCircle,

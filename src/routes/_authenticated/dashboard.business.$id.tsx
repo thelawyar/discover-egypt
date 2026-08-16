@@ -487,8 +487,8 @@ function BusinessForm() {
               />
             </div>
 
-            {!isNew ? (
-              <div className="space-y-1.5">
+            <div className="space-y-1.5">
+
                 <Label htmlFor="username">الرابط الخاص بالنشاط</Label>
                 <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3">
                   <span className="text-xs text-muted-foreground" dir="ltr">
@@ -509,7 +509,7 @@ function BusinessForm() {
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   {USERNAME_HINT} يمكنك استخدام هذا الرابط في كروت العمل وصفحات
-                  التواصل الاجتماعي.
+                  التواصل الاجتماعي.{isNew ? " اتركه فارغاً ليتم توليده تلقائياً." : ""}
                 </p>
                 {existing?.username ? (
                   <div className="flex flex-wrap items-center gap-2">
@@ -554,8 +554,8 @@ function BusinessForm() {
                     </ul>
                   </div>
                 ) : null}
-              </div>
-            ) : null}
+
+            </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="description">وصف النشاط</Label>
