@@ -11,7 +11,8 @@ async function inlinePhoto(url: string | null): Promise<string | null> {
     const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!res.ok) return null;
     const type = res.headers.get("content-type") ?? "";
-    if (!/^image\/(jpeg|png|webp|jpg)$/i.test(type)) return null;
+    // resvg can rasterize PNG/JPEG only — WebP would break the whole card.
+    if (!/^image\/(jpeg|jpg|png)$/i.test(type)) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
     if (buf.byteLength > 3_000_000) return null;
     let bin = "";

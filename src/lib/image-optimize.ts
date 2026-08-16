@@ -38,8 +38,11 @@ async function loadBitmap(file: File): Promise<ImageBitmap | HTMLImageElement> {
 async function encode(
   canvas: HTMLCanvasElement,
   quality: number,
+  format?: "jpeg",
 ): Promise<{ blob: Blob; ext: string; contentType: string }> {
-  const type = supportsWebp() ? "image/webp" : "image/jpeg";
+  // JPEG is forced for share-critical images (cover/logo): social crawlers and
+  // the Open Graph rasterizer cannot read WebP.
+  const type = format === "jpeg" || !supportsWebp() ? "image/jpeg" : "image/webp";
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, type, quality),
   );
@@ -57,7 +60,13 @@ async function encode(
  */
 export async function optimizeImage(
   file: File,
-  options: { maxWidth: number; crop?: boolean; quality?: number; ratio?: number },
+  options: {
+    maxWidth: number;
+    crop?: boolean;
+    quality?: number;
+    ratio?: number;
+    format?: "jpeg";
+  },
 ): Promise<OptimizedImage> {
   const source = await loadBitmap(file);
   const sw = "width" in source ? source.width : 0;
@@ -93,15 +102,19 @@ export async function optimizeImage(
   ctx.drawImage(source as CanvasImageSource, sx, sy, cw, ch, 0, 0, targetW, targetH);
   if ("close" in source) source.close();
 
-  const { blob, ext, contentType } = await encode(canvas, options.quality ?? 0.82);
+  const { blob, ext, contentType } = await encode(
+    canvas,
+    options.quality ?? 0.82,
+    options.format,
+  );
   return { blob, width: targetW, height: targetH, ext, contentType };
 }
 
 /** Cover image variants: og-ready 1200x630 plus a lightweight card thumbnail. */
 export async function buildCoverVariants(file: File) {
   const [large, thumb] = await Promise.all([
-    optimizeImage(file, { maxWidth: 1200, crop: true, quality: 0.84 }),
-    optimizeImage(file, { maxWidth: 600, crop: true, quality: 0.7 }),
+    optimizeImage(file, { maxWidth: 1200, crop: true, quality: 0.84, format: "jpeg" }),
+    optimizeImage(file, { maxWidth: 600, crop: true, quality: 0.7, format: "jpeg" }),
   ]);
   return { large, thumb };
 }
@@ -118,6 +131,7 @@ export async function buildImageVariants(
     crop?: boolean;
     ratio?: number;
     quality?: number;
+    format?: "jpeg";
   },
 ) {
   const [large, thumb] = await Promise.all([
@@ -126,12 +140,14 @@ export async function buildImageVariants(
       crop: options.crop,
       ratio: options.ratio,
       quality: options.quality ?? 0.82,
+      format: options.format,
     }),
     optimizeImage(file, {
       maxWidth: Math.min(options.thumbWidth ?? 480, options.maxWidth),
       crop: options.crop,
       ratio: options.ratio,
       quality: 0.7,
+      format: options.format,
     }),
   ]);
   return { large, thumb };
