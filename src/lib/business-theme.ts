@@ -98,7 +98,10 @@ function mix(hex: string, target: string, amount: number): string {
   return `#${out.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }
 
-export function resolveTheme(input: BusinessThemeInput | null | undefined): ResolvedTheme {
+export function resolveTheme(
+  input: BusinessThemeInput | null | undefined,
+  prefersDark = false,
+): ResolvedTheme {
   const styleRaw = (input?.theme_style ?? "classic") as ThemeStyleId;
   const style: ThemeStyleId = THEME_STYLES.some((s) => s.id === styleRaw)
     ? styleRaw
@@ -112,8 +115,16 @@ export function resolveTheme(input: BusinessThemeInput | null | undefined): Reso
 
   const contrast = Boolean(input?.theme_contrast);
   const primaryRaw = clean(input?.theme_primary, defaults[style].primary);
-  const bg = clean(input?.theme_bg, defaults[style].bg);
+  const bgRaw = clean(input?.theme_bg, defaults[style].bg);
+  // Site-wide dark mode: flip a light page background to the app's dark surface
+  // and lift the accent so it stays readable on it.
+  const bg = prefersDark && !isDarkColor(bgRaw) ? "#0d1424" : bgRaw;
   const dark = isDarkColor(bg);
+  const primaryBase =
+    prefersDark && !isDarkColor(bgRaw) && isDarkColor(primaryRaw)
+      ? mix(primaryRaw, "#ffffff", 0.35)
+      : primaryRaw;
+
 
   // High-contrast mode nudges the accent away from the background so text stays readable.
   const primary = contrast
