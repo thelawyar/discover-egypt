@@ -21,7 +21,10 @@ import { WEEK_DAYS } from "@/lib/directory-types";
 import { ATTR_GROUPS, attrLabel, priceLabel } from "@/lib/business-attributes";
 
 import { resolveTheme, themeVars } from "@/lib/business-theme";
+import { businessCover, businessLogo } from "@/lib/business-defaults";
+import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
+
 import { BusinessPageAds } from "@/components/ads/BusinessPageAds";
 import { QrCodeButton } from "@/components/QrCodeButton";
 import { Button } from "@/components/ui/button";
