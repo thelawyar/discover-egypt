@@ -128,8 +128,9 @@ export function resolveTheme(
 
   // High-contrast mode nudges the accent away from the background so text stays readable.
   const primary = contrast
-    ? mix(primaryRaw, dark ? "#ffffff" : "#000000", 0.18)
-    : primaryRaw;
+    ? mix(primaryBase, dark ? "#ffffff" : "#000000", 0.18)
+    : primaryBase;
+
 
   const fontRaw = (input?.theme_font ?? "cairo") as ThemeFontId;
   const font: ThemeFontId = THEME_FONTS.some((f) => f.id === fontRaw)
