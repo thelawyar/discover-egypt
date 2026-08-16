@@ -56,3 +56,25 @@ export function whatsAppPreview(input: string): string {
   return value ? `سيُحفظ الرقم كـ ${value}` : "";
 }
 
+/** Default opening message telling the owner the lead came from durtown.com. */
+export function whatsAppIntro(businessName: string, pageUrl?: string): string {
+  const lines = [
+    `مرحباً${businessName ? ` ${businessName}` : ""} 👋`,
+    "وصلت إليكم من دليل durtown.com (اكتشف مدينتك)",
+  ];
+  if (pageUrl) lines.push(pageUrl);
+  lines.push("وأحتاج الاستفسار عن:");
+  return lines.join("\n");
+}
+
+/** wa.me deep link with a pre-filled message mentioning durtown.com. */
+export function whatsAppLink(
+  number: string,
+  businessName: string,
+  pageUrl?: string,
+): string {
+  const digits = whatsAppDigits(number);
+  return `https://wa.me/${digits}?text=${encodeURIComponent(whatsAppIntro(businessName, pageUrl))}`;
+}
+
+
