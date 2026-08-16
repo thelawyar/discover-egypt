@@ -30,21 +30,16 @@ export function BusinessCard({
     >
 
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {item.cover_image_url ? (
-          <SmartImage
-            src={item.cover_image_url}
-            thumbSrc={item.cover_thumb_url}
-            alt={item.name}
-            width={1200}
-            height={750}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
-            className="size-full object-cover duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center text-muted-foreground">
-            <Store className="size-10" />
-          </div>
-        )}
+        <SmartImage
+          src={businessCover(item.cover_image_url)}
+          thumbSrc={item.cover_image_url ? item.cover_thumb_url : null}
+          alt={item.name}
+          width={1200}
+          height={750}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+          className="size-full object-cover duration-300 group-hover:scale-105"
+        />
+
         <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
           {item.is_featured ? (
             <span className="flex items-center gap-1 rounded-full bg-warning px-2.5 py-1 text-[11px] font-semibold text-warning-foreground">
