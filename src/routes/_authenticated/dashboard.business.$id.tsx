@@ -509,7 +509,7 @@ function BusinessForm() {
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   {USERNAME_HINT} يمكنك استخدام هذا الرابط في كروت العمل وصفحات
-                  التواصل الاجتماعي.
+                  التواصل الاجتماعي.{isNew ? " اتركه فارغاً ليتم توليده تلقائياً." : ""}
                 </p>
                 {existing?.username ? (
                   <div className="flex flex-wrap items-center gap-2">
