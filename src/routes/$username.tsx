@@ -3,7 +3,7 @@ import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-route
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getBusiness, resolveLegacyHandle } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
-import { absoluteOgImage, ogCardMeta } from "@/lib/og";
+import { absoluteOgImage, businessOgMeta, ogCardMeta } from "@/lib/og";
 import { BusinessProfile } from "@/components/BusinessProfile";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
