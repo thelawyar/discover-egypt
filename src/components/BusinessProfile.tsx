@@ -124,8 +124,10 @@ type ContactLink = {
 
 /** Full public mini-site for one business. */
 export function BusinessProfile({ data }: { data: BusinessDetail }) {
-  const theme = resolveTheme(data);
+  const { isDark } = useTheme();
+  const theme = resolveTheme(data, isDark);
   const tracked = useRef(false);
+
 
   const rating = data.reviews.length
     ? data.reviews.reduce((s, r) => s + r.rating, 0) / data.reviews.length
