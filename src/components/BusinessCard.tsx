@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { BriefcaseBusiness, MapPin, Phone, Star, Store } from "lucide-react";
+import { BriefcaseBusiness, MapPin, Phone, Star } from "lucide-react";
 import type { BusinessCardData } from "@/lib/directory-types";
 import { Highlight, matchesTerms } from "@/lib/highlight";
 import { SmartImage } from "@/components/SmartImage";
+import { businessCover } from "@/lib/business-defaults";
 import { supabase } from "@/integrations/supabase/client";
 
 export function BusinessCard({

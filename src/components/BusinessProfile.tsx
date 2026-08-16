@@ -7,7 +7,6 @@ import {
   MessageCircle,
   Phone,
   Star,
-  Store,
   Facebook,
   Instagram,
   Clock,
