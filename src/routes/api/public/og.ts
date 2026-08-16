@@ -84,8 +84,7 @@ export const Route = createFileRoute("/api/public/og")({
               "Cache-Control": "public, max-age=86400, s-maxage=604800",
             },
           });
-        } catch (err) {
-          console.error("og_render_failed", err);
+        } catch {
           // Rasterizer unavailable: fall back to the static preview image.
           return Response.redirect(new URL("/og-default.jpg", url).toString(), 302);
         }

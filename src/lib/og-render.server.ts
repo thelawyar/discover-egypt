@@ -34,6 +34,9 @@ async function ensureWasm(): Promise<void> {
     ready = wasmBytes()
       .then((bytes) => initWasm(bytes))
       .catch((e) => {
+        // HMR re-evaluates this module while the wasm instance survives; that
+        // second init is a no-op, not a failure.
+        if (e instanceof Error && /already initialized/i.test(e.message)) return;
         ready = null;
         throw e;
       });
