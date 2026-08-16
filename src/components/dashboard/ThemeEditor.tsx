@@ -46,7 +46,12 @@ export function ThemeEditor({
   async function uploadLogo(file: File) {
     setUploading(true);
     try {
-      const { url } = await uploadBusinessImage(file, userId, { maxWidth: 512 });
+      // JPEG: the logo can end up in share previews, which reject WebP.
+      const { url } = await uploadBusinessImage(file, userId, {
+        maxWidth: 512,
+        format: "jpeg",
+      });
+
       onChange({ logo_url: url });
       toast.success("تم رفع الشعار");
     } catch (err) {

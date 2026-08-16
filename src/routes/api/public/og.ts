@@ -11,7 +11,8 @@ async function inlinePhoto(url: string | null): Promise<string | null> {
     const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!res.ok) return null;
     const type = res.headers.get("content-type") ?? "";
-    if (!/^image\/(jpeg|png|webp|jpg)$/i.test(type)) return null;
+    // resvg can rasterize PNG/JPEG only — WebP would break the whole card.
+    if (!/^image\/(jpeg|jpg|png)$/i.test(type)) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
     if (buf.byteLength > 3_000_000) return null;
     let bin = "";
@@ -24,6 +25,34 @@ async function inlinePhoto(url: string | null): Promise<string | null> {
   }
 }
 
+/** Looks up an approved business by handle so share links stay short. */
+async function businessCard(handle: string): Promise<OgCard | null> {
+  try {
+    const { getPublicClient } = await import("@/lib/supabase-public.server");
+    const { data } = await getPublicClient()
+      .from("businesses")
+      .select(
+        "name, cover_image_url, logo_url, address, categories(name), cities(name), governorates(name)",
+      )
+      .eq("username", handle.toLowerCase())
+      .eq("status", "approved")
+      .maybeSingle();
+    if (!data) return null;
+    const city = (data.cities as { name: string } | null)?.name ?? null;
+    const gov = (data.governorates as { name: string } | null)?.name ?? null;
+    return {
+      kind: "business",
+      title: data.name.slice(0, 120),
+      subtitle: [city, gov].filter(Boolean).join(" - ") || data.address || null,
+      badge: (data.categories as { name: string } | null)?.name ?? null,
+      stats: [],
+      photo: await inlinePhoto(data.cover_image_url ?? data.logo_url ?? null),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export const Route = createFileRoute("/api/public/og")({
   server: {
     handlers: {
@@ -31,7 +60,8 @@ export const Route = createFileRoute("/api/public/og")({
         const url = new URL(request.url);
         const q = url.searchParams;
         const kindParam = (q.get("kind") ?? "site") as OgKind;
-        const card: OgCard = {
+        const handle = q.get("u");
+        const card: OgCard = (handle ? await businessCard(handle) : null) ?? {
           kind: KINDS.includes(kindParam) ? kindParam : "site",
           title: (q.get("t") ?? "اكتشف مدينتك").slice(0, 120),
           subtitle: q.get("s")?.slice(0, 200) || null,
@@ -43,6 +73,7 @@ export const Route = createFileRoute("/api/public/og")({
             .slice(0, 3),
           photo: await inlinePhoto(q.get("img")),
         };
+
 
         try {
           const { svgToPng } = await import("@/lib/og-render.server");

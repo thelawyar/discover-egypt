@@ -109,3 +109,30 @@ export function ogImageMeta(
     { name: "twitter:image:alt", content: alt },
   ];
 }
+
+/**
+ * Short, crawler-friendly card URL for a business handle. The cover photo is
+ * resolved server-side, so the link stays small enough for WhatsApp/Telegram.
+ */
+export function businessOgMeta(
+  username: string,
+  origin: string | null | undefined,
+  alt: string,
+  version?: string | null,
+): Meta[] {
+  const base = (origin ?? "").replace(/\/$/, "");
+  if (!base.startsWith("https://")) return [];
+  const usp = new URLSearchParams({ u: username });
+  if (version) usp.set("v", version.slice(0, 24));
+  const url = `${base}/api/public/og?${usp.toString()}`;
+  return [
+    { property: "og:image", content: url },
+    { property: "og:image:secure_url", content: url },
+    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:width", content: String(OG_WIDTH) },
+    { property: "og:image:height", content: String(OG_HEIGHT) },
+    { property: "og:image:alt", content: alt },
+    { name: "twitter:image", content: url },
+    { name: "twitter:image:alt", content: alt },
+  ];
+}

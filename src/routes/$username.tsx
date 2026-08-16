@@ -3,7 +3,7 @@ import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-route
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getBusiness, resolveLegacyHandle } from "@/lib/directory.functions";
 import { getRequestOrigin } from "@/lib/origin.functions";
-import { absoluteOgImage, ogCardMeta } from "@/lib/og";
+import { absoluteOgImage, businessOgMeta, ogCardMeta } from "@/lib/og";
 import { BusinessProfile } from "@/components/BusinessProfile";
 import { PageShell } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -164,27 +164,33 @@ export const Route = createFileRoute("/$username")({
       meta.push({ property: "og:updated_time", content: loaderData.updated_at });
     }
     const image = absoluteOgImage(loaderData.image, origin);
-    meta.push(
-      ...ogCardMeta(
-        {
-          kind: "business",
-          title: loaderData.name,
-          subtitle:
-            [loaderData.city_name, loaderData.governorate_name]
-              .filter(Boolean)
-              .join(" - ") || loaderData.description?.slice(0, 90) || null,
-          badge: loaderData.category_name,
-          stats: [
-            loaderData.rating ? `تقييم ${loaderData.rating.toFixed(1)} ★` : null,
-            loaderData.reviewCount ? `${loaderData.reviewCount} تقييم` : null,
-            loaderData.phone ? "اتصل الآن" : null,
-          ],
-          photo: loaderData.image,
-        },
-        origin,
-        loaderData.name,
-      ),
+    // Short share URL: the cover photo is fetched server-side, so messaging apps
+    // (WhatsApp/Telegram) get a compact link and a real PNG preview.
+    const shareMeta = businessOgMeta(
+      loaderData.username,
+      origin,
+      loaderData.name,
+      loaderData.updated_at,
     );
+    meta.push(
+      ...(shareMeta.length
+        ? shareMeta
+        : ogCardMeta(
+            {
+              kind: "business",
+              title: loaderData.name,
+              subtitle:
+                [loaderData.city_name, loaderData.governorate_name]
+                  .filter(Boolean)
+                  .join(" - ") || loaderData.description?.slice(0, 90) || null,
+              badge: loaderData.category_name,
+              photo: loaderData.image,
+            },
+            origin,
+            loaderData.name,
+          )),
+    );
+
 
     // Every gallery/cover image, absolute — richer LocalBusiness result.
     const images = Array.from(

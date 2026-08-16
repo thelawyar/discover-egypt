@@ -16,6 +16,7 @@ export async function uploadBusinessImage(
     crop?: boolean;
     ratio?: number;
     quality?: number;
+    format?: "jpeg";
   },
 ): Promise<UploadedImage> {
   if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
@@ -31,6 +32,7 @@ export async function uploadBusinessImage(
     crop: options.crop,
     ratio: options.ratio,
     quality: options.quality ?? 0.84,
+    format: options.format,
   });
 
   const base = `${userId}/${crypto.randomUUID()}`;
