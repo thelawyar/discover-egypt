@@ -314,7 +314,7 @@ export function GalleryEditor({
             <img
               src={coverPreview}
               alt="معاينة صورة الغلاف"
-              className="aspect-[16/9] w-full rounded-xl border border-border object-cover sm:aspect-[820/312]"
+              className="aspect-[12/5] w-full rounded-xl border border-border object-cover"
             />
           ) : null}
           <DialogFooter className="gap-2 sm:justify-start">
