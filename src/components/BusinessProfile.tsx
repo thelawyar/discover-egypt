@@ -247,12 +247,14 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
           style={cardStyle}
         >
           {/* مقاس الغلاف المعتمد: 1942×809 (نسبة 12/5) */}
-          <div className="aspect-[12/5] w-full">
-
+          <div
+            className="aspect-[12/5] w-full"
+            style={{ background: "var(--biz-card)" }}
+          >
             <img
               src={businessCover(data.cover_image_url)}
               alt={data.name}
-              className="size-full object-cover"
+              className="size-full object-contain"
             />
           </div>
           <img
