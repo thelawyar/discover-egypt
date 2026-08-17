@@ -246,8 +246,8 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
           className="relative overflow-hidden rounded-3xl border"
           style={cardStyle}
         >
-          {/* مقاس غلاف فيسبوك: 16/9 على الموبايل و820×312 على الشاشات الأكبر */}
-          <div className="aspect-[16/9] w-full sm:aspect-[820/312]">
+          {/* مقاس الغلاف المعتمد: 1942×809 (نسبة 12/5) */}
+          <div className="aspect-[12/5] w-full">
 
             <img
               src={businessCover(data.cover_image_url)}

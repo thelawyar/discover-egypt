@@ -855,7 +855,7 @@ function BusinessForm() {
                 <img
                   src={form.cover_image_url}
                   alt="غلاف النشاط"
-                  className="aspect-[16/9] w-full object-cover sm:aspect-[820/312]"
+                  className="aspect-[12/5] w-full object-cover"
                 />
                 <button
                   type="button"
