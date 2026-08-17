@@ -10,6 +10,9 @@ export type OptimizedImage = {
 
 const OG_RATIO = 1200 / 630;
 
+/** Business cover ratio (approved artwork is 1942x809 ≈ 12/5). */
+export const COVER_RATIO = 12 / 5;
+
 function supportsWebp(): boolean {
   try {
     const c = document.createElement("canvas");
@@ -110,11 +113,23 @@ export async function optimizeImage(
   return { blob, width: targetW, height: targetH, ext, contentType };
 }
 
-/** Cover image variants: og-ready 1200x630 plus a lightweight card thumbnail. */
+/** Cover image variants at the approved 12:5 banner ratio (1600x667 + thumb). */
 export async function buildCoverVariants(file: File) {
   const [large, thumb] = await Promise.all([
-    optimizeImage(file, { maxWidth: 1200, crop: true, quality: 0.84, format: "jpeg" }),
-    optimizeImage(file, { maxWidth: 600, crop: true, quality: 0.7, format: "jpeg" }),
+    optimizeImage(file, {
+      maxWidth: 1600,
+      crop: true,
+      ratio: COVER_RATIO,
+      quality: 0.84,
+      format: "jpeg",
+    }),
+    optimizeImage(file, {
+      maxWidth: 640,
+      crop: true,
+      ratio: COVER_RATIO,
+      quality: 0.7,
+      format: "jpeg",
+    }),
   ]);
   return { large, thumb };
 }
