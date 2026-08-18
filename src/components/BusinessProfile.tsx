@@ -248,13 +248,19 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
         >
           {/* مقاس الغلاف المعتمد: 1942×809 (نسبة 12/5) */}
           <div
-            className="aspect-[12/5] w-full"
+            className="relative aspect-[12/5] w-full overflow-hidden"
             style={{ background: "var(--biz-card)" }}
           >
             <img
               src={businessCover(data.cover_image_url)}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 size-full scale-110 object-cover opacity-35 blur-xl"
+            />
+            <img
+              src={businessCover(data.cover_image_url)}
               alt={data.name}
-              className="size-full object-contain"
+              className="relative size-full object-contain"
             />
           </div>
           <img
