@@ -1,4 +1,5 @@
 import type { City, Governorate } from "./directory-types";
+import { arNorm } from "./ar-normalize";
 
 /** Cities that belong to the selected governorate (all when none selected). */
 export function citiesForGovernorate(
@@ -24,9 +25,17 @@ export const CITY_MISMATCH_MESSAGE =
 
 /** Filter helper for a city search box. */
 export function filterCitiesByTerm(cities: City[], term: string): City[] {
-  const value = term.trim();
+  const value = arNorm(term);
   if (!value) return cities;
-  return cities.filter((c) => c.name.includes(value) || c.slug.includes(value));
+  return cities.filter(
+    (c) => arNorm(c.name).includes(value) || c.slug.toLowerCase().includes(value),
+  );
+}
+
+/** Exact Arabic-aware city-name match, tolerant of hamza, diacritics and spacing. */
+export function hasExactCityName(cities: City[], term: string): boolean {
+  const value = arNorm(term);
+  return Boolean(value && cities.some((city) => arNorm(city.name) === value));
 }
 
 /** Keeps gov/city search params consistent: an orphan city slug is dropped. */
