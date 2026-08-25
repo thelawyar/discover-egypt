@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, MapPin, Search } from "lucide-react";
 import type { City } from "@/lib/directory-types";
-import { filterCitiesByTerm } from "@/lib/location-filter";
+import { filterCitiesByTerm, hasExactCityName } from "@/lib/location-filter";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   cities: City[];
@@ -56,6 +57,10 @@ export function CityPicker({
     () => filterCitiesByTerm(cities, term).slice(0, 120),
     [cities, term],
   );
+  const cleanTerm = term.trim();
+  const canSuggest = Boolean(
+    onCreate && cleanTerm.length >= 2 && !hasExactCityName(cities, cleanTerm),
+  );
 
   return (
     <div ref={wrapRef} className={cn("relative", className)}>
@@ -103,22 +108,6 @@ export function CityPicker({
             {list.length === 0 ? (
               <div className="px-3 py-4 text-center text-xs text-muted-foreground">
                 <p>لا توجد مدن مطابقة</p>
-                {onCreate && term.trim().length >= 2 ? (
-                  <button
-                    type="button"
-                    disabled={creating}
-                    onClick={async () => {
-                      const created = await onCreate(term.trim());
-                      if (created) {
-                        onChange(created);
-                        setOpen(false);
-                      }
-                    }}
-                    className="mt-2 w-full rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-60"
-                  >
-                    {creating ? "جارٍ الإضافة..." : `إضافة مدينة «${term.trim()}»`}
-                  </button>
-                ) : null}
               </div>
             ) : (
               list.map((c) => (
@@ -143,6 +132,32 @@ export function CityPicker({
                 </button>
               ))
             )}
+            {canSuggest ? (
+              <div className="border-t border-border p-2">
+                {list.length > 0 ? (
+                  <p className="mb-2 px-1 text-[10px] text-muted-foreground">
+                    راجع المدن القريبة أولاً لتجنب التكرار.
+                  </p>
+                ) : null}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={creating}
+                  onClick={async () => {
+                    if (!onCreate) return;
+                    const created = await onCreate(cleanTerm);
+                    if (created) {
+                      onChange(created);
+                      setOpen(false);
+                    }
+                  }}
+                  className="w-full text-xs font-bold"
+                >
+                  {creating ? "جارٍ التحقق..." : `إضافة «${cleanTerm}» كمدينة جديدة`}
+                </Button>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

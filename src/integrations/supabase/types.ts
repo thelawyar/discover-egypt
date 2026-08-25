@@ -1438,7 +1438,7 @@ export type Database = {
       }
       suggest_city: {
         Args: { _governorate_id: string; _name: string }
-        Returns: string
+        Returns: Json
       }
       track_ad_click: { Args: { _ad_id: string }; Returns: undefined }
       track_ad_impression: { Args: { _ad_id: string }; Returns: undefined }
