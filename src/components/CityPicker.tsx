@@ -14,6 +14,12 @@ type Props = {
   placeholder?: string;
   allLabel?: string;
   className?: string;
+  /**
+   * When provided, a "add this city" action shows up for a search term that
+   * matches nothing. Should return the new value (id or slug) to select.
+   */
+  onCreate?: (name: string) => Promise<string | null>;
+  creating?: boolean;
 };
 
 /** City selector with a built-in search box for fast picking. */
