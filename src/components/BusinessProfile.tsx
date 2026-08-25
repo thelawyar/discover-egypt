@@ -508,6 +508,37 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
                 افتح الموقع على الخريطة
               </a>
             ) : null}
+
+            {data.branches.length ? (
+              <div className="rounded-2xl border p-4" style={cardStyle}>
+                <h2 className="mb-3 text-sm font-bold">الفروع ({data.branches.length})</h2>
+                <ul className="space-y-3">
+                  {data.branches.map((b) => (
+                    <li key={b.id} className="text-sm">
+                      <p className="flex items-center gap-1.5 font-semibold">
+                        <MapPin className="size-4" style={{ color: "var(--biz-primary)" }} />
+                        {b.name}
+                      </p>
+                      <p className="mt-1 text-xs" style={{ color: "var(--biz-muted)" }}>
+                        {[b.city_name, b.governorate_name, b.address]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                      {b.phone ? (
+                        <a
+                          href={`tel:${b.phone}`}
+                          dir="ltr"
+                          className="mt-1 inline-block text-xs font-medium"
+                          style={{ color: "var(--biz-primary)" }}
+                        >
+                          {b.phone}
+                        </a>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </aside>
         </div>
       </div>

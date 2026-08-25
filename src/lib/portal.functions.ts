@@ -46,7 +46,7 @@ export const getCityPortal = createServerFn({ method: "GET" })
         .from("businesses")
         .select(CARD_SELECT)
         .eq("status", "approved")
-        .eq("city_id", cityId);
+        .overlaps("city_ids", [cityId]);
 
     const nowIso = new Date().toISOString();
     const soon = new Date(Date.now() + 30 * 86400000).toISOString();
@@ -56,7 +56,7 @@ export const getCityPortal = createServerFn({ method: "GET" })
         .from("businesses")
         .select("id", { count: "exact", head: true })
         .eq("status", "approved")
-        .eq("city_id", cityId),
+        .overlaps("city_ids", [cityId]),
       base()
         .order("is_featured", { ascending: false })
         .order("view_count", { ascending: false })
@@ -67,7 +67,7 @@ export const getCityPortal = createServerFn({ method: "GET" })
         .from("businesses")
         .select(`${CARD_SELECT},latitude,longitude`)
         .eq("status", "approved")
-        .eq("city_id", cityId)
+        .overlaps("city_ids", [cityId])
         .not("latitude", "is", null)
         .not("longitude", "is", null)
         .limit(40),
@@ -94,7 +94,7 @@ export const getCityPortal = createServerFn({ method: "GET" })
         .from("businesses")
         .select("categories(name,slug)")
         .eq("status", "approved")
-        .eq("city_id", cityId)
+        .overlaps("city_ids", [cityId])
         .limit(2000),
     ]);
 
@@ -186,8 +186,8 @@ export const discoverRandom = createServerFn({ method: "GET" })
         resolve("categories", data.cat),
       ]);
 
-      if (cityId) query = query.eq("city_id", cityId);
-      else if (govId) query = query.eq("governorate_id", govId);
+      if (cityId) query = query.overlaps("city_ids", [cityId]);
+      else if (govId) query = query.overlaps("governorate_ids", [govId]);
 
       if (strict) {
         if (catId) query = query.eq("category_id", catId);

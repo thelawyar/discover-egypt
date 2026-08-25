@@ -58,7 +58,21 @@ export type BusinessCardData = BusinessAttributes & {
 };
 
 
+export type BusinessBranch = {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  city_name: string | null;
+  city_slug: string | null;
+  governorate_name: string | null;
+};
+
 export type BusinessDetail = BusinessCardData & {
+  branches: BusinessBranch[];
   logo_url: string | null;
   theme_primary: string | null;
   theme_bg: string | null;

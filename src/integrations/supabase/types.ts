@@ -135,6 +135,76 @@ export type Database = {
           },
         ]
       }
+      business_branches: {
+        Row: {
+          address: string | null
+          business_id: string
+          city_id: string | null
+          created_at: string
+          governorate_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          sort_order: number
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_id: string
+          city_id?: string | null
+          created_at?: string
+          governorate_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_id?: string
+          city_id?: string | null
+          created_at?: string
+          governorate_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_branches_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_branches_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_branches_governorate_id_fkey"
+            columns: ["governorate_id"]
+            isOneToOne: false
+            referencedRelation: "governorates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_events: {
         Row: {
           business_id: string
@@ -574,6 +644,7 @@ export type Database = {
           amenities: string[]
           category_id: string | null
           city_id: string | null
+          city_ids: string[]
           cover_image_url: string | null
           cover_thumb_url: string | null
           created_at: string
@@ -582,6 +653,7 @@ export type Database = {
           facebook: string | null
           good_for: string[]
           governorate_id: string | null
+          governorate_ids: string[]
           id: string
           instagram: string | null
           is_featured: boolean
@@ -618,6 +690,7 @@ export type Database = {
           amenities?: string[]
           category_id?: string | null
           city_id?: string | null
+          city_ids?: string[]
           cover_image_url?: string | null
           cover_thumb_url?: string | null
           created_at?: string
@@ -626,6 +699,7 @@ export type Database = {
           facebook?: string | null
           good_for?: string[]
           governorate_id?: string | null
+          governorate_ids?: string[]
           id?: string
           instagram?: string | null
           is_featured?: boolean
@@ -662,6 +736,7 @@ export type Database = {
           amenities?: string[]
           category_id?: string | null
           city_id?: string | null
+          city_ids?: string[]
           cover_image_url?: string | null
           cover_thumb_url?: string | null
           created_at?: string
@@ -670,6 +745,7 @@ export type Database = {
           facebook?: string | null
           good_for?: string[]
           governorate_id?: string | null
+          governorate_ids?: string[]
           id?: string
           instagram?: string | null
           is_featured?: boolean
@@ -1343,6 +1419,10 @@ export type Database = {
         Returns: boolean
       }
       random_username: { Args: never; Returns: string }
+      refresh_business_locations: {
+        Args: { _business_id: string }
+        Returns: undefined
+      }
       resolve_legacy_handle: { Args: { _username: string }; Returns: string }
       run_event_reminders: { Args: { _hours?: number }; Returns: number }
       search_term_stats: {
