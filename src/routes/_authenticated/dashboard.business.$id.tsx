@@ -19,6 +19,7 @@ import {
 } from "@/lib/phone";
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
+import { useCitySuggest } from "@/hooks/useCitySuggest";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
 import { isHexColor } from "@/lib/business-theme";
 import { ATTR_GROUPS, PRICE_LEVELS } from "@/lib/business-attributes";
@@ -259,20 +260,19 @@ function BusinessForm() {
 
   }, [existing]);
 
-  const cities = citiesForGovernorate(
-    taxonomy?.cities ?? [],
-    form.governorate_id || null,
-  );
+  const { suggestCity, pending: suggestingCity, extraCities } = useCitySuggest();
+  const allCities = [...(taxonomy?.cities ?? []), ...extraCities];
+
+  const cities = citiesForGovernorate(allCities, form.governorate_id || null);
 
   // Drop a stale city whenever it no longer belongs to the selected governorate.
   useEffect(() => {
     if (!form.city_id || !form.governorate_id) return;
-    const list = taxonomy?.cities ?? [];
-    if (!list.length) return;
-    if (!cityBelongsToGovernorate(list, form.city_id, form.governorate_id)) {
+    if (!allCities.length) return;
+    if (!cityBelongsToGovernorate(allCities, form.city_id, form.governorate_id)) {
       setForm((prev) => ({ ...prev, city_id: "" }));
     }
-  }, [form.city_id, form.governorate_id, taxonomy?.cities]);
+  }, [form.city_id, form.governorate_id, taxonomy?.cities, extraCities]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -335,7 +335,6 @@ function BusinessForm() {
       const parsed = schema.safeParse(form);
       if (!parsed.success) throw new Error(parsed.error.issues[0].message);
 
-      const allCities = taxonomy?.cities ?? [];
       if (
         allCities.length &&
         !cityBelongsToGovernorate(
@@ -669,6 +668,8 @@ function BusinessForm() {
                   placeholder={
                     form.governorate_id ? "اختر المدينة" : "اختر المحافظة أولاً"
                   }
+                  creating={suggestingCity}
+                  onCreate={(name) => suggestCity(form.governorate_id, name)}
                 />
               </div>
             </div>

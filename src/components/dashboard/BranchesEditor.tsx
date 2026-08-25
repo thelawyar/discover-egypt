@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { CityPicker } from "@/components/CityPicker";
 import type { City, Governorate } from "@/lib/directory-types";
 import { citiesForGovernorate } from "@/lib/location-filter";
+import { useCitySuggest } from "@/hooks/useCitySuggest";
 
 type BranchRow = {
   id: string;
@@ -107,15 +108,15 @@ export function BranchesEditor({ businessId }: { businessId: string }) {
     onError: () => toast.error("تعذّر حذف الفرع"),
   });
 
+  const { suggestCity, pending: suggestingCity, extraCities } = useCitySuggest();
+  const allCities = [...(taxonomy?.cities ?? []), ...extraCities];
+
   const cityName = (id: string | null) =>
-    taxonomy?.cities.find((c) => c.id === id)?.name ?? "";
+    allCities.find((c) => c.id === id)?.name ?? "";
   const govName = (id: string | null) =>
     taxonomy?.governorates.find((g) => g.id === id)?.name ?? "";
 
-  const cityOptions = citiesForGovernorate(
-    taxonomy?.cities ?? [],
-    draft.governorate_id || null,
-  );
+  const cityOptions = citiesForGovernorate(allCities, draft.governorate_id || null);
 
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
@@ -225,6 +226,12 @@ export function BranchesEditor({ businessId }: { businessId: string }) {
                 });
               }}
               className="mt-1"
+              disabled={!draft.governorate_id}
+              placeholder={
+                draft.governorate_id ? "اختر المدينة" : "اختر المحافظة أولاً"
+              }
+              creating={suggestingCity}
+              onCreate={(name) => suggestCity(draft.governorate_id, name)}
             />
           </div>
           <div>

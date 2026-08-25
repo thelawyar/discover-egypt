@@ -14,6 +14,12 @@ type Props = {
   placeholder?: string;
   allLabel?: string;
   className?: string;
+  /**
+   * When provided, a "add this city" action shows up for a search term that
+   * matches nothing. Should return the new value (id or slug) to select.
+   */
+  onCreate?: (name: string) => Promise<string | null>;
+  creating?: boolean;
 };
 
 /** City selector with a built-in search box for fast picking. */
@@ -26,6 +32,8 @@ export function CityPicker({
   placeholder = "اختر المدينة",
   allLabel,
   className,
+  onCreate,
+  creating = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
@@ -93,9 +101,25 @@ export function CityPicker({
               </button>
             ) : null}
             {list.length === 0 ? (
-              <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-                لا توجد مدن مطابقة
-              </p>
+              <div className="px-3 py-4 text-center text-xs text-muted-foreground">
+                <p>لا توجد مدن مطابقة</p>
+                {onCreate && term.trim().length >= 2 ? (
+                  <button
+                    type="button"
+                    disabled={creating}
+                    onClick={async () => {
+                      const created = await onCreate(term.trim());
+                      if (created) {
+                        onChange(created);
+                        setOpen(false);
+                      }
+                    }}
+                    className="mt-2 w-full rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    {creating ? "جارٍ الإضافة..." : `إضافة مدينة «${term.trim()}»`}
+                  </button>
+                ) : null}
+              </div>
             ) : (
               list.map((c) => (
                 <button

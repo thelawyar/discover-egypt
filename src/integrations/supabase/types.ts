@@ -1436,6 +1436,10 @@ export type Database = {
           zero_rate: number
         }[]
       }
+      suggest_city: {
+        Args: { _governorate_id: string; _name: string }
+        Returns: string
+      }
       track_ad_click: { Args: { _ad_id: string }; Returns: undefined }
       track_ad_impression: { Args: { _ad_id: string }; Returns: undefined }
       track_business_event: {
