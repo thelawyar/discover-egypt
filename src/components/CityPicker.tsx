@@ -101,9 +101,25 @@ export function CityPicker({
               </button>
             ) : null}
             {list.length === 0 ? (
-              <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-                لا توجد مدن مطابقة
-              </p>
+              <div className="px-3 py-4 text-center text-xs text-muted-foreground">
+                <p>لا توجد مدن مطابقة</p>
+                {onCreate && term.trim().length >= 2 ? (
+                  <button
+                    type="button"
+                    disabled={creating}
+                    onClick={async () => {
+                      const created = await onCreate(term.trim());
+                      if (created) {
+                        onChange(created);
+                        setOpen(false);
+                      }
+                    }}
+                    className="mt-2 w-full rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground disabled:opacity-60"
+                  >
+                    {creating ? "جارٍ الإضافة..." : `إضافة مدينة «${term.trim()}»`}
+                  </button>
+                ) : null}
+              </div>
             ) : (
               list.map((c) => (
                 <button
