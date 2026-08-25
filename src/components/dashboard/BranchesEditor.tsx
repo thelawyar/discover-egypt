@@ -226,6 +226,12 @@ export function BranchesEditor({ businessId }: { businessId: string }) {
                 });
               }}
               className="mt-1"
+              disabled={!draft.governorate_id}
+              placeholder={
+                draft.governorate_id ? "اختر المدينة" : "اختر المحافظة أولاً"
+              }
+              creating={suggestingCity}
+              onCreate={(name) => suggestCity(draft.governorate_id, name)}
             />
           </div>
           <div>
