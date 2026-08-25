@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BriefcaseBusiness, CalendarDays, Clock, ExternalLink, Images, Pencil } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, Clock, ExternalLink, Images, MapPin, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
@@ -11,6 +11,7 @@ import { HoursEditor } from "@/components/dashboard/HoursEditor";
 import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { JobsEditor } from "@/components/dashboard/JobsEditor";
 import { EventsEditor } from "@/components/dashboard/EventsEditor";
+import { BranchesEditor } from "@/components/dashboard/BranchesEditor";
 
 export const Route = createFileRoute("/_authenticated/dashboard/manage/$id")({
   head: () => ({
@@ -38,6 +39,7 @@ const TABS = [
   { key: "gallery", label: "الصور", icon: Images },
   { key: "jobs", label: "الوظائف", icon: BriefcaseBusiness },
   { key: "events", label: "العروض والأحداث", icon: CalendarDays },
+  { key: "branches", label: "الفروع", icon: MapPin },
 ] as const;
 
 function ManageBusinessPage() {
@@ -115,6 +117,9 @@ function ManageBusinessPage() {
               </TabsContent>
               <TabsContent value="events" className="mt-4">
                 <EventsEditor businessId={id} />
+              </TabsContent>
+              <TabsContent value="branches" className="mt-4">
+                <BranchesEditor businessId={id} />
               </TabsContent>
             </Tabs>
           </>
