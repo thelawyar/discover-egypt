@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { CityPicker } from "@/components/CityPicker";
 import type { City, Governorate } from "@/lib/directory-types";
 import { citiesForGovernorate } from "@/lib/location-filter";
+import { useCitySuggest } from "@/hooks/useCitySuggest";
 
 type BranchRow = {
   id: string;
