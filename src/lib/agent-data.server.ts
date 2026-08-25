@@ -94,7 +94,7 @@ export async function agentSearchBusinesses(input: {
     .eq("status", "approved")
     .limit(limit);
 
-  if (cityId) q = q.eq("city_id", cityId);
+  if (cityId) q = q.overlaps("city_ids", [cityId]);
   if (catId) q = q.eq("category_id", catId);
 
   const term = (input.query ?? "").replace(/[%,()]/g, " ").trim().slice(0, 80);

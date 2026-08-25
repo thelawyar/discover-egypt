@@ -210,8 +210,8 @@ export const searchBusinesses = createServerFn({ method: "GET" })
           const cityList = (cities.data ?? []).map((c) => c.id);
           const govList = (govs.data ?? []).map((g) => g.id);
           if (catList.length) parts.push(`category_id.in.(${catList.join(",")})`);
-          if (cityList.length) parts.push(`city_id.in.(${cityList.join(",")})`);
-          if (govList.length) parts.push(`governorate_id.in.(${govList.join(",")})`);
+          for (const id of cityList) parts.push(`city_ids.cs.{${id}}`);
+          for (const id of govList) parts.push(`governorate_ids.cs.{${id}}`);
           return parts.join(",");
         }),
       );
@@ -291,8 +291,8 @@ export const searchBusinesses = createServerFn({ method: "GET" })
         .select(CARD_SELECT, { count: "exact" })
         .eq("status", "approved");
 
-      if (ids.cityId) query = query.eq("city_id", ids.cityId);
-      if (ids.govId) query = query.eq("governorate_id", ids.govId);
+      if (ids.cityId) query = query.overlaps("city_ids", [ids.cityId]);
+      if (ids.govId) query = query.overlaps("governorate_ids", [ids.govId]);
       if (ids.catId) query = query.eq("category_id", ids.catId);
       if (product.length >= 2)
         query = query.or(
@@ -577,7 +577,7 @@ export const getCityPage = createServerFn({ method: "GET" })
       .from("businesses")
       .select(CARD_SELECT, { count: "exact" })
       .eq("status", "approved")
-      .eq("city_id", city.id)
+      .overlaps("city_ids", [city.id])
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
       .range(from, from + perPage - 1);
@@ -643,7 +643,7 @@ export const getSearchFacetCounts = createServerFn({ method: "GET" }).handler(
       supabase.from("cities").select("id,slug,governorate_id").order("name"),
       supabase
         .from("businesses")
-        .select("category_id,city_id,updated_at")
+        .select("category_id,city_ids,updated_at")
         .eq("status", "approved")
         .limit(20000),
     ]);
@@ -658,9 +658,9 @@ export const getSearchFacetCounts = createServerFn({ method: "GET" }).handler(
 
     for (const r of rows.data ?? []) {
       if (r.category_id) byCat.set(r.category_id, (byCat.get(r.category_id) ?? 0) + 1);
-      if (r.city_id) {
-        byCity.set(r.city_id, (byCity.get(r.city_id) ?? 0) + 1);
-        const gov = cityGov.get(r.city_id);
+      for (const cityId of (r.city_ids as string[] | null) ?? []) {
+        byCity.set(cityId, (byCity.get(cityId) ?? 0) + 1);
+        const gov = cityGov.get(cityId);
         if (gov) byGov.set(gov, (byGov.get(gov) ?? 0) + 1);
       }
       if (r.updated_at && (!lastmod || r.updated_at > lastmod)) lastmod = r.updated_at;
@@ -757,7 +757,7 @@ export const getHomeFeed = createServerFn({ method: "GET" })
               .eq("slug", data.gov)
               .maybeSingle()
           ).data?.id ?? NO_MATCH);
-      query = query.eq("governorate_id", govId);
+      query = query.overlaps("governorate_ids", [govId]);
     }
 
     const { data: rows, count } = await query
