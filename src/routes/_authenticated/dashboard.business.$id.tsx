@@ -335,7 +335,6 @@ function BusinessForm() {
       const parsed = schema.safeParse(form);
       if (!parsed.success) throw new Error(parsed.error.issues[0].message);
 
-      const allCities = taxonomy?.cities ?? [];
       if (
         allCities.length &&
         !cityBelongsToGovernorate(
