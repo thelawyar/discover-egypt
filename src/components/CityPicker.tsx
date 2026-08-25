@@ -32,6 +32,8 @@ export function CityPicker({
   placeholder = "اختر المدينة",
   allLabel,
   className,
+  onCreate,
+  creating = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
