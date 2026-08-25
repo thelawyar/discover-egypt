@@ -19,6 +19,7 @@ import {
 } from "@/lib/phone";
 import { buildCoverVariants } from "@/lib/image-optimize";
 import { useAuth } from "@/hooks/useAuth";
+import { useCitySuggest } from "@/hooks/useCitySuggest";
 import { normalizeUsername, validateUsername, USERNAME_HINT } from "@/lib/username";
 import { isHexColor } from "@/lib/business-theme";
 import { ATTR_GROUPS, PRICE_LEVELS } from "@/lib/business-attributes";
