@@ -108,15 +108,15 @@ export function BranchesEditor({ businessId }: { businessId: string }) {
     onError: () => toast.error("تعذّر حذف الفرع"),
   });
 
+  const { suggestCity, pending: suggestingCity, extraCities } = useCitySuggest();
+  const allCities = [...(taxonomy?.cities ?? []), ...extraCities];
+
   const cityName = (id: string | null) =>
-    taxonomy?.cities.find((c) => c.id === id)?.name ?? "";
+    allCities.find((c) => c.id === id)?.name ?? "";
   const govName = (id: string | null) =>
     taxonomy?.governorates.find((g) => g.id === id)?.name ?? "";
 
-  const cityOptions = citiesForGovernorate(
-    taxonomy?.cities ?? [],
-    draft.governorate_id || null,
-  );
+  const cityOptions = citiesForGovernorate(allCities, draft.governorate_id || null);
 
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card">
