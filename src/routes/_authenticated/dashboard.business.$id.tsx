@@ -668,6 +668,8 @@ function BusinessForm() {
                   placeholder={
                     form.governorate_id ? "اختر المدينة" : "اختر المحافظة أولاً"
                   }
+                  creating={suggestingCity}
+                  onCreate={(name) => suggestCity(form.governorate_id, name)}
                 />
               </div>
             </div>
