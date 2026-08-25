@@ -507,7 +507,7 @@ export const getBusiness = createServerFn({ method: "GET" })
     const r = row as unknown as Row;
     const businessId = r.id as string;
 
-    const [images, hours, reviews] = await Promise.all([
+    const [images, hours, reviews, branches] = await Promise.all([
       supabase
         .from("business_images")
         .select("id,url")
@@ -525,6 +525,14 @@ export const getBusiness = createServerFn({ method: "GET" })
         .eq("status", "approved")
         .order("created_at", { ascending: false })
         .limit(30),
+      supabase
+        .from("business_branches")
+        .select(
+          "id,name,address,phone,whatsapp,latitude,longitude,cities(name,slug),governorates(name)",
+        )
+        .eq("business_id", businessId)
+        .order("sort_order")
+        .order("created_at"),
     ]);
 
     return {
@@ -545,6 +553,21 @@ export const getBusiness = createServerFn({ method: "GET" })
       longitude: (r.longitude as number) ?? null,
       city_slug: rel(r.cities, "slug"),
       view_count: (r.view_count as number) ?? 0,
+      branches: (branches.data ?? []).map((b) => {
+        const row = b as unknown as Row;
+        return {
+          id: row.id as string,
+          name: row.name as string,
+          address: (row.address as string) ?? null,
+          phone: (row.phone as string) ?? null,
+          whatsapp: (row.whatsapp as string) ?? null,
+          latitude: (row.latitude as number) ?? null,
+          longitude: (row.longitude as number) ?? null,
+          city_name: rel(row.cities, "name"),
+          city_slug: rel(row.cities, "slug"),
+          governorate_name: rel(row.governorates, "name"),
+        };
+      }),
       images: images.data ?? [],
       hours: hours.data ?? [],
       reviews: reviews.data ?? [],
