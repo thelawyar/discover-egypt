@@ -225,6 +225,17 @@ export function MessagesInbox() {
                   </div>
                 </div>
               </div>
+              {openId === m.id ? (
+                <>
+                  {!m.sender_id ? (
+                    <p className="mt-2 rounded-lg bg-muted px-2 py-1 text-[10px] text-muted-foreground">
+                      هذا المراسل بدون حساب — ردك سيُحفظ في المحادثة، ويفضّل التواصل
+                      معه على رقمه أو بريده.
+                    </p>
+                  ) : null}
+                  <MessageThread messageId={m.id} fromBusiness />
+                </>
+              ) : null}
             </li>
           ))}
         </ul>
