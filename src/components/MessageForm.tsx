@@ -13,6 +13,7 @@ export function MessageForm({
   businessId: string;
   businessName: string;
 }) {
+  const { user } = useAuth();
   const [kind, setKind] = useState<"message" | "order">("message");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -35,6 +36,8 @@ export function MessageForm({
       business_id: businessId,
       sender_name: name.trim().slice(0, 100),
       sender_phone: phone.trim() || null,
+      sender_email: user?.email ?? null,
+      sender_id: user?.id ?? null,
       kind,
       body: body.trim().slice(0, 2000),
     });
