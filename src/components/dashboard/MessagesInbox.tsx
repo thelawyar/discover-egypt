@@ -45,6 +45,7 @@ function timeAgo(iso: string) {
 export function MessagesInbox() {
   const queryClient = useQueryClient();
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["business-messages"],
@@ -53,7 +54,7 @@ export function MessagesInbox() {
       const { data, error } = await supabase
         .from("business_messages")
         .select(
-          "id,business_id,sender_name,sender_phone,kind,body,is_read,created_at,businesses(name,username)",
+          "id,business_id,sender_name,sender_phone,sender_email,sender_id,kind,body,is_read,created_at,last_reply_at,businesses(name,username)",
         )
         .order("created_at", { ascending: false })
         .limit(100);
