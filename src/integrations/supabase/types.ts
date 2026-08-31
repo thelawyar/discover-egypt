@@ -442,6 +442,44 @@ export type Database = {
           },
         ]
       }
+      business_message_replies: {
+        Row: {
+          body: string
+          created_at: string
+          from_business: boolean
+          id: string
+          message_id: string
+          sender_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          from_business: boolean
+          id?: string
+          message_id: string
+          sender_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          from_business?: boolean
+          id?: string
+          message_id?: string
+          sender_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_message_replies_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "business_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_messages: {
         Row: {
           body: string
@@ -450,9 +488,12 @@ export type Database = {
           id: string
           is_read: boolean
           kind: string
+          last_reply_at: string | null
           sender_email: string | null
+          sender_id: string | null
           sender_name: string
           sender_phone: string | null
+          unread_for_sender: boolean
           updated_at: string
         }
         Insert: {
@@ -462,9 +503,12 @@ export type Database = {
           id?: string
           is_read?: boolean
           kind?: string
+          last_reply_at?: string | null
           sender_email?: string | null
+          sender_id?: string | null
           sender_name: string
           sender_phone?: string | null
+          unread_for_sender?: boolean
           updated_at?: string
         }
         Update: {
@@ -474,9 +518,12 @@ export type Database = {
           id?: string
           is_read?: boolean
           kind?: string
+          last_reply_at?: string | null
           sender_email?: string | null
+          sender_id?: string | null
           sender_name?: string
           sender_phone?: string | null
+          unread_for_sender?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -1381,6 +1428,10 @@ export type Database = {
       business_withdraw: { Args: { _business_id: string }; Returns: boolean }
       can_manage_business: {
         Args: { _business_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_view_message: {
+        Args: { _message_id: string; _user_id: string }
         Returns: boolean
       }
       claim_admin_invite: { Args: { _token: string }; Returns: boolean }
