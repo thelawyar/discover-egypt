@@ -161,15 +161,41 @@ export function MessagesInbox() {
                   <p className="mt-1 whitespace-pre-line break-words text-muted-foreground">
                     {m.body}
                   </p>
-                  {m.sender_phone ? (
-                    <a
-                      href={`tel:${m.sender_phone}`}
-                      dir="ltr"
-                      className="mt-1 inline-flex items-center gap-1 font-semibold text-primary"
-                    >
-                      <Phone className="size-3" /> {m.sender_phone}
-                    </a>
-                  ) : null}
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    {m.sender_phone ? (
+                      <a
+                        href={`tel:${m.sender_phone}`}
+                        dir="ltr"
+                        className="inline-flex items-center gap-1 font-semibold text-primary"
+                      >
+                        <Phone className="size-3" /> {m.sender_phone}
+                      </a>
+                    ) : null}
+                    {m.sender_email ? (
+                      <a
+                        href={`mailto:${m.sender_email}`}
+                        dir="ltr"
+                        className="inline-flex items-center gap-1 font-semibold text-primary"
+                      >
+                        <Mail className="size-3" /> {m.sender_email}
+                      </a>
+                    ) : null}
+                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <UserCheck className="size-3" />
+                      {m.sender_id ? "مراسل مسجَّل" : "زائر بدون حساب"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenId((v) => (v === m.id ? null : m.id));
+                      if (!m.is_read) markRead.mutate([m.id]);
+                    }}
+                    className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-[11px] font-semibold"
+                  >
+                    <Reply className="size-3" />
+                    {openId === m.id ? "إغلاق المحادثة" : "فتح والرد"}
+                  </button>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
                   <span className="text-[10px] text-muted-foreground">
