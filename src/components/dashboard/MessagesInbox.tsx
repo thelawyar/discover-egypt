@@ -1,20 +1,34 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Inbox, MailOpen, Phone, Trash2, ShoppingBag, MessageSquare } from "lucide-react";
+import {
+  Inbox,
+  MailOpen,
+  Phone,
+  Trash2,
+  ShoppingBag,
+  MessageSquare,
+  Mail,
+  Reply,
+  UserCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { MessageThread } from "@/components/dashboard/MessageThread";
 
 type MessageRow = {
   id: string;
   business_id: string;
   sender_name: string;
   sender_phone: string | null;
+  sender_email: string | null;
+  sender_id: string | null;
   kind: string;
   body: string;
   is_read: boolean;
   created_at: string;
+  last_reply_at: string | null;
   businesses: { name: string; username: string } | null;
 };
 
