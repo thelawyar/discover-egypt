@@ -68,7 +68,9 @@ export function MessageForm({
     >
       <h2 className="mb-1 text-sm font-bold">راسل {businessName}</h2>
       <p className="mb-3 text-xs" style={{ color: "var(--biz-muted)" }}>
-        اطلب منتج أو اسأل عن خدمة، وسيصلك الرد على رقمك.
+        {user
+          ? "اطلب منتج أو اسأل عن خدمة، وسيصلك رد النشاط داخل «رسائلي» مع إشعار."
+          : "اطلب منتج أو اسأل عن خدمة، وسيصلك الرد على رقمك. سجّل الدخول لتتابع الرد داخل الموقع."}
       </p>
 
       {sent ? (
