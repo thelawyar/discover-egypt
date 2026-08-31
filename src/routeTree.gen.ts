@@ -38,6 +38,7 @@ import { Route as ApiPublicOgRouteImport } from './routes/api/public/og'
 import { Route as ApiPublicMdRouteImport } from './routes/api/public/md'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
 import { Route as AuthenticatedDashboardNotificationsRouteImport } from './routes/_authenticated/dashboard.notifications'
+import { Route as AuthenticatedDashboardMessagesRouteImport } from './routes/_authenticated/dashboard.messages'
 import { Route as AuthenticatedDashboardListsRouteImport } from './routes/_authenticated/dashboard.lists'
 import { Route as AuthenticatedDashboardEventsRouteImport } from './routes/_authenticated/dashboard.events'
 import { Route as AuthenticatedDashboardBusinessesRouteImport } from './routes/_authenticated/dashboard.businesses'
@@ -197,6 +198,12 @@ const AuthenticatedDashboardNotificationsRoute =
     path: '/dashboard/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardMessagesRoute =
+  AuthenticatedDashboardMessagesRouteImport.update({
+    id: '/dashboard/messages',
+    path: '/dashboard/messages',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardListsRoute =
   AuthenticatedDashboardListsRouteImport.update({
     id: '/dashboard/lists',
@@ -268,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
   '/dashboard/events': typeof AuthenticatedDashboardEventsRoute
   '/dashboard/lists': typeof AuthenticatedDashboardListsRoute
+  '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
@@ -305,6 +313,7 @@ export interface FileRoutesByTo {
   '/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
   '/dashboard/events': typeof AuthenticatedDashboardEventsRoute
   '/dashboard/lists': typeof AuthenticatedDashboardListsRoute
+  '/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
@@ -344,6 +353,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/businesses': typeof AuthenticatedDashboardBusinessesRoute
   '/_authenticated/dashboard/events': typeof AuthenticatedDashboardEventsRoute
   '/_authenticated/dashboard/lists': typeof AuthenticatedDashboardListsRoute
+  '/_authenticated/dashboard/messages': typeof AuthenticatedDashboardMessagesRoute
   '/_authenticated/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/public/md': typeof ApiPublicMdRoute
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/dashboard/businesses'
     | '/dashboard/events'
     | '/dashboard/lists'
+    | '/dashboard/messages'
     | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/api/public/md'
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/dashboard/businesses'
     | '/dashboard/events'
     | '/dashboard/lists'
+    | '/dashboard/messages'
     | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/api/public/md'
@@ -458,6 +470,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/businesses'
     | '/_authenticated/dashboard/events'
     | '/_authenticated/dashboard/lists'
+    | '/_authenticated/dashboard/messages'
     | '/_authenticated/dashboard/notifications'
     | '/_authenticated/dashboard/profile'
     | '/api/public/md'
@@ -699,6 +712,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/messages': {
+      id: '/_authenticated/dashboard/messages'
+      path: '/dashboard/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof AuthenticatedDashboardMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/lists': {
       id: '/_authenticated/dashboard/lists'
       path: '/dashboard/lists'
@@ -759,6 +779,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardBusinessesRoute: typeof AuthenticatedDashboardBusinessesRoute
   AuthenticatedDashboardEventsRoute: typeof AuthenticatedDashboardEventsRoute
   AuthenticatedDashboardListsRoute: typeof AuthenticatedDashboardListsRoute
+  AuthenticatedDashboardMessagesRoute: typeof AuthenticatedDashboardMessagesRoute
   AuthenticatedDashboardNotificationsRoute: typeof AuthenticatedDashboardNotificationsRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
@@ -774,6 +795,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardBusinessesRoute: AuthenticatedDashboardBusinessesRoute,
   AuthenticatedDashboardEventsRoute: AuthenticatedDashboardEventsRoute,
   AuthenticatedDashboardListsRoute: AuthenticatedDashboardListsRoute,
+  AuthenticatedDashboardMessagesRoute: AuthenticatedDashboardMessagesRoute,
   AuthenticatedDashboardNotificationsRoute:
     AuthenticatedDashboardNotificationsRoute,
   AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,

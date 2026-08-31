@@ -1,20 +1,34 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Inbox, MailOpen, Phone, Trash2, ShoppingBag, MessageSquare } from "lucide-react";
+import {
+  Inbox,
+  MailOpen,
+  Phone,
+  Trash2,
+  ShoppingBag,
+  MessageSquare,
+  Mail,
+  Reply,
+  UserCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { MessageThread } from "@/components/dashboard/MessageThread";
 
 type MessageRow = {
   id: string;
   business_id: string;
   sender_name: string;
   sender_phone: string | null;
+  sender_email: string | null;
+  sender_id: string | null;
   kind: string;
   body: string;
   is_read: boolean;
   created_at: string;
+  last_reply_at: string | null;
   businesses: { name: string; username: string } | null;
 };
 
@@ -31,6 +45,7 @@ function timeAgo(iso: string) {
 export function MessagesInbox() {
   const queryClient = useQueryClient();
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["business-messages"],
@@ -39,7 +54,7 @@ export function MessagesInbox() {
       const { data, error } = await supabase
         .from("business_messages")
         .select(
-          "id,business_id,sender_name,sender_phone,kind,body,is_read,created_at,businesses(name,username)",
+          "id,business_id,sender_name,sender_phone,sender_email,sender_id,kind,body,is_read,created_at,last_reply_at,businesses(name,username)",
         )
         .order("created_at", { ascending: false })
         .limit(100);
@@ -146,15 +161,41 @@ export function MessagesInbox() {
                   <p className="mt-1 whitespace-pre-line break-words text-muted-foreground">
                     {m.body}
                   </p>
-                  {m.sender_phone ? (
-                    <a
-                      href={`tel:${m.sender_phone}`}
-                      dir="ltr"
-                      className="mt-1 inline-flex items-center gap-1 font-semibold text-primary"
-                    >
-                      <Phone className="size-3" /> {m.sender_phone}
-                    </a>
-                  ) : null}
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    {m.sender_phone ? (
+                      <a
+                        href={`tel:${m.sender_phone}`}
+                        dir="ltr"
+                        className="inline-flex items-center gap-1 font-semibold text-primary"
+                      >
+                        <Phone className="size-3" /> {m.sender_phone}
+                      </a>
+                    ) : null}
+                    {m.sender_email ? (
+                      <a
+                        href={`mailto:${m.sender_email}`}
+                        dir="ltr"
+                        className="inline-flex items-center gap-1 font-semibold text-primary"
+                      >
+                        <Mail className="size-3" /> {m.sender_email}
+                      </a>
+                    ) : null}
+                    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <UserCheck className="size-3" />
+                      {m.sender_id ? "مراسل مسجَّل" : "زائر بدون حساب"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenId((v) => (v === m.id ? null : m.id));
+                      if (!m.is_read) markRead.mutate([m.id]);
+                    }}
+                    className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-[11px] font-semibold"
+                  >
+                    <Reply className="size-3" />
+                    {openId === m.id ? "إغلاق المحادثة" : "فتح والرد"}
+                  </button>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
                   <span className="text-[10px] text-muted-foreground">
@@ -184,6 +225,17 @@ export function MessagesInbox() {
                   </div>
                 </div>
               </div>
+              {openId === m.id ? (
+                <>
+                  {!m.sender_id ? (
+                    <p className="mt-2 rounded-lg bg-muted px-2 py-1 text-[10px] text-muted-foreground">
+                      هذا المراسل بدون حساب — ردك سيُحفظ في المحادثة، ويفضّل التواصل
+                      معه على رقمه أو بريده.
+                    </p>
+                  ) : null}
+                  <MessageThread messageId={m.id} fromBusiness />
+                </>
+              ) : null}
             </li>
           ))}
         </ul>

@@ -105,6 +105,9 @@ function Dashboard() {
             <Button asChild variant="outline" className="rounded-full">
               <Link to="/dashboard/lists">🔖 قوائمي</Link>
             </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/dashboard/messages">💬 رسائلي</Link>
+            </Button>
             <Button asChild className="rounded-full">
               <Link to="/dashboard/business/$id" params={{ id: "new" }}>
                 <Plus className="size-4" /> أضف نشاطاً

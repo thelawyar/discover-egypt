@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
 /** Public contact / order form shown on the business mini-site. */
@@ -12,6 +13,7 @@ export function MessageForm({
   businessId: string;
   businessName: string;
 }) {
+  const { user } = useAuth();
   const [kind, setKind] = useState<"message" | "order">("message");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -34,6 +36,8 @@ export function MessageForm({
       business_id: businessId,
       sender_name: name.trim().slice(0, 100),
       sender_phone: phone.trim() || null,
+      sender_email: user?.email ?? null,
+      sender_id: user?.id ?? null,
       kind,
       body: body.trim().slice(0, 2000),
     });
@@ -64,7 +68,9 @@ export function MessageForm({
     >
       <h2 className="mb-1 text-sm font-bold">راسل {businessName}</h2>
       <p className="mb-3 text-xs" style={{ color: "var(--biz-muted)" }}>
-        اطلب منتج أو اسأل عن خدمة، وسيصلك الرد على رقمك.
+        {user
+          ? "اطلب منتج أو اسأل عن خدمة، وسيصلك رد النشاط داخل «رسائلي» مع إشعار."
+          : "اطلب منتج أو اسأل عن خدمة، وسيصلك الرد على رقمك. سجّل الدخول لتتابع الرد داخل الموقع."}
       </p>
 
       {sent ? (
