@@ -142,8 +142,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         media: `(device-width: ${w / dppx}px) and (device-height: ${h / dppx}px) and (-webkit-device-pixel-ratio: ${dppx}) and (orientation: portrait)`,
       })),
     ],
-
-
+    scripts: [
+      {
+        src: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2179120672324882",
+        async: true,
+        crossOrigin: "anonymous",
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
