@@ -542,6 +542,26 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
           </aside>
         </div>
       </div>
+
+      {data.whatsapp ? (
+        <a
+          href={whatsAppLink(
+            data.whatsapp,
+            data.name,
+            typeof window !== "undefined"
+              ? `${window.location.origin}/${data.username}`
+              : `https://durtown.com/${data.username}`,
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackContact(data.id, "whatsapp_floating")}
+          aria-label="مراسلة عبر واتساب"
+          className="fixed bottom-4 end-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg shadow-black/20 transition-transform hover:scale-105 active:scale-95 sm:bottom-6 sm:end-6"
+          style={{ backgroundColor: "#25D366" }}
+        >
+          <MessageCircle className="size-7 text-white" fill="currentColor" />
+        </a>
+      ) : null}
     </div>
   );
 }
