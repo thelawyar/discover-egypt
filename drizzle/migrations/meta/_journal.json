@@ -8,6 +8,13 @@
       "when": 1792583895992,
       "tag": "0000_service_providers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792584491963,
+      "tag": "0001_site_visits_tracking",
+      "breakpoints": true
     }
   ]
 }
