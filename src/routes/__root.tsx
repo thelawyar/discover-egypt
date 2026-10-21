@@ -1,3 +1,4 @@
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -26,7 +27,7 @@ function NotFoundComponent() {
 }
 
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -115,16 +116,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700&family=Almarai:wght@400;700&family=Amiri:wght@400;700&display=swap",
       },
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: loaderData?.iconUrl ?? "/favicon.png", type: "image/png" },
+      { rel: "icon", href: (loaderData as { iconUrl?: string | null } | undefined)?.iconUrl ?? "/favicon.png", type: "image/png" },
       {
         rel: "icon",
-        href: loaderData?.iconUrl ?? "/app-icon-192.png",
+        href: (loaderData as { iconUrl?: string | null } | undefined)?.iconUrl ?? "/app-icon-192.png",
         type: "image/png",
         sizes: "192x192",
       },
       {
         rel: "apple-touch-icon",
-        href: loaderData?.iconUrl ?? "/apple-touch-icon.png",
+        href: (loaderData as { iconUrl?: string | null } | undefined)?.iconUrl ?? "/apple-touch-icon.png",
         sizes: "180x180",
       },
       { rel: "manifest", href: "/manifest.webmanifest" },

@@ -309,7 +309,7 @@ export const Route = createFileRoute("/search")({
   },
 
   component: SearchPage,
-  errorComponent: ({ error }) => <ResultsError message={error.message} />,
+  errorComponent: ({ error }) => <ResultsError message={(error as Error).message} />,
 
 });
 

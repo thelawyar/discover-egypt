@@ -1271,6 +1271,39 @@ export type Database = {
         }
         Relationships: []
       }
+      service_providers: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string | null
+          phone: string
+          service_type: string
+          status: Database["public"]["Enums"]["business_status"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          phone: string
+          service_type: string
+          status?: Database["public"]["Enums"]["business_status"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          phone?: string
+          service_type?: string
+          status?: Database["public"]["Enums"]["business_status"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           accent_color: string
