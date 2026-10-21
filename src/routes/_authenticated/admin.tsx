@@ -19,6 +19,7 @@ import { AdminInsights } from "@/components/AdminInsights";
 import { ModerationLog } from "@/components/AdminModerationLog";
 import { AdminReviews } from "@/components/AdminReviews";
 import { AdminReports } from "@/components/AdminReports";
+import { AdminServiceProviders } from "@/components/AdminServiceProviders";
 import { AdminEvents } from "@/components/AdminEvents";
 
 
@@ -47,6 +48,7 @@ function AdminPage() {
     | "moderation"
     | "reviews"
     | "reports"
+    | "services"
 
     | "events"
     | "insights"
@@ -200,7 +202,7 @@ function AdminPage() {
         </div>
 
         <div className="mt-5 -mx-4 flex gap-2 overflow-x-auto border-b border-border px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
-          {([["moderation", "الأنشطة"], ["events", "العروض والأحداث"], ["reviews", "التقييمات"], ["reports", "البلاغات"], ["insights", "الإحصائيات"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["ads", "الإعلانات"], ["searches", "كلمات البحث"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
+          {([["moderation", "الأنشطة"], ["events", "العروض والأحداث"], ["reviews", "التقييمات"], ["reports", "البلاغات"], ["services", "مقدمو الخدمات"], ["insights", "الإحصائيات"], ["categories", "التصنيفات"], ["users", "المستخدمون"], ["ads", "الإعلانات"], ["searches", "كلمات البحث"], ["seo", "حالة السيو"], ["branding", "هوية الموقع"]] as const).map(([v, label]) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -223,6 +225,7 @@ function AdminPage() {
         {view === "branding" ? <BrandingSettings /> : null}
         {view === "reviews" ? <AdminReviews /> : null}
         {view === "reports" ? <AdminReports /> : null}
+        {view === "services" ? <AdminServiceProviders /> : null}
         {view === "events" ? <AdminEvents /> : null}
         {view === "insights" ? <AdminInsights /> : null}
         {view === "users" ? <AdminUsers /> : null}

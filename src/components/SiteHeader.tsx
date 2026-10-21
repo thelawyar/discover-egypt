@@ -165,6 +165,13 @@ export function PageShell({ children }: { children: React.ReactNode }) {
               العروض والأحداث
             </Link>
             <Link
+              to="/services"
+              className="rounded-full px-3 py-1.5 hover:bg-muted"
+              activeProps={{ className: "rounded-full px-3 py-1.5 bg-muted font-semibold" }}
+            >
+              مقدمو الخدمات
+            </Link>
+            <Link
               to="/lists"
               className="rounded-full px-3 py-1.5 hover:bg-muted"
               activeProps={{ className: "rounded-full px-3 py-1.5 bg-muted font-semibold" }}
