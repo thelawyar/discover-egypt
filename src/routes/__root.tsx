@@ -201,6 +201,7 @@ function RootComponent() {
           <UpdatePrompt />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
+          <SiteVisitTracker />
           <Toaster position="top-center" dir="rtl" richColors />
         </AuthProvider>
       </ThemeProvider>
