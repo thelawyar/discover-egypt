@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { AdminTraffic } from "@/components/AdminTraffic";
 import { downloadCsv, printReport, type ReportTable } from "@/lib/export-report";
 
 
@@ -226,6 +227,8 @@ export function AdminInsights() {
           تعذّر تحميل الإحصائيات.
         </p>
       ) : (
+        <>
+          <AdminTraffic days={days} />
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Kpi
