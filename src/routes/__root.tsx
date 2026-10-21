@@ -1,3 +1,4 @@
+import { SiteVisitTracker } from "@/components/SiteVisitTracker";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -200,6 +201,7 @@ function RootComponent() {
           <UpdatePrompt />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
+          <SiteVisitTracker />
           <Toaster position="top-center" dir="rtl" richColors />
         </AuthProvider>
       </ThemeProvider>

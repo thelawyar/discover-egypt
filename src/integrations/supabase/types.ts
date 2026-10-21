@@ -1367,6 +1367,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          created_at: string
+          id: string
+          path: string
+          source: string
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path: string
+          source?: string
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path?: string
+          source?: string
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1415,6 +1439,7 @@ export type Database = {
         Args: { _business_id: string; _email: string }
         Returns: boolean
       }
+      admin_traffic_stats: { Args: { _days?: number }; Returns: Json }
       ar_norm: { Args: { _t: string }; Returns: string }
       business_add_manager: {
         Args: { _business_id: string; _email: string }
@@ -1533,6 +1558,10 @@ export type Database = {
           _label?: string
           _source?: string
         }
+        Returns: undefined
+      }
+      track_site_visit: {
+        Args: { _path: string; _source?: string; _visitor: string }
         Returns: undefined
       }
     }
