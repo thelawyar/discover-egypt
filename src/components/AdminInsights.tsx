@@ -229,7 +229,6 @@ export function AdminInsights() {
       ) : (
         <>
           <AdminTraffic days={days} />
-        <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Kpi
               icon={<Search className="size-3.5" />}
