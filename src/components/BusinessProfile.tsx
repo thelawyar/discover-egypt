@@ -31,6 +31,7 @@ import { MessageForm } from "@/components/MessageForm";
 import { whatsAppLink } from "@/lib/phone";
 import { ReviewForm } from "@/components/ReviewForm";
 import { BusinessJobs } from "@/components/BusinessJobs";
+import { BusinessStore } from "@/components/BusinessStore";
 import { AddToListButton } from "@/components/AddToListButton";
 import { ReportBusinessButton } from "@/components/ReportBusinessButton";
 
@@ -402,6 +403,8 @@ export function BusinessProfile({ data }: { data: BusinessDetail }) {
                 </div>
               </div>
             ) : null}
+
+            <BusinessStore businessId={data.id} businessName={data.name} whatsapp={data.whatsapp} username={data.username} />
 
             <BusinessJobs businessId={data.id} />
 
