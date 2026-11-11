@@ -1391,6 +1391,174 @@ export type Database = {
         }
         Relationships: []
       }
+      store_products: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_settings: {
+        Row: {
+          business_id: string
+          instapay_handle: string | null
+          is_enabled: boolean
+          notes: string | null
+          payment_methods: string[]
+          shipping_prepay_required: boolean
+          updated_at: string
+          wallet_number: string | null
+        }
+        Insert: {
+          business_id: string
+          instapay_handle?: string | null
+          is_enabled?: boolean
+          notes?: string | null
+          payment_methods?: string[]
+          shipping_prepay_required?: boolean
+          updated_at?: string
+          wallet_number?: string | null
+        }
+        Update: {
+          business_id?: string
+          instapay_handle?: string | null
+          is_enabled?: boolean
+          notes?: string | null
+          payment_methods?: string[]
+          shipping_prepay_required?: boolean
+          updated_at?: string
+          wallet_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_shipping_methods: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          price: number
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          price?: number
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_shipping_methods_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_variants: {
+        Row: {
+          business_id: string
+          color: string | null
+          created_at: string
+          id: string
+          price: number
+          product_id: string
+          size: string | null
+          stock: number
+        }
+        Insert: {
+          business_id: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          price?: number
+          product_id: string
+          size?: string | null
+          stock?: number
+        }
+        Update: {
+          business_id?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          price?: number
+          product_id?: string
+          size?: string | null
+          stock?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_variants_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "store_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1545,6 +1713,7 @@ export type Database = {
           zero_rate: number
         }[]
       }
+      store_is_public: { Args: { _business_id: string }; Returns: boolean }
       suggest_city: {
         Args: { _governorate_id: string; _name: string }
         Returns: Json
