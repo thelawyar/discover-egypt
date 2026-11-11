@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BriefcaseBusiness, CalendarDays, Clock, ExternalLink, Images, MapPin, Pencil } from "lucide-react";
+import { ShoppingBag, BriefcaseBusiness, CalendarDays, Clock, ExternalLink, Images, MapPin, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageShell } from "@/components/SiteHeader";
@@ -12,6 +12,7 @@ import { GalleryEditor } from "@/components/dashboard/GalleryEditor";
 import { JobsEditor } from "@/components/dashboard/JobsEditor";
 import { EventsEditor } from "@/components/dashboard/EventsEditor";
 import { BranchesEditor } from "@/components/dashboard/BranchesEditor";
+import { StoreEditor } from "@/components/dashboard/StoreEditor";
 
 export const Route = createFileRoute("/_authenticated/dashboard/manage/$id")({
   head: () => ({
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/manage/$id")({
 });
 
 const TABS = [
+  { key: "store", label: "المتجر", icon: ShoppingBag },
   { key: "hours", label: "مواعيد العمل", icon: Clock },
   { key: "gallery", label: "الصور", icon: Images },
   { key: "jobs", label: "الوظائف", icon: BriefcaseBusiness },
@@ -117,6 +119,9 @@ function ManageBusinessPage() {
               </TabsContent>
               <TabsContent value="events" className="mt-4">
                 <EventsEditor businessId={id} />
+              </TabsContent>
+              <TabsContent value="store" className="mt-4">
+                <StoreEditor businessId={id} userId={user?.id ?? ""} />
               </TabsContent>
               <TabsContent value="branches" className="mt-4">
                 <BranchesEditor businessId={id} />
