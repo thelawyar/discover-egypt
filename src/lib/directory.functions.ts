@@ -457,7 +457,7 @@ export const suggestSearch = createServerFn({ method: "GET" })
     const supabase = getPublicClient();
 
     const { findPublicProducts } = await import("./product-search.server");
-    const [biz, cats, cities, products] = await Promise.all([
+    const [biz, cats, products, cities] = await Promise.all([
       supabase
         .from("businesses")
         .select("id,username,name,cover_image_url,categories(name),cities(name)")
