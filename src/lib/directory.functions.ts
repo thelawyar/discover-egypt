@@ -4,6 +4,7 @@ import { arNorm } from "./ar-normalize";
 import type {
   BusinessCardData,
   BusinessDetail,
+  ProductSearchResult,
   Taxonomy,
 } from "./directory-types";
 
@@ -127,6 +128,8 @@ export type SearchFilters = {
 
 export type SearchResponse = {
   items: BusinessCardData[];
+  products: ProductSearchResult[];
+  productTotal: number;
   total: number;
   page: number;
   /** Present when the AI interpreter widened a descriptive query. */
@@ -413,11 +416,16 @@ export const searchBusinesses = createServerFn({ method: "GET" })
       }
     }
 
+    const { findPublicProducts } = await import("./product-search.server");
+    const productResults = await findPublicProducts({
+      term, product, page, sort, cityId, govId, catId, filters: baseFilters, openIds,
+    });
+
     // Log the search so the admin dashboard can surface popular / empty terms.
     if (term.length >= 2 && page === 1) {
       await supabase.rpc("log_search_query", {
         _term: term,
-        _results: count ?? 0,
+        _results: (count ?? 0) + productResults.total,
         _city: data.city ?? undefined,
         _category: data.cat ?? undefined,
       });
@@ -425,6 +433,8 @@ export const searchBusinesses = createServerFn({ method: "GET" })
 
     return {
       items: (rows ?? []).map((r) => toCard(r as unknown as Row)),
+      products: productResults.items,
+      productTotal: productResults.total,
       total: count ?? 0,
       page,
       smart,
@@ -441,12 +451,13 @@ export const suggestSearch = createServerFn({ method: "GET" })
     const raw = data.q.trim().replace(/[%,()]/g, " ").slice(0, 60);
     const term = arNorm(raw);
     if (term.length < 2)
-      return { businesses: [], categories: [], cities: [] };
+      return { businesses: [], categories: [], cities: [], products: [] };
 
     const { getPublicClient } = await import("./supabase-public.server");
     const supabase = getPublicClient();
 
-    const [biz, cats, cities] = await Promise.all([
+    const { findPublicProducts } = await import("./product-search.server");
+    const [biz, cats, cities, products] = await Promise.all([
       supabase
         .from("businesses")
         .select("id,username,name,cover_image_url,categories(name),cities(name)")
@@ -460,6 +471,7 @@ export const suggestSearch = createServerFn({ method: "GET" })
         .eq("status", "approved")
         .ilike("name_norm", `%${term}%`)
         .limit(4),
+      findPublicProducts({ term: raw, page: 1, cityId: null, govId: null, catId: null }),
       supabase
         .from("cities")
         .select("name,slug")
@@ -481,6 +493,7 @@ export const suggestSearch = createServerFn({ method: "GET" })
       }),
       categories: cats.data ?? [],
       cities: cities.data ?? [],
+      products: products.items.slice(0, 4),
     };
   });
 

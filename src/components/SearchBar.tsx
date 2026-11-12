@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { suggestSearch } from "@/lib/directory.functions";
 import { Highlight, searchTokens } from "@/lib/highlight";
+import { formatEGP } from "@/lib/store";
+import { Button } from "@/components/ui/button";
 import type { City, Governorate } from "@/lib/directory-types";
 
 
@@ -72,6 +74,7 @@ export function SearchBar({
     suggestions &&
       (suggestions.businesses.length ||
         suggestions.categories.length ||
+        suggestions.products.length ||
         suggestions.cities.length),
   );
 
@@ -283,6 +286,24 @@ export function SearchBar({
                     </span>
                   </span>
                 </button>
+              ))}
+            </div>
+          ) : null}
+
+          {suggestions?.products.length ? (
+            <div className="border-t border-border p-1">
+              <p className="px-3 py-1 text-[11px] font-bold text-muted-foreground">المنتجات</p>
+              {suggestions.products.map((p) => (
+                <Button key={p.id} type="button" variant="ghost" onClick={() => {
+                  setSuggestOpen(false);
+                  navigate({ to: "/$username", params: { username: p.username }, hash: `product-${p.id}` });
+                }} className="flex h-auto w-full justify-start gap-3 px-3 py-2 text-start">
+                  {p.image_url ? <img src={p.image_url} alt="" className="size-9 shrink-0 rounded-md object-contain" /> : <Tag className="size-4 shrink-0 text-muted-foreground" />}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold"><Highlight text={p.name} terms={tokens} /></span>
+                    <span className="block truncate text-[11px] text-muted-foreground">{p.business_name}{p.price != null ? ` · ${p.price_from ? "من " : ""}${formatEGP(p.price)}` : ""}</span>
+                  </span>
+                </Button>
               ))}
             </div>
           ) : null}
