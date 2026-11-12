@@ -35,10 +35,12 @@ export const Route = createFileRoute("/")({
   head: ({ loaderData }) => ({
     meta: [
       { title: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "description",
         content:
-          "ابحث عن العيادات والمحلات والمصانع والمدارس والأكشاك في مدينتك. دليل تجاري شامل لكل المحافظات والمدن المصرية.",
+          "ابحث عن الأنشطة والخدمات والمنتجات وأسعارها في مدينتك. دليل تجاري شامل لكل المحافظات والمدن المصرية.",
       },
       { property: "og:title", content: "اكتشف مدينتك | الدليل التجاري لكل مدن مصر" },
       {

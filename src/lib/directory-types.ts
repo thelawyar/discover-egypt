@@ -71,6 +71,22 @@ export type BusinessBranch = {
   governorate_name: string | null;
 };
 
+export type ProductSearchResult = {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  business_id: string;
+  business_name: string;
+  username: string;
+  city_name: string | null;
+  governorate_name: string | null;
+  price: number | null;
+  original_price: number | null;
+  price_from: boolean;
+  in_stock: boolean;
+};
+
 export type BusinessDetail = BusinessCardData & {
   branches: BusinessBranch[];
   logo_url: string | null;

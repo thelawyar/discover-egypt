@@ -32,6 +32,7 @@ import {
   type AttrParams,
 } from "@/components/search/AttributeFilters";
 import { Button } from "@/components/ui/button";
+import { ProductResultCard } from "@/components/search/ProductResultCard";
 
 import {
   clearLastSearch,
@@ -123,7 +124,7 @@ export const Route = createFileRoute("/search")({
         ? cat
         : prod
           ? `${prod}`
-          : "الأنشطة التجارية";
+      : "الأنشطة والمنتجات";
     const parts = [
       term ? `نتائج البحث عن ${subject}` : `${subject}`,
       cat && term ? `في ${cat}` : null,
@@ -140,7 +141,7 @@ export const Route = createFileRoute("/search")({
       term ? `لـ ${subject}` : cat ? `ضمن تصنيف ${cat}` : null,
       prod ? `تشمل ${prod}` : null,
       place ? `في ${place}` : "في المدن المصرية",
-      "— دليل اكتشف مدينتك للأنشطة التجارية: العناوين وأرقام التواصل والمواعيد.",
+      "— اكتشف مدينتك: الأنشطة والخدمات والمنتجات وأسعارها وطرق التواصل.",
     ]);
 
     const origin = ld?.origin ?? "";
@@ -296,10 +297,13 @@ export const Route = createFileRoute("/search")({
     ]);
     return {
       origin,
-      pages: Math.max(1, Math.ceil(results.total / 12)),
-      total: results.total,
+      pages: Math.max(1, Math.ceil(Math.max(results.total, results.productTotal) / 12)),
+      total: results.total + results.productTotal,
       image: results.items.find((b) => b.cover_image_url)?.cover_image_url ?? null,
-      items: results.items.map((b) => ({ handle: b.username ?? b.id, name: b.name })),
+      items: [
+        ...results.items.map((b) => ({ handle: b.username ?? b.id, name: b.name })),
+        ...results.products.map((p) => ({ handle: `${p.username}#product-${p.id}`, name: p.name })),
+      ],
       labels: {
         gov: taxonomy.governorates.find((g) => g.slug === deps.gov)?.name ?? null,
         city: taxonomy.cities.find((c) => c.slug === deps.city)?.name ?? null,
@@ -331,8 +335,8 @@ function resultsHeading(s: {
       : s.cat
         ? `${s.cat}`
         : prod
-          ? `أنشطة توفر «${prod}»`
-          : "كل الأنشطة التجارية",
+          ? `نتائج «${prod}»`
+          : "كل الأنشطة والمنتجات",
     term && s.cat ? `في ${s.cat}` : null,
     term && prod ? `تشمل «${prod}»` : null,
     place ? `في ${place}` : null,
@@ -352,7 +356,7 @@ function SearchPage() {
 
 
   const perPage = 12;
-  const pages = Math.max(1, Math.ceil(results.total / perPage));
+  const pages = Math.max(1, Math.ceil(Math.max(results.total, results.productTotal) / perPage));
   const normalized = normalizeLocationParams(taxonomy, {
     gov: params.gov,
     city: params.city,
@@ -555,7 +559,7 @@ function SearchPage() {
 
 
           <span className="ms-auto text-xs text-muted-foreground">
-            {results.total.toLocaleString("ar-EG")} نتيجة
+            {(results.total + results.productTotal).toLocaleString("ar-EG")} نتيجة
           </span>
 
           <ShareResults params={params} />
@@ -593,7 +597,16 @@ function SearchPage() {
           />
         ) : null}
 
-        {results.items.length === 0 ? (
+        {results.products.length > 0 ? (
+          <section className="mb-8" aria-label="نتائج المنتجات">
+            <h2 className="mb-4 text-base font-bold">المنتجات <span className="text-sm font-normal text-muted-foreground">({results.productTotal.toLocaleString("ar-EG")})</span></h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {results.products.map((item) => <ProductResultCard key={item.id} item={item} terms={searchTokens(params.q || params.prod)} />)}
+            </div>
+          </section>
+        ) : null}
+
+        {results.items.length === 0 && results.products.length === 0 ? (
 
           <NoResults
             params={params}
@@ -602,7 +615,7 @@ function SearchPage() {
               navigate({ search: (p: SearchParams) => ({ ...p, ...patch, page: 1 }) })
             }
           />
-        ) : (
+        ) : results.items.length > 0 ? (
 
           <ResultsWithAds
             items={results.items}
@@ -615,7 +628,7 @@ function SearchPage() {
             }}
             terms={searchTokens(params.q)}
           />
-        )}
+        ) : null}
 
         {pages > 1 ? (
           <div className="mt-8 flex items-center justify-center gap-2">

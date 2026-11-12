@@ -42,6 +42,20 @@ export function BusinessStore(props: { businessId: string; businessName: string;
     try { setCart(JSON.parse(localStorage.getItem(storageKey) ?? "[]")); } catch { /* ignore */ }
   }, [storageKey]);
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(cart)); }, [cart, storageKey]);
+  useEffect(() => {
+    if (!data?.settings?.is_enabled || !props.whatsapp) return;
+    function openLinkedProduct() {
+      const id = window.location.hash.replace(/^#product-/, "");
+      const product = data?.products.find((p) => p.id === id);
+      if (product) {
+        setPicked(product);
+        document.getElementById(`product-${product.id}`)?.scrollIntoView({ block: "center" });
+      }
+    }
+    openLinkedProduct();
+    window.addEventListener("hashchange", openLinkedProduct);
+    return () => window.removeEventListener("hashchange", openLinkedProduct);
+  }, [data, props.whatsapp]);
 
   if (!data?.settings?.is_enabled || !data.products.length || !props.whatsapp) return null;
   const count = cart.reduce((s, l) => s + l.qty, 0);
@@ -60,7 +74,7 @@ export function BusinessStore(props: { businessId: string; businessName: string;
           const inStock = p.store_variants.some((v) => v.stock > 0);
           const cheapest = [...p.store_variants].sort((a, b) => Number(a.price) - Number(b.price))[0];
           return (
-            <Button key={p.id} type="button" variant="outline" onClick={() => setPicked(p)}
+            <Button key={p.id} id={`product-${p.id}`} type="button" variant="outline" onClick={() => setPicked(p)}
               className="block h-auto overflow-hidden whitespace-normal rounded-lg p-0 text-start">
               {p.image_url ? <img src={p.image_url} alt={p.name} loading="lazy" className="aspect-square w-full object-cover" />
                 : <div className="flex aspect-square items-center justify-center bg-muted"><ShoppingBag className="size-8 opacity-40" /></div>}
