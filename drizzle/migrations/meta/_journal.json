@@ -43,6 +43,13 @@
       "when": 1794489725726,
       "tag": "0005_store_guest_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794495750153,
+      "tag": "0006_store_product_search_index",
+      "breakpoints": true
     }
   ]
 }
