@@ -14,3 +14,4 @@
 - Guest store SELECT policies use only the public visibility helper; keep management helper calls in authenticated policies to avoid denied function execution for guests.
 - Product search reads through the public client with normalized indexed product text and business location filters; reuse its results for autocomplete so unpublished stores stay hidden.
 - Product search links use #product-<id> on the existing business page; the store opens that product after its public data loads, preserving guest checkout.
+- Product size multiselections expand into individual variants using a shared helper; retain each existing identifier once so checkout and per-size stock remain compatible.
