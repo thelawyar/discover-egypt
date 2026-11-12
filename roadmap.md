@@ -1,3 +1,6 @@
 - [x] Ensure dashboard store changes appear on the business page and preserve guest WhatsApp checkout.
 - [x] Add optional before-discount pricing, automatic discount percentages, and validation tests.
 - [x] Verify saved prices and checkout as a guest; temporary product removed and no WhatsApp message sent.
+- [ ] Include public store products in directory search and autocomplete, respecting location filters.
+- [ ] Show product prices and link search results directly to the selected product in its store.
+- [ ] Verify product search, filters, and guest store navigation.
