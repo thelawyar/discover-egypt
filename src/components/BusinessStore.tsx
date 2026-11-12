@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { whatsAppDigits } from "@/lib/phone";
 import {
-  PAYMENT_METHODS, addToCart, buildOrderMessage, cartSubtotal, cartTotal, formatEGP, variantLabel,
+  PAYMENT_METHODS, addToCart, buildOrderMessage, cartSubtotal, cartTotal, discountPercent, formatEGP, variantLabel,
   type CartLine, type PaymentMethod,
 } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-type Variant = { id: string; size: string | null; color: string | null; price: number; stock: number };
+type Variant = { id: string; size: string | null; color: string | null; price: number; original_price: number | null; stock: number };
 type Product = { id: string; name: string; description: string | null; image_url: string | null; store_variants: Variant[] };
 
 /** Mini online store on the business page. Guests order via their own WhatsApp. */
@@ -25,10 +25,11 @@ export function BusinessStore(props: { businessId: string; businessName: string;
     queryFn: async () => {
       const [s, p, sh] = await Promise.all([
         supabase.from("store_settings").select("*").eq("business_id", businessId).maybeSingle(),
-        supabase.from("store_products").select("id,name,description,image_url,store_variants(id,size,color,price,stock)")
+        supabase.from("store_products").select("id,name,description,image_url,store_variants(id,size,color,price,original_price,stock)")
           .eq("business_id", businessId).eq("is_active", true).order("sort_order").order("created_at"),
         supabase.from("store_shipping_methods").select("id,name,price,notes").eq("business_id", businessId).eq("is_active", true).order("price"),
       ]);
+      for (const result of [s, p, sh]) if (result.error) throw result.error;
       return { settings: s.data, products: (p.data ?? []) as Product[], shipping: sh.data ?? [] };
     },
   });
@@ -57,17 +58,18 @@ export function BusinessStore(props: { businessId: string; businessName: string;
         {data.products.map((p) => {
           const prices = p.store_variants.map((v) => Number(v.price));
           const inStock = p.store_variants.some((v) => v.stock > 0);
+          const cheapest = [...p.store_variants].sort((a, b) => Number(a.price) - Number(b.price))[0];
           return (
-            <button key={p.id} type="button" onClick={() => setPicked(p)}
-              className="overflow-hidden rounded-xl border text-start transition hover:shadow-md" style={{ borderColor: "var(--biz-border)" }}>
+            <Button key={p.id} type="button" variant="outline" onClick={() => setPicked(p)}
+              className="block h-auto overflow-hidden whitespace-normal rounded-lg p-0 text-start">
               {p.image_url ? <img src={p.image_url} alt={p.name} loading="lazy" className="aspect-square w-full object-cover" />
                 : <div className="flex aspect-square items-center justify-center bg-muted"><ShoppingBag className="size-8 opacity-40" /></div>}
               <div className="p-2.5">
                 <p className="line-clamp-1 text-sm font-bold">{p.name}</p>
-                <p className="text-xs opacity-80">{prices.length ? (Math.min(...prices) === Math.max(...prices) ? formatEGP(prices[0]) : `من ${formatEGP(Math.min(...prices))}`) : ""}</p>
+                {cheapest ? <StorePrice variant={cheapest} from={Math.min(...prices) !== Math.max(...prices)} /> : null}
                 {!inStock ? <p className="text-xs text-destructive">نفدت الكمية</p> : null}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -85,6 +87,17 @@ export function BusinessStore(props: { businessId: string; businessName: string;
       </Sheet>
     </div>
   );
+}
+
+function StorePrice({ variant, from = false }: { variant: Variant; from?: boolean }) {
+  const discount = discountPercent(Number(variant.price), variant.original_price == null ? null : Number(variant.original_price));
+  return <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+    <span className="font-bold">{from ? "من " : ""}{formatEGP(Number(variant.price))}</span>
+    {discount > 0 ? <>
+      <del className="text-muted-foreground">{formatEGP(Number(variant.original_price))}</del>
+      <span className="rounded bg-success/15 px-1.5 py-0.5 font-bold text-success">خصم {discount}%</span>
+    </> : null}
+  </div>;
 }
 
 function ProductDialog({ product, onClose, onAdd }: { product: Product | null; onClose: () => void; onAdd: (l: CartLine) => void }) {
@@ -105,12 +118,13 @@ function ProductDialog({ product, onClose, onAdd }: { product: Product | null; o
             {product.description ? <p className="whitespace-pre-line text-sm text-muted-foreground">{product.description}</p> : null}
             <div className="flex flex-wrap gap-2">
               {product.store_variants.map((x) => (
-                <button key={x.id} type="button" disabled={x.stock <= 0} onClick={() => { setVariantId(x.id); setQty(1); }}
-                  className={`rounded-full border px-3 py-1.5 text-xs disabled:opacity-40 ${x.id === variantId ? "border-primary bg-primary text-primary-foreground" : ""}`}>
+                <Button key={x.id} type="button" variant={x.id === variantId ? "default" : "outline"} disabled={x.stock <= 0} onClick={() => { setVariantId(x.id); setQty(1); }}
+                  className="h-auto whitespace-normal rounded-full px-3 py-1.5 text-xs disabled:opacity-40">
                   {variantLabel(x.size, x.color) || "عادي"} — {formatEGP(Number(x.price))}{x.stock <= 0 ? " (نفد)" : ""}
-                </button>
+                </Button>
               ))}
             </div>
+            {v ? <StorePrice variant={v} /> : null}
             {v ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

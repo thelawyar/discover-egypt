@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Store variants keep `price` as the final charge and nullable `original_price` as the comparison price; shared helpers validate discounts so legacy prices and checkout remain consistent.
+- Store editor mutations invalidate the business-scoped public store query so returning to a business page shows saved changes.
+- Guest store SELECT policies use only the public visibility helper; keep management helper calls in authenticated policies to avoid denied function execution for guests.

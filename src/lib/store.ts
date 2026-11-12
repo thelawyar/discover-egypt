@@ -7,6 +7,17 @@ export const PAYMENT_METHODS = {
 } as const;
 export type PaymentMethod = keyof typeof PAYMENT_METHODS;
 
+/** The existing price is always the amount charged; original price is optional. */
+export function validStorePrice(price: number, originalPrice: number | null): boolean {
+  return Number.isFinite(price) && price >= 0 && (originalPrice === null ||
+    (Number.isFinite(originalPrice) && originalPrice > 0 && originalPrice >= price));
+}
+
+export function discountPercent(price: number, originalPrice: number | null): number {
+  if (!validStorePrice(price, originalPrice) || originalPrice === null || originalPrice <= price) return 0;
+  return Math.round(((originalPrice - price) / originalPrice) * 100);
+}
+
 export type CartLine = {
   variantId: string;
   productName: string;

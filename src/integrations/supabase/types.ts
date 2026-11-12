@@ -1517,6 +1517,7 @@ export type Database = {
           color: string | null
           created_at: string
           id: string
+          original_price: number | null
           price: number
           product_id: string
           size: string | null
@@ -1527,6 +1528,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           id?: string
+          original_price?: number | null
           price?: number
           product_id: string
           size?: string | null
@@ -1537,6 +1539,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           id?: string
+          original_price?: number | null
           price?: number
           product_id?: string
           size?: string | null
