@@ -4,14 +4,14 @@ import { ImagePlus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadBusinessImage } from "@/lib/upload-business-image";
-import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/store";
+import { PAYMENT_METHODS, discountPercent, validStorePrice, type PaymentMethod } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 
-type Variant = { id?: string; size: string; color: string; price: string; stock: string };
+type Variant = { id?: string; size: string; color: string; price: string; originalPrice: string; stock: string };
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="rounded-2xl border bg-card p-4 sm:p-5">
@@ -75,6 +75,7 @@ function SettingsSection({ businessId }: { businessId: string }) {
     onSuccess: () => {
       toast.success("تم حفظ إعدادات المتجر");
       qc.invalidateQueries({ queryKey: ["store-settings", businessId] });
+      qc.invalidateQueries({ queryKey: ["public-store", businessId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -127,7 +128,10 @@ function ShippingSection({ businessId }: { businessId: string }) {
       return data;
     },
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: key });
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: key });
+    qc.invalidateQueries({ queryKey: ["public-store", businessId] });
+  };
   const add = useMutation({
     mutationFn: async () => {
       if (!draft.name.trim()) throw new Error("اكتب اسم طريقة الشحن أو المنطقة");
@@ -167,12 +171,17 @@ function ShippingSection({ businessId }: { businessId: string }) {
   );
 }
 
-const EMPTY_VARIANT: Variant = { size: "", color: "", price: "", stock: "" };
+const EMPTY_VARIANT: Variant = { size: "", color: "", price: "", originalPrice: "", stock: "" };
 
 function ProductsSection({ businessId, userId }: { businessId: string; userId: string }) {
   const qc = useQueryClient();
   const key = ["store-products-admin", businessId];
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const finish = () => {
+    setEditing(null);
+    qc.invalidateQueries({ queryKey: key });
+    qc.invalidateQueries({ queryKey: ["public-store", businessId] });
+  };
   const { data } = useQuery({
     queryKey: key,
     queryFn: async () => {
@@ -192,7 +201,7 @@ function ProductsSection({ businessId, userId }: { businessId: string; userId: s
       <div className="space-y-2">
         {data?.map((p) =>
           editing === p.id ? (
-            <ProductForm key={p.id} businessId={businessId} userId={userId} product={p} onDone={() => { setEditing(null); qc.invalidateQueries({ queryKey: key }); }} />
+            <ProductForm key={p.id} businessId={businessId} userId={userId} product={p} onDone={finish} />
           ) : (
             <div key={p.id} className="flex items-center gap-3 rounded-xl border p-3">
               {p.image_url ? <img src={p.image_url} alt="" className="size-14 rounded-lg object-cover" /> : <div className="size-14 rounded-lg bg-muted" />}
@@ -209,7 +218,7 @@ function ProductsSection({ businessId, userId }: { businessId: string; userId: s
         {!data?.length && editing !== "new" ? <p className="text-sm text-muted-foreground">لا توجد منتجات بعد.</p> : null}
       </div>
       {editing === "new" ? (
-        <div className="mt-3"><ProductForm businessId={businessId} userId={userId} onDone={() => { setEditing(null); qc.invalidateQueries({ queryKey: key }); }} /></div>
+        <div className="mt-3"><ProductForm businessId={businessId} userId={userId} onDone={finish} /></div>
       ) : (
         <Button className="mt-4 rounded-full" onClick={() => setEditing("new")}><Plus className="size-4" /> منتج جديد</Button>
       )}
@@ -219,7 +228,7 @@ function ProductsSection({ businessId, userId }: { businessId: string; userId: s
 
 type ProductRow = {
   id: string; name: string; description: string | null; image_url: string | null; is_active: boolean;
-  store_variants: { id: string; size: string | null; color: string | null; price: number; stock: number }[];
+  store_variants: { id: string; size: string | null; color: string | null; price: number; original_price: number | null; stock: number }[];
 };
 
 function ProductForm({ businessId, userId, product, onDone }: { businessId: string; userId: string; product?: ProductRow; onDone: () => void }) {
@@ -230,7 +239,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
   const [uploading, setUploading] = useState(false);
   const [variants, setVariants] = useState<Variant[]>(
     product?.store_variants.length
-      ? product.store_variants.map((v) => ({ id: v.id, size: v.size ?? "", color: v.color ?? "", price: String(v.price), stock: String(v.stock) }))
+      ? product.store_variants.map((v) => ({ id: v.id, size: v.size ?? "", color: v.color ?? "", price: String(v.price), originalPrice: v.original_price == null ? "" : String(v.original_price), stock: String(v.stock) }))
       : [{ ...EMPTY_VARIANT }],
   );
 
@@ -251,6 +260,10 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
       if (!name.trim()) throw new Error("اكتب اسم المنتج");
       const rows = variants.filter((v) => v.price !== "");
       if (!rows.length) throw new Error("أضف سعراً لاختيار واحد على الأقل");
+      for (const v of rows) {
+        if (!validStorePrice(Number(v.price), v.originalPrice === "" ? null : Number(v.originalPrice)))
+          throw new Error("السعر قبل الخصم يجب أن يكون أكبر من أو يساوي السعر بعد الخصم، والأسعار لا تكون سالبة");
+      }
       const payload = { business_id: businessId, name: name.trim(), description: description.trim() || null, image_url: imageUrl || null, is_active: isActive };
       let productId = product?.id;
       if (productId) {
@@ -261,7 +274,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
         if (error) throw error;
         productId = data.id;
       }
-      const keepIds = rows.filter((v) => v.id).map((v) => v.id!);
+      const keepIds = rows.flatMap((v) => v.id ? [v.id] : []);
       const removed = (product?.store_variants ?? []).filter((v) => !keepIds.includes(v.id)).map((v) => v.id);
       if (removed.length) {
         const { error } = await supabase.from("store_variants").delete().in("id", removed);
@@ -272,6 +285,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
           product_id: productId, business_id: businessId,
           size: v.size.trim() || null, color: v.color.trim() || null,
           price: Math.max(0, Number(v.price) || 0), stock: Math.max(0, Math.floor(Number(v.stock) || 0)),
+          original_price: v.originalPrice === "" ? null : Number(v.originalPrice),
         };
         const { error } = v.id
           ? await supabase.from("store_variants").update(row).eq("id", v.id)
@@ -306,12 +320,19 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
       <p className="text-sm font-medium">المقاسات والألوان والأسعار والكميات</p>
       <div className="space-y-2">
         {variants.map((v, i) => (
-          <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+          <div key={i} className="grid grid-cols-2 items-end gap-2 sm:grid-cols-3">
             <Input placeholder="المقاس (اختياري)" value={v.size} onChange={(e) => setV(i, { size: e.target.value })} />
             <Input placeholder="اللون (اختياري)" value={v.color} onChange={(e) => setV(i, { color: e.target.value })} />
-            <Input placeholder="السعر" type="number" min={0} value={v.price} onChange={(e) => setV(i, { price: e.target.value })} />
+            <label className="space-y-1 text-xs">السعر قبل الخصم (اختياري)
+              <Input aria-label="السعر قبل الخصم" placeholder="بدون خصم" type="number" min={0} step="0.01" value={v.originalPrice} onChange={(e) => setV(i, { originalPrice: e.target.value })} />
+            </label>
+            <label className="space-y-1 text-xs">السعر بعد الخصم / سعر البيع
+              <Input aria-label="السعر بعد الخصم" placeholder="سعر البيع" type="number" min={0} step="0.01" value={v.price} onChange={(e) => setV(i, { price: e.target.value })} />
+            </label>
             <Input placeholder="الكمية" type="number" min={0} value={v.stock} onChange={(e) => setV(i, { stock: e.target.value })} />
             <Button size="icon" variant="ghost" disabled={variants.length === 1} onClick={() => setVariants((vs) => vs.filter((_, j) => j !== i))} aria-label="حذف"><Trash2 className="size-4" /></Button>
+            {v.price !== "" && v.originalPrice !== "" && discountPercent(Number(v.price), Number(v.originalPrice)) > 0 ?
+              <p className="col-span-2 text-xs font-bold text-success">خصم {discountPercent(Number(v.price), Number(v.originalPrice))}%</p> : null}
           </div>
         ))}
       </div>

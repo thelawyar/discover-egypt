@@ -1,0 +1,3 @@
+- [ ] Ensure dashboard store changes appear on the business page and preserve guest WhatsApp checkout.
+- [ ] Add optional before-discount pricing, automatic discount percentages, and validation tests.
+- [ ] Verify saved prices and the checkout flow.
