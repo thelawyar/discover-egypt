@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SizePicker } from "./SizePicker";
+import { expandSizeSelections } from "@/lib/store-sizes";
 
-type Variant = { id?: string; size: string; color: string; price: string; originalPrice: string; stock: string };
+type Variant = { id?: string; sizes: string[]; color: string; price: string; originalPrice: string; stock: string };
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="rounded-2xl border bg-card p-4 sm:p-5">
@@ -171,7 +173,7 @@ function ShippingSection({ businessId }: { businessId: string }) {
   );
 }
 
-const EMPTY_VARIANT: Variant = { size: "", color: "", price: "", originalPrice: "", stock: "" };
+const EMPTY_VARIANT: Variant = { sizes: [], color: "", price: "", originalPrice: "", stock: "" };
 
 function ProductsSection({ businessId, userId }: { businessId: string; userId: string }) {
   const qc = useQueryClient();
@@ -239,7 +241,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
   const [uploading, setUploading] = useState(false);
   const [variants, setVariants] = useState<Variant[]>(
     product?.store_variants.length
-      ? product.store_variants.map((v) => ({ id: v.id, size: v.size ?? "", color: v.color ?? "", price: String(v.price), originalPrice: v.original_price == null ? "" : String(v.original_price), stock: String(v.stock) }))
+      ? product.store_variants.map((v) => ({ id: v.id, sizes: v.size ? [v.size] : [], color: v.color ?? "", price: String(v.price), originalPrice: v.original_price == null ? "" : String(v.original_price), stock: String(v.stock) }))
       : [{ ...EMPTY_VARIANT }],
   );
 
@@ -258,7 +260,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
   const save = useMutation({
     mutationFn: async () => {
       if (!name.trim()) throw new Error("اكتب اسم المنتج");
-      const rows = variants.filter((v) => v.price !== "");
+      const rows = expandSizeSelections(variants.filter((v) => v.price !== ""));
       if (!rows.length) throw new Error("أضف سعراً لاختيار واحد على الأقل");
       for (const v of rows) {
         if (!validStorePrice(Number(v.price), v.originalPrice === "" ? null : Number(v.originalPrice)))
@@ -321,7 +323,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
       <div className="space-y-2">
         {variants.map((v, i) => (
           <div key={i} className="grid grid-cols-2 items-end gap-2 sm:grid-cols-3">
-            <Input placeholder="المقاس (اختياري)" value={v.size} onChange={(e) => setV(i, { size: e.target.value })} />
+            <SizePicker value={v.sizes} onChange={(sizes) => setV(i, { sizes })} />
             <Input placeholder="اللون (اختياري)" value={v.color} onChange={(e) => setV(i, { color: e.target.value })} />
             <label className="space-y-1 text-xs">السعر قبل الخصم (اختياري)
               <Input aria-label="السعر قبل الخصم" placeholder="بدون خصم" type="number" min={0} step="0.01" value={v.originalPrice} onChange={(e) => setV(i, { originalPrice: e.target.value })} />
@@ -329,7 +331,7 @@ function ProductForm({ businessId, userId, product, onDone }: { businessId: stri
             <label className="space-y-1 text-xs">السعر بعد الخصم / سعر البيع
               <Input aria-label="السعر بعد الخصم" placeholder="سعر البيع" type="number" min={0} step="0.01" value={v.price} onChange={(e) => setV(i, { price: e.target.value })} />
             </label>
-            <Input placeholder="الكمية" type="number" min={0} value={v.stock} onChange={(e) => setV(i, { stock: e.target.value })} />
+            <Input aria-label="الكمية لكل مقاس" placeholder="الكمية لكل مقاس" type="number" min={0} value={v.stock} onChange={(e) => setV(i, { stock: e.target.value })} />
             <Button size="icon" variant="ghost" disabled={variants.length === 1} onClick={() => setVariants((vs) => vs.filter((_, j) => j !== i))} aria-label="حذف"><Trash2 className="size-4" /></Button>
             {v.price !== "" && v.originalPrice !== "" && discountPercent(Number(v.price), Number(v.originalPrice)) > 0 ?
               <p className="col-span-2 text-xs font-bold text-success">خصم {discountPercent(Number(v.price), Number(v.originalPrice))}%</p> : null}
