@@ -4,5 +4,5 @@
 - [x] Include public store products in directory search and autocomplete, respecting location filters.
 - [x] Show product prices and link search results directly to the selected product in its store.
 - [x] Verify product search, filters, and guest store navigation.
-- [ ] Add letter/numeric multi-size selection and select-all while keeping colors optional.
-- [ ] Verify size expansion, saved variants, and mobile selection.
+- [x] Add letter/numeric multi-size selection and select-all while keeping colors optional.
+- [x] Verify size expansion, saved variants, and mobile selection.
